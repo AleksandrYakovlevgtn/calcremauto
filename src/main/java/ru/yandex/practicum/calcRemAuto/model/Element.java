@@ -12,6 +12,7 @@ public class Element {
     double armatureSide = 0;
     double kuzDetReplaceSide = 0;
     int glass = 0;
+    String nameGlass;
     int zerkalo = 0;
     int molding = 0;
     int ruchka = 0;
