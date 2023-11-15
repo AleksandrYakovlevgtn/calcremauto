@@ -22,11 +22,11 @@ public class CarService {
         }
         for (Object works : element) {
             if (works.getClass() == Element.class) {
-                int remont = ((Element) works).getRemont();
+                double remont = ((Element) works).getRemont();
                 int navesnoe = (((Element) works).getMolding() + ((Element) works).getRuchka() + ((Element) works).getZerkalo());
-                total.setArmatyrchik((int) (total.getArmatyrchik() + (((Element) works).getSide() * 1500)));
-                total.setMalyr((int) (total.getMalyr() + ((((Element) works).getSide() * 2250)) + (750 * navesnoe) + (750 * remont)));
-                total.setMaster(total.getMaster() + (1500 + (250 * navesnoe) + (250 * remont)));
+                total.setArmatyrchik((int) (total.getArmatyrchik() + (((Element) works).getPaintSide() * 1500)));
+                total.setMalyr((int) (total.getMalyr() + ((((Element) works).getPaintSide() * 2250)) + (750 * navesnoe) + (750 * remont)));
+                total.setMaster(total.getMaster() + (1500 + (250 * navesnoe) +(int) ((250 * remont))));
                 total.setTotal(total.getTotal() + (total.getMalyr() + total.getArmatyrchik() + total.getMaster()));
             }
         }
@@ -44,18 +44,18 @@ public class CarService {
         element.setName(new NameOfElement().getFullNameElement(e[0], e[1]));
         if ((e[2] == 2) || element.getName().equals("КРЫША")) {
             if (element.getName().equals("КАПОТ") || element.getName().equals("КРЫША")) {
-                element.setSide(2);
+                element.setPaintSide(2);
             } else if (element.getName().equals("КРЫЛО_ПЕРЕДНЕЕ")
                     || element.getName().equals("БАМПЕР_ПЕРЕДНИЙ")
                     || element.getName().equals("БАМПЕР_ЗАДНИЙ")) {
-                element.setSide(1);
+                element.setPaintSide(1);
             } else {
-                element.setSide(1.5);
+                element.setPaintSide(1.5);
             }
         } else if (element.getName().equals("КАПОТ")) {
-            element.setSide(1.5);
+            element.setPaintSide(1.5);
         } else {
-            element.setSide(1);
+            element.setPaintSide(1);
         }
         if (e[2] == 3) {
             element.setRemont(e[3]);

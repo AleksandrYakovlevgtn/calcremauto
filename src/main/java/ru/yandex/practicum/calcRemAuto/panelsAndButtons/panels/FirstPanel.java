@@ -2,6 +2,7 @@ package ru.yandex.practicum.calcRemAuto.panelsAndButtons.panels;
 
 import lombok.Getter;
 import lombok.Setter;
+import ru.yandex.practicum.calcRemAuto.model.Client;
 import ru.yandex.practicum.calcRemAuto.panelsAndButtons.buttons.Buttons;
 
 import javax.swing.*;
@@ -15,16 +16,16 @@ public class FirstPanel extends JFrame{
     Buttons but = new Buttons();
     Frame frame = new Frame();
     SearchPanel searchPanel = new SearchPanel();
-    AddPanel addPanel =new AddPanel();
+    AddClientPanel addPanel =new AddClientPanel();
     private List<JButton> buttons = new ArrayList<>();
     public JPanel firstPanel(JPanel panel){
         buttons.add(but.getButtonCalc());
         buttons.add(but.getButtonSearch());
         buttons.add(but.getButtonCloseApp());
-        GridLayout firstFrame = new GridLayout(3, 1);
 
         panel.setBounds(300,100,200,200);
-        panel.setLayout(firstFrame);
+        panel.setLayout(new GridLayout(3, 1));
+
         buttons.forEach(panel::add);
         panel.updateUI();
 
@@ -38,7 +39,8 @@ public class FirstPanel extends JFrame{
         but.getButtonCalc().addActionListener(e -> {
             panel.removeAll();
             panel.updateUI();
-            addPanel.clientAdd(panel);
+            Client client = new Client();
+            addPanel.clientAdd(panel,client);
         });
         return panel;
     }
