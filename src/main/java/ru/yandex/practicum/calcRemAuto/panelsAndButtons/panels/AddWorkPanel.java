@@ -17,12 +17,12 @@ public class AddWorkPanel {
     JPanel elementLeftRightSidePanel = new JPanel();
     JPanel elementCenterSide = new JPanel();
     JPanel panelGlass = new JPanel();
-
+    JTextArea elementListTextViewing = new JTextArea(30, 19);
     Double elementArmatureSide = 0.0;
     Double elementKuzDetReplaceSide = 0.0;
     String elementRemont;
     Double elementPaintSide = 0.0;
-    boolean haveGlass = false;
+    Integer haveGlass = 0;
     List<Element> elementList = new ArrayList<>();
     Map<String, Map<String, List<String>>> lineBorderColorMap = new HashMap<>();
     JButton sideButtonPushed;
@@ -36,57 +36,77 @@ public class AddWorkPanel {
     JButton glassButtonPushed;
 
     public JPanel startAddPanel(JPanel panel, Client client, JFrame frame) {
+        elementListTextViewing.setLineWrap(true);
         panel.removeAll();
         JPanel panelStartAdd = new JPanel();
         JPanel panelXYZ = new JPanel();
         JPanel panelSaveAndBack = new JPanel();
         JPanel panelXYZSaveAndBack = new JPanel();
         JPanel panelAdd = new JPanel();
+        JPanel panelForTextArea = new JPanel();
+        JPanel panelForTextAreaXY = new JPanel(new BorderLayout());
 
         panelXYZ.setLayout(new BorderLayout());
-        panel.setLayout(new BorderLayout());
-        panelSaveAndBack.setLayout(new GridLayout(1, 2));
         panelXYZSaveAndBack.setLayout(new BorderLayout());
+        panel.setLayout(new BorderLayout());
         panelAdd.setLayout(new BorderLayout());
-
-        panel.setBounds(0, 0, 775, 550);
-        panelStartAdd.setBounds(0, 0, 125, 125);
-        panelSaveAndBack.setBounds(0, 0, 125, 125);
-        panelXYZSaveAndBack.setBounds(0, 100, 125, 125);
-
-        panelStartAdd.setLayout(new GridLayout(5, 1));
-        panelStartAdd.add(new JLabel("Выбери сторону."));
-        panelStartAdd.add(takeColor(but.getButtonLeft(), 1));
-        panelStartAdd.add(takeColor(but.getButtonCenter(), 1));
-        panelStartAdd.add(takeColor(but.getButtonRight(), 1));
-        panelStartAdd.add(takeColor(but.getButtonGlass(), 1));
-
-        panelSaveAndBack.add(but.getButtonBack());
-        panelSaveAndBack.add(but.getButtonSave());
-
+        panelSaveAndBack.setLayout(new GridBagLayout());
+        panelStartAdd.setLayout(new GridBagLayout());
+        panelForTextArea.setLayout(new GridBagLayout());
+        // Добавляем начальные кнопки слева вверху
+        panelStartAdd.add(new JLabel("Выбери сторону."), new GridBagConstraints(0, 0, 1, 1, 1, 1,
+                GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
+                new Insets(2, 2, 2, 2), 0, 10));
+        panelStartAdd.add(takeColor(removeActionListener(but.getButtonLeft()), 1), new GridBagConstraints(0, 1, 1, 1, 1, 1,
+                GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
+                new Insets(2, 2, 2, 2), 0, 0));
+        panelStartAdd.add(takeColor(removeActionListener(but.getButtonCenter()), 1), new GridBagConstraints(0, 2, 1, 1, 1, 1,
+                GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
+                new Insets(2, 2, 2, 2), 0, 0));
+        panelStartAdd.add(takeColor(removeActionListener(but.getButtonRight()), 1), new GridBagConstraints(0, 3, 1, 1, 1, 1,
+                GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
+                new Insets(2, 2, 2, 2), 0, 0));
+        panelStartAdd.add(takeColor(removeActionListener(but.getButtonGlass()), 1), new GridBagConstraints(0, 4, 1, 1, 1, 1,
+                GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
+                new Insets(2, 2, 2, 2), 0, 0));
+        // Добавляем кнопки снизу с права "назад" и "сохранить"
+        panelSaveAndBack.add(but.getButtonBack(), new GridBagConstraints(0, 0, 1, 1, 1, 1,
+                GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
+                new Insets(2, 2, 10, 2), 40, 0));
+        panelSaveAndBack.add(but.getButtonSave(), new GridBagConstraints(1, 0, 1, 1, 1, 1,
+                GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
+                new Insets(2, 2, 10, 10), 1, 0));
+        // Добавляем текстовое окно с добавленными элементами
+        panelForTextArea.add(new JScrollPane(elementListTextViewing), new GridBagConstraints(0, 0, 1, 1, 1, 1,
+                GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
+                new Insets(20, 20, 20, 10), 20, 10));
+        // Добавляем текстовое окно в правую область
+        panelForTextAreaXY.add(panelForTextArea, BorderLayout.NORTH);
+        panel.add(panelForTextAreaXY, BorderLayout.EAST);
+        // Добавляем панель с основными кнопками верхний левый угол
         panelXYZ.add(panelStartAdd, BorderLayout.NORTH);
         panel.add(panelXYZ, BorderLayout.WEST);
-
+        // Добавляем панель нижнего правого угла с 2 кнопками
         panelXYZSaveAndBack.add(panelSaveAndBack, BorderLayout.EAST);
         panel.add(panelXYZSaveAndBack, BorderLayout.SOUTH);
+        // Добавляем в основную панель запененную начальную панель
         panel.add(panelAdd, BorderLayout.CENTER);
-
         panelStartAdd.updateUI();
-
+        // Назначаем действия кнопкам
         but.getButtonLeft().addActionListener(e -> {
-            sideButtonPushed = changeColorPushedButton(sideButtonPushed,but.getButtonLeft(),1);
+            sideButtonPushed = changeColorPushedButton(sideButtonPushed, but.getButtonLeft(), 1);
             addElementLeftRightSide(clearAll(panelAdd));
         });
         but.getButtonRight().addActionListener(e -> {
-            sideButtonPushed = changeColorPushedButton(sideButtonPushed,but.getButtonRight(),1);
+            sideButtonPushed = changeColorPushedButton(sideButtonPushed, but.getButtonRight(), 1);
             addElementLeftRightSide(clearAll(panelAdd));
         });
         but.getButtonGlass().addActionListener(e -> {
-            sideButtonPushed = changeColorPushedButton(sideButtonPushed,but.getButtonGlass(),1);
+            sideButtonPushed = changeColorPushedButton(sideButtonPushed, but.getButtonGlass(), 1);
             addElementGlass(clearAll(panelAdd));
         });
         but.getButtonCenter().addActionListener(e -> {
-            sideButtonPushed = changeColorPushedButton(sideButtonPushed,but.getButtonCenter(),1);
+            sideButtonPushed = changeColorPushedButton(sideButtonPushed, but.getButtonCenter(), 1);
             addElementCenterSide(clearAll(panelAdd));
         });
         return panel;
@@ -103,28 +123,28 @@ public class AddWorkPanel {
         elementLeftRightSidePanel.add(new JLabel("Выбери Элемент."), new GridBagConstraints(0, 0, 1, 1, 1, 1,
                 GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
                 new Insets(2, 2, 2, 2), 0, 10));
-        elementLeftRightSidePanel.add(takeColor(but.getButtonFrontWing(), 2), new GridBagConstraints(0, 1, 1, 1, 1, 1,
+        elementLeftRightSidePanel.add(takeColor(removeActionListener(but.getButtonFrontWing()), 2), new GridBagConstraints(0, 1, 1, 1, 1, 1,
                 GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
                 new Insets(2, 2, 2, 2), 0, 0));
-        elementLeftRightSidePanel.add(takeColor(but.getButtonFrontDoor(), 2), new GridBagConstraints(0, 2, 1, 1, 1, 1,
+        elementLeftRightSidePanel.add(takeColor(removeActionListener(but.getButtonFrontDoor()), 2), new GridBagConstraints(0, 2, 1, 1, 1, 1,
                 GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
                 new Insets(2, 2, 2, 2), 0, 0));
-        elementLeftRightSidePanel.add(takeColor(but.getButtonBackDoor(), 2), new GridBagConstraints(0, 3, 1, 1, 1, 1,
+        elementLeftRightSidePanel.add(takeColor(removeActionListener(but.getButtonBackDoor()), 2), new GridBagConstraints(0, 3, 1, 1, 1, 1,
                 GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
                 new Insets(2, 2, 2, 2), 0, 0));
-        elementLeftRightSidePanel.add(takeColor(but.getButtonBackWing(), 2), new GridBagConstraints(0, 4, 1, 1, 1, 1,
+        elementLeftRightSidePanel.add(takeColor(removeActionListener(but.getButtonBackWing()), 2), new GridBagConstraints(0, 4, 1, 1, 1, 1,
                 GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
                 new Insets(2, 2, 2, 2), 0, 0));
-        elementLeftRightSidePanel.add(takeColor(but.getButtonBalk(), 2), new GridBagConstraints(0, 5, 1, 1, 1, 1,
+        elementLeftRightSidePanel.add(takeColor(removeActionListener(but.getButtonBalk()), 2), new GridBagConstraints(0, 5, 1, 1, 1, 1,
                 GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
                 new Insets(2, 2, 2, 2), 0, 0));
-        elementLeftRightSidePanel.add(takeColor(but.getButtonDoorStep(), 2), new GridBagConstraints(0, 6, 1, 1, 1, 1,
+        elementLeftRightSidePanel.add(takeColor(removeActionListener(but.getButtonDoorStep()), 2), new GridBagConstraints(0, 6, 1, 1, 1, 1,
                 GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
                 new Insets(2, 2, 2, 2), 0, 0));
-        elementLeftRightSidePanel.add(takeColor(but.getButtonFrontDoorway(), 2), new GridBagConstraints(0, 7, 1, 1, 1, 1,
+        elementLeftRightSidePanel.add(takeColor(removeActionListener(but.getButtonFrontDoorway()), 2), new GridBagConstraints(0, 7, 1, 1, 1, 1,
                 GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
                 new Insets(2, 2, 2, 2), 0, 0));
-        elementLeftRightSidePanel.add(takeColor(but.getButtonBackDoorway(), 2), new GridBagConstraints(0, 8, 1, 1, 1, 1,
+        elementLeftRightSidePanel.add(takeColor(removeActionListener(but.getButtonBackDoorway()), 2), new GridBagConstraints(0, 8, 1, 1, 1, 1,
                 GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
                 new Insets(2, 2, 2, 2), 0, 0));
 
@@ -134,43 +154,43 @@ public class AddWorkPanel {
         panelAdd.updateUI();
 
         but.getButtonFrontWing().addActionListener(e -> {
-            clearColorButton();
-            elementButtonPushed = changeColorPushedButton(elementButtonPushed,but.getButtonFrontWing(),2);
+            clearPushedButtonAfterElementAdd();
+            elementButtonPushed = changeColorPushedButton(elementButtonPushed, but.getButtonFrontWing(), 2);
             addElementWorks(elementLeftRightSidePanel, clearCenter(panelAdd));
         });
         but.getButtonFrontDoor().addActionListener(e -> {
-            clearColorButton();
-            elementButtonPushed = changeColorPushedButton(elementButtonPushed,but.getButtonFrontDoor(),2);
+            clearPushedButtonAfterElementAdd();
+            elementButtonPushed = changeColorPushedButton(elementButtonPushed, but.getButtonFrontDoor(), 2);
             addElementWorks(elementLeftRightSidePanel, clearCenter(panelAdd));
         });
         but.getButtonBackDoor().addActionListener(e -> {
-            clearColorButton();
-            elementButtonPushed = changeColorPushedButton(elementButtonPushed,but.getButtonBackDoor(),2);
+            clearPushedButtonAfterElementAdd();
+            elementButtonPushed = changeColorPushedButton(elementButtonPushed, but.getButtonBackDoor(), 2);
             addElementWorks(elementLeftRightSidePanel, clearCenter(panelAdd));
         });
         but.getButtonBackWing().addActionListener(e -> {
-            clearColorButton();
-            elementButtonPushed = changeColorPushedButton(elementButtonPushed,but.getButtonBackWing(),2);
+            clearPushedButtonAfterElementAdd();
+            elementButtonPushed = changeColorPushedButton(elementButtonPushed, but.getButtonBackWing(), 2);
             addElementWorks(elementLeftRightSidePanel, clearCenter(panelAdd));
         });
         but.getButtonDoorStep().addActionListener(e -> {
-            clearColorButton();
-            elementButtonPushed = changeColorPushedButton(elementButtonPushed,but.getButtonDoorStep(),2);
+            clearPushedButtonAfterElementAdd();
+            elementButtonPushed = changeColorPushedButton(elementButtonPushed, but.getButtonDoorStep(), 2);
             addElementWorks(elementLeftRightSidePanel, clearCenter(panelAdd));
         });
         but.getButtonBalk().addActionListener(e -> {
-            clearColorButton();
-            elementButtonPushed = changeColorPushedButton(elementButtonPushed,but.getButtonBalk(),2);
+            clearPushedButtonAfterElementAdd();
+            elementButtonPushed = changeColorPushedButton(elementButtonPushed, but.getButtonBalk(), 2);
             addElementWorks(elementLeftRightSidePanel, clearCenter(panelAdd));
         });
         but.getButtonFrontDoorway().addActionListener(e -> {
-            clearColorButton();
-            elementButtonPushed = changeColorPushedButton(elementButtonPushed,but.getButtonFrontDoorway(),2);
+            clearPushedButtonAfterElementAdd();
+            elementButtonPushed = changeColorPushedButton(elementButtonPushed, but.getButtonFrontDoorway(), 2);
             addElementWorks(elementLeftRightSidePanel, clearCenter(panelAdd));
         });
         but.getButtonBackDoorway().addActionListener(e -> {
-            clearColorButton();
-            elementButtonPushed = changeColorPushedButton(elementButtonPushed,but.getButtonBackDoorway(),2);
+            clearPushedButtonAfterElementAdd();
+            elementButtonPushed = changeColorPushedButton(elementButtonPushed, but.getButtonBackDoorway(), 2);
             addElementWorks(elementLeftRightSidePanel, clearCenter(panelAdd));
         });
     }
@@ -250,7 +270,7 @@ public class AddWorkPanel {
         elementKuzDetReplaceSide = 0.0;
         elementArmatureSide = 0.0;
         elementPaintSide = 0.0;
-        haveGlass = false;
+        haveGlass = 0;
         remont.getDocument().addDocumentListener(new DocumentListener() {
             @Override
             public void insertUpdate(DocumentEvent e) throws RuntimeException {
@@ -297,7 +317,7 @@ public class AddWorkPanel {
                 }
             }
         });
-        // Удаляем лишние строчки из работ так как не везде есть молдинги, зеркала и ручки.
+        // Удаляем лишние строчки из работ так как не везде есть молдинги, зеркала, ручки и стекла.
         if (elementLeftRightSidePanel.getComponents().length > 9) {
             for (int i = elementLeftRightSidePanel.getComponents().length - 1; i >= 9; i--) {
                 elementLeftRightSidePanel.remove(i);
@@ -381,23 +401,27 @@ public class AddWorkPanel {
             zamenaOrRsButtonPushed = but.getReplaceButton();
             if (elementButtonPushed.getText().equals("Пер.Дверь") || elementButtonPushed.getText().equals("Зад.Дверь")) {
                 // При замене дверей идет окраска с 2-х сторон и надбавка к арматурщику.
-                elementPaintSide = 1.55555556;
-                elementArmatureSide = 1.333333333333333;
+                elementPaintSide = 4.5;
+                elementArmatureSide = 2.6;
                 paint1xOr2xButtonPushed = but.getPaint2xButton();
                 but.getPaint2xButton().setBorder(BorderFactory.createLineBorder(Color.red, 1));
                 but.getPaint1xButton().setBorder(BorderFactory.createLineBorder(Color.lightGray, 1));
             } else if (elementButtonPushed.getText().equals("Брус") || elementButtonPushed.getText().equals("Порог") || elementButtonPushed.getText().equals("Зад.Крыло")) {
                 // При замене приварной детали идет окраска с 1 стороны + 30% от кузовщика и надбавка к арматуре.
-                elementPaintSide = 1.77777777778;
-                elementArmatureSide = 1.66666666667;
-                elementKuzDetReplaceSide = 6.0;
+                if (elementButtonPushed.getText().equals("Брус") || elementButtonPushed.getText().equals("Порог")) {
+                    elementPaintSide = 2 + 2.4;
+                } else {
+                    elementPaintSide = 3 + 2.4;
+                }
+                elementArmatureSide = 3.4;
+                elementKuzDetReplaceSide = 8.0;
                 paint1xOr2xButtonPushed = but.getPaint1xButton();
                 but.getPaint1xButton().setBorder(BorderFactory.createLineBorder(Color.red, 1));
                 but.getPaint2xButton().setBorder(BorderFactory.createLineBorder(Color.lightGray, 1));
             } else {
                 // Во всех остальных случаях окраска с 1 стороны и обычный норматив арматурщику.
-                elementPaintSide = 1.0;
-                elementArmatureSide = 1.0;
+                elementPaintSide = 3.0;
+                elementArmatureSide = 2.0;
                 paint1xOr2xButtonPushed = but.getPaint1xButton();
                 but.getPaint1xButton().setBorder(BorderFactory.createLineBorder(Color.red, 1));
                 but.getPaint2xButton().setBorder(BorderFactory.createLineBorder(Color.lightGray, 1));
@@ -410,8 +434,8 @@ public class AddWorkPanel {
         but.getDisassembleButton().addActionListener(e -> { // Р\С
             zamenaOrRsButtonPushed = but.getDisassembleButton();
             paint1xOr2xButtonPushed = but.getPaint1xButton();
-            elementPaintSide = 1.0;
-            elementArmatureSide = 1.0;
+            elementPaintSide = 3.0;
+            elementArmatureSide = 2.0;
             but.getReplaceButton().setBorder(BorderFactory.createLineBorder(Color.lightGray, 1));
             but.getDisassembleButton().setBorder(BorderFactory.createLineBorder(Color.red, 1));
             but.getPaint2xButton().setBorder(BorderFactory.createLineBorder(Color.lightGray, 1));
@@ -426,7 +450,8 @@ public class AddWorkPanel {
                 but.getReplaceButton().setBorder(BorderFactory.createLineBorder(Color.lightGray, 1));
                 but.getDisassembleButton().setBorder(BorderFactory.createLineBorder(Color.red, 1));
             }
-            elementPaintSide = 1.0;
+            elementPaintSide = 3.0;
+            elementArmatureSide = 2.0;
             but.getPaint2xButton().setBorder(BorderFactory.createLineBorder(Color.lightGray, 1));
             but.getPaint1xButton().setBorder(BorderFactory.createLineBorder(Color.red, 1));
             addElementToList(clearCenter(panelAdd));
@@ -435,11 +460,12 @@ public class AddWorkPanel {
         but.getPaint2xButton().addActionListener(e -> { // окраска 2х
             paint1xOr2xButtonPushed = but.getPaint2xButton();
             if (zamenaOrRsButtonPushed == null) {
-                zamenaOrRsButtonPushed = but.getDisassembleButton();
+                zamenaOrRsButtonPushed = but.getDisassembleButton(); // Р/С
                 but.getReplaceButton().setBorder(BorderFactory.createLineBorder(Color.lightGray, 1));
                 but.getDisassembleButton().setBorder(BorderFactory.createLineBorder(Color.red, 1));
             }
-            elementPaintSide = 1.55555556;
+            elementPaintSide = 4.5;
+            elementArmatureSide = 2.0;
             but.getPaint1xButton().setBorder(BorderFactory.createLineBorder(Color.lightGray, 1));
             but.getPaint2xButton().setBorder(BorderFactory.createLineBorder(Color.red, 1));
             addElementToList(clearCenter(panelAdd));
@@ -459,9 +485,13 @@ public class AddWorkPanel {
             }
         });
         but.getRuchkaButton().addActionListener(e -> {
-            // Если окраска только ручки выставляем 0.3 арматура
+            // Если окраска только ручки выставляем 0.6 арматура
             if (paint1xOr2xButtonPushed == null) {
-                elementArmatureSide = 0.33333333333;
+                if (elementArmatureSide > 0) {
+                    elementArmatureSide = elementArmatureSide + 0.6;
+                } else {
+                    elementArmatureSide = 0.6;
+                }
                 addElementToList(clearCenter(panelAdd));
                 panelAdd.updateUI();
             }
@@ -469,9 +499,13 @@ public class AddWorkPanel {
             but.getRuchkaButton().setBorder(BorderFactory.createLineBorder(Color.red, 1));
         });
         but.getMoldingButton().addActionListener(e -> {
-            // Если окраска только молдинга выставляем 0.3 арматура
+            // Если окраска только молдинга выставляем 0.6 арматура
             if (paint1xOr2xButtonPushed == null) {
-                elementArmatureSide = 0.33333333333;
+                if (elementArmatureSide > 0) {
+                    elementArmatureSide = elementArmatureSide + 0.6;
+                } else {
+                    elementArmatureSide = 0.6;
+                }
                 addElementToList(clearCenter(panelAdd));
                 panelAdd.updateUI();
             }
@@ -479,9 +513,13 @@ public class AddWorkPanel {
             but.getMoldingButton().setBorder(BorderFactory.createLineBorder(Color.red, 1));
         });
         but.getZerkaloButton().addActionListener(e -> {
-            // Если окраска только зеркала выставляем 0.3 арматура
+            // Если окраска только зеркала выставляем 0.6 арматура
             if (paint1xOr2xButtonPushed == null) {
-                elementArmatureSide = 0.33333333333;
+                if (elementArmatureSide > 0) {
+                    elementArmatureSide = elementArmatureSide + 0.6;
+                } else {
+                    elementArmatureSide = 0.6;
+                }
                 addElementToList(clearCenter(panelAdd));
                 panelAdd.updateUI();
             }
@@ -489,12 +527,12 @@ public class AddWorkPanel {
             but.getZerkaloButton().setBorder(BorderFactory.createLineBorder(Color.red, 1));
         });
         but.getButtonFrontWing().addActionListener(e -> {
-            haveGlass = true;
+            haveGlass++;
             glassButtonPushed = removeActionListener(but.getButtonFrontWing());
             but.getButtonFrontWing().setBorder(BorderFactory.createLineBorder(Color.red, 1));
         });
         but.getButtonRearWindow().addActionListener(e -> {
-            haveGlass = true;
+            haveGlass++;
             glassButtonPushed = removeActionListener(but.getButtonRearWindow());
             but.getButtonRearWindow().setBorder(BorderFactory.createLineBorder(Color.red, 1));
         });
@@ -524,16 +562,17 @@ public class AddWorkPanel {
         panelAdd.updateUI();
 
         but.getButtonWindshield().addActionListener(e -> {
-            //glassButtonPushed = removeActionListener(but.getButtonWindshield());
-            elementButtonPushed = removeActionListener(but.getButtonWindshield());
-            addElementToList(clearCenter(panelAdd));
+            if (sideButtonPushed.getText().equals("Остекление")) {
+                elementButtonPushed = changeColorPushedButton(elementButtonPushed, removeActionListener(but.getButtonWindshield()), 2);
+                addElementToList(clearCenter(panelAdd));
+            }
         });
         but.getButtonRearWindow().addActionListener(e -> {
-            //glassButtonPushed = removeActionListener(but.getButtonRearWindow());
-            elementButtonPushed = removeActionListener(but.getButtonRearWindow());
-            addElementToList(clearCenter(panelAdd));
+            if (sideButtonPushed.getText().equals("Остекление")) {
+                elementButtonPushed = changeColorPushedButton(elementButtonPushed, removeActionListener(but.getButtonRearWindow()), 2);
+                addElementToList(clearCenter(panelAdd));
+            }
         });
-        //return panelAdd;
     }
 
     private void addElementToList(JPanel panel) {
@@ -551,9 +590,9 @@ public class AddWorkPanel {
         panelAddElementToList.add(new JLabel(" "), new GridBagConstraints(0, 1, 1, 1, 1, 1,
                 GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
                 new Insets(0, 0, 0, 0), 0, 0));
-        panelAddElementToList.add(removeActionListener(but.getAddButton()), new GridBagConstraints(0, 2, 1, 1, 1, 1,
+        panelAddElementToList.add(takeColor(removeActionListener(but.getAddButton()), 1), new GridBagConstraints(0, 2, 1, 1, 1, 1,
                 GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
-                new Insets(2, 2, 2, 2), 0, 0));
+                new Insets(0, 2, 2, 2), 30, 0));
 
         panelXY.add(panelAddElementToList, BorderLayout.NORTH);
         panelXY2.add(panelXY, BorderLayout.WEST);
@@ -562,8 +601,8 @@ public class AddWorkPanel {
 
         but.getAddButton().addActionListener(o -> {
             Element element = createElement();
-            sideButtonPushed.setBorder(BorderFactory.createLineBorder(Color.green, 1));
-            elementButtonPushed.setBorder(BorderFactory.createLineBorder(Color.green, 1));
+            //sideButtonPushed.setBorder(BorderFactory.createLineBorder(Color.green, 1));
+            //elementButtonPushed.setBorder(BorderFactory.createLineBorder(Color.green, 1));
             if (elementList.isEmpty()) {
                 elementList.add(element);
                 if (lineBorderColorMap.get(sideButtonPushed.getText()) != null) {
@@ -631,9 +670,11 @@ public class AddWorkPanel {
                                 if (check.equals(button.getText())) {
                                     button.setBorder(BorderFactory.createLineBorder(Color.green));
                                 }
+                                //Если есть кнопка ремонт, то делим ее на значение "ремонт" и "число"
                                 if (check.contains("Ремонт")) {
                                     button.setBorder(BorderFactory.createLineBorder(Color.green));
                                     String[] split = check.split(" ");
+                                    // Возвращаем значение "elementRemont" для того чтобы отобразить сколько у данного элемента это значение
                                     if (split.length > 1) {
                                         elementRemont = split[1];
                                     }
@@ -650,12 +691,16 @@ public class AddWorkPanel {
         }
         return button;
     }
-    private JButton changeColorPushedButton(JButton lastPushedButton,JButton pushedButton,int panelNumber){
-        if(lastPushedButton != null){
-            takeColor(lastPushedButton,panelNumber);
+
+    private JButton changeColorPushedButton(JButton lastPushedButton, JButton pushedButton, int panelNumber) {
+        //Сначала проверяем была ли старая кнопка нажата и ищем было ли у данной кнопки раньше "добавление" в элемент
+        if (lastPushedButton != null) {
+            // если было, у нее меняется рамка на зеленую если нет, то на серую.
+            takeColor(lastPushedButton, panelNumber);
         }
+        // Дальше меняем местами нажатую кнопку и выставляем у нее рамку на красную для понимания какая кнопка нажата
         lastPushedButton = pushedButton;
-        lastPushedButton.setBorder(BorderFactory.createLineBorder(Color.RED,1));
+        lastPushedButton.setBorder(BorderFactory.createLineBorder(Color.RED, 1));
         return lastPushedButton;
     }
 
@@ -698,7 +743,7 @@ public class AddWorkPanel {
 
     private JPanel clearAll(JPanel panel) {
         BorderLayout layout = (BorderLayout) panel.getLayout();
-        clearColorButton();
+        clearPushedButtonAfterElementAdd();
         elementLeftRightSidePanel.removeAll();
         elementCenterSide.removeAll();
         panelGlass.removeAll();
@@ -717,7 +762,7 @@ public class AddWorkPanel {
         return panel;
     }
 
-    private void clearColorButton() {
+    private void clearPushedButtonAfterElementAdd() {
         zamenaOrRsButtonPushed = null;
         paint1xOr2xButtonPushed = null;
         remontButtonPushed = null;
@@ -725,6 +770,7 @@ public class AddWorkPanel {
         moldingButtonPushed = null;
         zercaloButtonPushed = null;
         glassButtonPushed = null;
+        haveGlass = 0;
     }
 
     private Element createElement() {
@@ -738,11 +784,15 @@ public class AddWorkPanel {
             } else {
                 element.setName(sideButtonPushed.getText().substring(0, sideButtonPushed.getText().length() - 2) + "ый " + elementButtonPushed.getText());
             }
-        // Второе оформление имени остекление
+            // Если Элемент меняется, то к имени добавляем "замена".
+            if(zamenaOrRsButtonPushed.getText().equals("Замена")){
+                element.setName(element.getName() + " " + zamenaOrRsButtonPushed.getText());
+            }
+            // Второе оформление имени остекление
         } else if (sideButtonPushed.getText().equals("Остекление")) {
             element.setName(elementButtonPushed.getText() + " " + sideButtonPushed.getText());
-            element.setGlass(1);
-        // Третье оформление имени центральная часть авто (сторону упускаем оставляем только элемент)
+            element.setGlass(2);
+            // Третье оформление имени центральная часть авто (сторону упускаем, оставляем только элемент)
         } else {
             element.setName(elementButtonPushed.getText());
         }
@@ -772,10 +822,15 @@ public class AddWorkPanel {
                     element.setMolding(1);
                 }
             }
-            // Если у элемента нужно есть стекло, то проверяем надо ли снимать.
-            if(haveGlass){
-                element.setGlass(1);
-                element.setNameGlass(glassButtonPushed.getText() + " стекло c/у");
+            // Если у элемента есть стекло, то проверяем надо ли снимать.
+            if (haveGlass > 0) {
+                // Умножаем 2 так как норма на стекло 2
+                element.setGlass(haveGlass * 2);
+                if (haveGlass.equals(2)) {
+                    element.setNameGlass("Лобовое и Заднее" + " стекло c/у");
+                } else {
+                    element.setNameGlass(glassButtonPushed.getText() + " стекло c/у");
+                }
             }
         }
         return element;

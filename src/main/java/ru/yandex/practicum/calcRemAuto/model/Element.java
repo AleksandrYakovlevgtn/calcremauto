@@ -18,4 +18,20 @@ public class Element {
     int ruchka = 0;
     double remont = 0;
     double total = 0;
+    @Override
+    public String toString() {
+        return "Element{" +
+                "name='" + name + '\'' +
+                ", paintSide=" + paintSide +
+                ", armatureSide=" + armatureSide +
+                ", kuzDetReplaceSide=" + kuzDetReplaceSide +
+                ", glass=" + glass +
+                ", nameGlass='" + nameGlass + '\'' +
+                ", zerkalo=" + zerkalo +
+                ", molding=" + molding +
+                ", ruchka=" + ruchka +
+                ", remont=" + remont +
+                ", total=" + total +
+                '}';
+    }
 }
