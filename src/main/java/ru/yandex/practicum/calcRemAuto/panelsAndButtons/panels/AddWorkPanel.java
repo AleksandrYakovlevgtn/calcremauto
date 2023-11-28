@@ -5,6 +5,7 @@ import ru.yandex.practicum.calcRemAuto.model.Element;
 import ru.yandex.practicum.calcRemAuto.panelsAndButtons.buttons.Buttons;
 
 import javax.swing.*;
+import javax.swing.border.LineBorder;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import java.awt.*;
@@ -18,7 +19,7 @@ public class AddWorkPanel {
     JPanel elementCenterSide = new JPanel();
     JPanel panelGlass = new JPanel();
     JTextArea elementListTextViewing = new JTextArea(30, 19);
-    Double elementArmatureSide = 0.0;
+    double elementArmatureSide = 0.0;
     Double elementKuzDetReplaceSide = 0.0;
     String elementRemont;
     Double elementPaintSide = 0.0;
@@ -57,16 +58,16 @@ public class AddWorkPanel {
         panelStartAdd.add(new JLabel("Выбери сторону."), new GridBagConstraints(0, 0, 1, 1, 1, 1,
                 GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
                 new Insets(2, 2, 2, 2), 0, 10));
-        panelStartAdd.add(takeColor(removeActionListener(but.getButtonLeft()), 1), new GridBagConstraints(0, 1, 1, 1, 1, 1,
+        panelStartAdd.add(takeColor(removeActionListenerTEST(but.getButtonLeft()), 1), new GridBagConstraints(0, 1, 1, 1, 1, 1,
                 GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
                 new Insets(2, 2, 2, 2), 0, 0));
-        panelStartAdd.add(takeColor(removeActionListener(but.getButtonCenter()), 1), new GridBagConstraints(0, 2, 1, 1, 1, 1,
+        panelStartAdd.add(takeColor(removeActionListenerTEST(but.getButtonCenter()), 1), new GridBagConstraints(0, 2, 1, 1, 1, 1,
                 GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
                 new Insets(2, 2, 2, 2), 0, 0));
-        panelStartAdd.add(takeColor(removeActionListener(but.getButtonRight()), 1), new GridBagConstraints(0, 3, 1, 1, 1, 1,
+        panelStartAdd.add(takeColor(removeActionListenerTEST(but.getButtonRight()), 1), new GridBagConstraints(0, 3, 1, 1, 1, 1,
                 GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
                 new Insets(2, 2, 2, 2), 0, 0));
-        panelStartAdd.add(takeColor(removeActionListener(but.getButtonGlass()), 1), new GridBagConstraints(0, 4, 1, 1, 1, 1,
+        panelStartAdd.add(takeColor(removeActionListenerTEST(but.getButtonGlass()), 1), new GridBagConstraints(0, 4, 1, 1, 1, 1,
                 GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
                 new Insets(2, 2, 2, 2), 0, 0));
         // Добавляем кнопки снизу с права "назад" и "сохранить"
@@ -123,28 +124,28 @@ public class AddWorkPanel {
         elementLeftRightSidePanel.add(new JLabel("Выбери Элемент."), new GridBagConstraints(0, 0, 1, 1, 1, 1,
                 GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
                 new Insets(2, 2, 2, 2), 0, 10));
-        elementLeftRightSidePanel.add(takeColor(removeActionListener(but.getButtonFrontWing()), 2), new GridBagConstraints(0, 1, 1, 1, 1, 1,
+        elementLeftRightSidePanel.add(takeColor(removeActionListenerTEST(but.getButtonFrontWing()), 2), new GridBagConstraints(0, 1, 1, 1, 1, 1,
                 GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
                 new Insets(2, 2, 2, 2), 0, 0));
-        elementLeftRightSidePanel.add(takeColor(removeActionListener(but.getButtonFrontDoor()), 2), new GridBagConstraints(0, 2, 1, 1, 1, 1,
+        elementLeftRightSidePanel.add(takeColor(removeActionListenerTEST(but.getButtonFrontDoor()), 2), new GridBagConstraints(0, 2, 1, 1, 1, 1,
                 GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
                 new Insets(2, 2, 2, 2), 0, 0));
-        elementLeftRightSidePanel.add(takeColor(removeActionListener(but.getButtonBackDoor()), 2), new GridBagConstraints(0, 3, 1, 1, 1, 1,
+        elementLeftRightSidePanel.add(takeColor(removeActionListenerTEST(but.getButtonBackDoor()), 2), new GridBagConstraints(0, 3, 1, 1, 1, 1,
                 GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
                 new Insets(2, 2, 2, 2), 0, 0));
-        elementLeftRightSidePanel.add(takeColor(removeActionListener(but.getButtonBackWing()), 2), new GridBagConstraints(0, 4, 1, 1, 1, 1,
+        elementLeftRightSidePanel.add(takeColor(removeActionListenerTEST(but.getButtonBackWing()), 2), new GridBagConstraints(0, 4, 1, 1, 1, 1,
                 GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
                 new Insets(2, 2, 2, 2), 0, 0));
-        elementLeftRightSidePanel.add(takeColor(removeActionListener(but.getButtonBalk()), 2), new GridBagConstraints(0, 5, 1, 1, 1, 1,
+        elementLeftRightSidePanel.add(takeColor(removeActionListenerTEST(but.getButtonBalk()), 2), new GridBagConstraints(0, 5, 1, 1, 1, 1,
                 GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
                 new Insets(2, 2, 2, 2), 0, 0));
-        elementLeftRightSidePanel.add(takeColor(removeActionListener(but.getButtonDoorStep()), 2), new GridBagConstraints(0, 6, 1, 1, 1, 1,
+        elementLeftRightSidePanel.add(takeColor(removeActionListenerTEST(but.getButtonDoorStep()), 2), new GridBagConstraints(0, 6, 1, 1, 1, 1,
                 GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
                 new Insets(2, 2, 2, 2), 0, 0));
-        elementLeftRightSidePanel.add(takeColor(removeActionListener(but.getButtonFrontDoorway()), 2), new GridBagConstraints(0, 7, 1, 1, 1, 1,
+        elementLeftRightSidePanel.add(takeColor(removeActionListenerTEST(but.getButtonFrontDoorway()), 2), new GridBagConstraints(0, 7, 1, 1, 1, 1,
                 GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
                 new Insets(2, 2, 2, 2), 0, 0));
-        elementLeftRightSidePanel.add(takeColor(removeActionListener(but.getButtonBackDoorway()), 2), new GridBagConstraints(0, 8, 1, 1, 1, 1,
+        elementLeftRightSidePanel.add(takeColor(removeActionListenerTEST(but.getButtonBackDoorway()), 2), new GridBagConstraints(0, 8, 1, 1, 1, 1,
                 GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
                 new Insets(2, 2, 2, 2), 0, 0));
 
@@ -330,7 +331,7 @@ public class AddWorkPanel {
         if (!elementButtonPushed.getText().equals("Пер.Проём")) {
             if (!elementButtonPushed.getText().equals("Зад.Проём")) {
                 // Замена проемов отдельно не существует (кузовная деталь) и входит либо в порог, либо в брус.
-                elementLeftRightSidePanel.add(takeColor(removeActionListener(but.getReplaceButton()), 3), new GridBagConstraints(1, 1, 1, 1, 1, 1,
+                elementLeftRightSidePanel.add(takeColor(removeActionListenerTEST(but.getReplaceButton()), 3), new GridBagConstraints(1, 1, 1, 1, 1, 1,
                         GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
                         new Insets(2, 2, 2, 2), 0, 0));
                 // Станешь умнее УБЕРИ ЭТО ЗАДВОЕНИЕ!!!!!!!!
@@ -345,19 +346,19 @@ public class AddWorkPanel {
                     GridBagConstraints.EAST, GridBagConstraints.HORIZONTAL,
                     new Insets(2, 2, 2, 2), 0, 0));
         }
-        elementLeftRightSidePanel.add(takeColor(removeActionListener(but.getDisassembleButton()), 3), new GridBagConstraints(2, 1, 1, 1, 1, 1,
+        elementLeftRightSidePanel.add(takeColor(removeActionListenerTEST(but.getDisassembleButton()), 3), new GridBagConstraints(2, 1, 1, 1, 1, 1,
                 GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
                 new Insets(2, 2, 2, 2), 0, 0));
 
-        elementLeftRightSidePanel.add(takeColor(removeActionListener(but.getPaint1xButton()), 3), new GridBagConstraints(1, 2, 1, 1, 1, 1,
+        elementLeftRightSidePanel.add(takeColor(removeActionListenerTEST(but.getPaint1xButton()), 3), new GridBagConstraints(1, 2, 1, 1, 1, 1,
                 GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
                 new Insets(2, 2, 2, 2), 0, 0));
 
-        elementLeftRightSidePanel.add(takeColor(removeActionListener(but.getPaint2xButton()), 3), new GridBagConstraints(2, 2, 1, 1, 1, 1,
+        elementLeftRightSidePanel.add(takeColor(removeActionListenerTEST(but.getPaint2xButton()), 3), new GridBagConstraints(2, 2, 1, 1, 1, 1,
                 GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
                 new Insets(2, 2, 2, 2), 0, 0));
 
-        elementLeftRightSidePanel.add(takeColor(removeActionListener(but.getRepairButton()), 3), new GridBagConstraints(1, 3, 1, 1, 1, 1,
+        elementLeftRightSidePanel.add(takeColor(removeActionListenerTEST(but.getRepairButton()), 3), new GridBagConstraints(1, 3, 1, 1, 1, 1,
                 GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
                 new Insets(2, 2, 2, 2), 0, 0));
 
@@ -366,15 +367,15 @@ public class AddWorkPanel {
                 new Insets(2, 2, 2, 2), 0, 0));
         if (elementButtonPushed.getText().contains("Пер.Дверь") || elementButtonPushed.getText().contains("Зад.Дверь")) {
             if (elementButtonPushed.getText().contains("Пер.Дверь")) {
-                elementLeftRightSidePanel.add(takeColor(removeActionListener(but.getZerkaloButton()), 3), new GridBagConstraints(1, 6, 1, 1, 1, 1,
+                elementLeftRightSidePanel.add(takeColor(removeActionListenerTEST(but.getZerkaloButton()), 3), new GridBagConstraints(1, 6, 1, 1, 1, 1,
                         GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
                         new Insets(2, 2, 2, 2), 0, 0));
             }
-            elementLeftRightSidePanel.add(takeColor(removeActionListener(but.getRuchkaButton()), 3), new GridBagConstraints(1, 4, 1, 1, 1, 1,
+            elementLeftRightSidePanel.add(takeColor(removeActionListenerTEST(but.getRuchkaButton()), 3), new GridBagConstraints(1, 4, 1, 1, 1, 1,
                     GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
                     new Insets(2, 2, 2, 5), 0, 0));
 
-            elementLeftRightSidePanel.add(takeColor(removeActionListener(but.getMoldingButton()), 3), new GridBagConstraints(1, 5, 1, 1, 1, 1,
+            elementLeftRightSidePanel.add(takeColor(removeActionListenerTEST(but.getMoldingButton()), 3), new GridBagConstraints(1, 5, 1, 1, 1, 1,
                     GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
                     new Insets(2, 2, 2, 2), 0, 0));
         }
@@ -382,7 +383,7 @@ public class AddWorkPanel {
             elementLeftRightSidePanel.add(new JLabel("    Остекление"), new GridBagConstraints(1, 4, 1, 1, 1, 1,
                     GridBagConstraints.EAST, GridBagConstraints.HORIZONTAL,
                     new Insets(2, 2, 2, 5), 0, 0));
-            elementLeftRightSidePanel.add(takeColor(removeActionListener(but.getButtonWindshield()), 3), new GridBagConstraints(1, 5, 1, 1, 1, 1,
+            elementLeftRightSidePanel.add(takeColor(removeActionListenerTEST(but.getButtonWindshield()), 3), new GridBagConstraints(1, 5, 1, 1, 1, 1,
                     GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
                     new Insets(2, 2, 2, 5), 0, 0));
         }
@@ -390,7 +391,7 @@ public class AddWorkPanel {
             elementLeftRightSidePanel.add(new JLabel("    Остекление"), new GridBagConstraints(1, 4, 1, 1, 1, 1,
                     GridBagConstraints.EAST, GridBagConstraints.HORIZONTAL,
                     new Insets(2, 2, 2, 5), 0, 0));
-            elementLeftRightSidePanel.add(takeColor(removeActionListener(but.getButtonRearWindow()), 3), new GridBagConstraints(1, 5, 1, 1, 1, 1,
+            elementLeftRightSidePanel.add(takeColor(removeActionListenerTEST(but.getButtonRearWindow()), 3), new GridBagConstraints(1, 5, 1, 1, 1, 1,
                     GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
                     new Insets(2, 2, 2, 5), 0, 0));
         }
@@ -430,7 +431,7 @@ public class AddWorkPanel {
             but.getReplaceButton().setBorder(BorderFactory.createLineBorder(Color.red, 1));
             addElementToList(clearCenter(panelAdd));
             panelAdd.updateUI();
-        });
+        }); // замена
         but.getDisassembleButton().addActionListener(e -> { // Р\С
             zamenaOrRsButtonPushed = but.getDisassembleButton();
             paint1xOr2xButtonPushed = but.getPaint1xButton();
@@ -442,7 +443,7 @@ public class AddWorkPanel {
             but.getPaint1xButton().setBorder(BorderFactory.createLineBorder(Color.red, 1));
             addElementToList(clearCenter(panelAdd));
             panelAdd.updateUI();
-        });
+        }); // р\с
         but.getPaint1xButton().addActionListener(e -> { // окраска 1х
             paint1xOr2xButtonPushed = but.getPaint1xButton();
             if (zamenaOrRsButtonPushed == null) {
@@ -456,7 +457,7 @@ public class AddWorkPanel {
             but.getPaint1xButton().setBorder(BorderFactory.createLineBorder(Color.red, 1));
             addElementToList(clearCenter(panelAdd));
             panelAdd.updateUI();
-        });
+        }); // окраска 1х
         but.getPaint2xButton().addActionListener(e -> { // окраска 2х
             paint1xOr2xButtonPushed = but.getPaint2xButton();
             if (zamenaOrRsButtonPushed == null) {
@@ -470,7 +471,7 @@ public class AddWorkPanel {
             but.getPaint2xButton().setBorder(BorderFactory.createLineBorder(Color.red, 1));
             addElementToList(clearCenter(panelAdd));
             panelAdd.updateUI();
-        });
+        }); // окраска 2х
         but.getRepairButton().addActionListener(e -> { // ремонт
             // проверяем добелена ли окраска и разборка.
             if (zamenaOrRsButtonPushed != null && paint1xOr2xButtonPushed != null) {
@@ -478,64 +479,198 @@ public class AddWorkPanel {
                     // добавляем перед последним символом точку переведя число в двоичное.
                     remontButtonPushed = but.getRepairButton();
                     elementRemont = remont.getText();
-                    removeActionListener(but.getRepairButton()).setBorder(BorderFactory.createLineBorder(Color.red, 1));
+                    remontButtonPushed.setBorder(BorderFactory.createLineBorder(Color.red, 1));
                     addElementToList(clearCenter(panelAdd));
                     panelAdd.updateUI();
                 }
             }
-        });
-        but.getRuchkaButton().addActionListener(e -> {
+        });  // ремонт
+        but.getRuchkaButton().addActionListener(e -> {       // ручка
+            if (paint1xOr2xButtonPushed == null) {
+            /* Проверяем на прошлое нажатие основные кнопки, и в случае если они имеют зеленую рамку нажимаем их что бы
+               верно выставить нормативы.*/
+                checkEarlyPushedReplaceOrDisassembleButton();
+            }
             // Если окраска только ручки выставляем 0.6 арматура
-            if (paint1xOr2xButtonPushed == null) {
-                if (elementArmatureSide > 0) {
-                    elementArmatureSide = elementArmatureSide + 0.6;
-                } else {
-                    elementArmatureSide = 0.6;
+            if (ruchkaButtonPushed == null) {
+                if (paint1xOr2xButtonPushed == null) {
+                    if (elementArmatureSide > 0.1) {
+                        elementArmatureSide = elementArmatureSide + 0.6;
+                    } else {
+                        elementArmatureSide = 0.6;
+                    }
                 }
                 addElementToList(clearCenter(panelAdd));
                 panelAdd.updateUI();
+                ruchkaButtonPushed = but.getRuchkaButton();
+                but.getRuchkaButton().setBorder(BorderFactory.createLineBorder(Color.red, 1));
+            } else {
+                // Если ручка уже добавлена, а мы хотим ее убрать необходимо повторно нажать на кнопку
+                LineBorder color = (LineBorder) ruchkaButtonPushed.getBorder();
+                // Если кнопка уже была нажата и элемент был добавлен (то есть имеет цвет рамки зеленый) мы убираем нормативы
+                if (color.getLineColor() == (Color.green)) {
+                    if (paint1xOr2xButtonPushed == null) {
+                        if (elementArmatureSide >= 0.6) {
+                            elementArmatureSide = elementArmatureSide - 0.6;
+                        } else {
+                            elementArmatureSide = 0.0;
+                        }
+                    }
+                    // Устанавливаем цвет кнопки на серый тем самым убрав ее из элемента
+                    but.getRuchkaButton().setBorder(BorderFactory.createLineBorder(Color.lightGray, 1));
+                    ruchkaButtonPushed = null;
+                    addElementToList(clearCenter(panelAdd));
+                    panelAdd.updateUI();
+                } else {
+                    // Если кнопка была нажата, но элемент не был добавлен (то есть имеет цвет рамки красный) мы убираем нормативы
+                    if (paint1xOr2xButtonPushed == null) {
+                        if (elementArmatureSide >= 0.6) {
+                            elementArmatureSide = elementArmatureSide - 0.6;
+                        } else {
+                            elementArmatureSide = 0.0;
+                        }
+                    }
+                    // Устанавливаем цвет кнопки на серый тем самым убрав ее из элемента
+                    addElementToList(clearCenter(panelAdd));
+                    panelAdd.updateUI();
+                    but.getRuchkaButton().setBorder(BorderFactory.createLineBorder(Color.lightGray, 1));
+                    ruchkaButtonPushed = null;
+                }
             }
-            ruchkaButtonPushed = removeActionListener(but.getRuchkaButton());
-            but.getRuchkaButton().setBorder(BorderFactory.createLineBorder(Color.red, 1));
-        });
+        });  // ручка
         but.getMoldingButton().addActionListener(e -> {
+            if (paint1xOr2xButtonPushed == null) {
+            /* Проверяем на прошлое нажатие основные кнопки, и в случае если они имеют зеленую рамку нажимаем их что бы
+               верно выставить нормативы.*/
+                checkEarlyPushedReplaceOrDisassembleButton();
+            }
             // Если окраска только молдинга выставляем 0.6 арматура
-            if (paint1xOr2xButtonPushed == null) {
-                if (elementArmatureSide > 0) {
-                    elementArmatureSide = elementArmatureSide + 0.6;
-                } else {
-                    elementArmatureSide = 0.6;
+            if (moldingButtonPushed == null) {
+                if (paint1xOr2xButtonPushed == null) {
+                    if (elementArmatureSide > 0.1) {
+                        elementArmatureSide = elementArmatureSide + 0.6;
+                    } else {
+                        elementArmatureSide = 0.6;
+                    }
                 }
                 addElementToList(clearCenter(panelAdd));
                 panelAdd.updateUI();
+                moldingButtonPushed = but.getMoldingButton();
+                but.getMoldingButton().setBorder(BorderFactory.createLineBorder(Color.red, 1));
+            } else {
+                // Если молдинг уже добавлен, а мы хотим его убрать необходимо повторно нажать на кнопку
+                LineBorder color = (LineBorder) moldingButtonPushed.getBorder();
+                // Если кнопка уже была нажата и элемент был добавлен (то есть имеет цвет рамки зеленый) мы убираем нормативы
+                if (color.getLineColor() == (Color.green)) {
+                    if (paint1xOr2xButtonPushed == null) {
+                        if (elementArmatureSide >= 0.6) {
+                            elementArmatureSide = elementArmatureSide - 0.6;
+                        } else {
+                            elementArmatureSide = 0.0;
+                        }
+                    }
+                    // Устанавливаем цвет кнопки на серый тем самым убрав ее из элемента
+                    but.getMoldingButton().setBorder(BorderFactory.createLineBorder(Color.lightGray, 1));
+                    moldingButtonPushed = null;
+                    addElementToList(clearCenter(panelAdd));
+                    panelAdd.updateUI();
+                } else {
+                    // Если кнопка была нажата, но элемент не был добавлен (то есть имеет цвет рамки красный) мы убираем нормативы
+                    if (paint1xOr2xButtonPushed == null) {
+                        if (elementArmatureSide >= 0.6) {
+                            elementArmatureSide = elementArmatureSide - 0.6;
+                        } else {
+                            elementArmatureSide = 0.0;
+                        }
+                    }
+                    // Устанавливаем цвет кнопки на серый тем самым убрав ее из элемента
+                    addElementToList(clearCenter(panelAdd));
+                    panelAdd.updateUI();
+                    but.getMoldingButton().setBorder(BorderFactory.createLineBorder(Color.lightGray, 1));
+                    moldingButtonPushed = null;
+                }
             }
-            moldingButtonPushed = removeActionListener(but.getMoldingButton());
-            but.getMoldingButton().setBorder(BorderFactory.createLineBorder(Color.red, 1));
-        });
+        }); // молдинг
         but.getZerkaloButton().addActionListener(e -> {
-            // Если окраска только зеркала выставляем 0.6 арматура
             if (paint1xOr2xButtonPushed == null) {
-                if (elementArmatureSide > 0) {
-                    elementArmatureSide = elementArmatureSide + 0.6;
-                } else {
-                    elementArmatureSide = 0.6;
+            /* Проверяем на прошлое нажатие основные кнопки, и в случае если они имеют зеленую рамку нажимаем их что бы
+               верно выставить нормативы.*/
+                checkEarlyPushedReplaceOrDisassembleButton();
+            }
+            // Если окраска только зеркала выставляем 0.6 арматура
+            if (zercaloButtonPushed == null) {
+                if (paint1xOr2xButtonPushed == null) {
+                    if (elementArmatureSide > 0.1) {
+                        elementArmatureSide = elementArmatureSide + 0.6;
+                    } else {
+                        elementArmatureSide = 0.6;
+                    }
                 }
                 addElementToList(clearCenter(panelAdd));
                 panelAdd.updateUI();
+                zercaloButtonPushed = but.getZerkaloButton();
+                but.getZerkaloButton().setBorder(BorderFactory.createLineBorder(Color.red, 1));
+            } else {
+                // Если зеркало уже добавлено, а мы хотим его убрать необходимо повторно нажать на кнопку
+                LineBorder color = (LineBorder) zercaloButtonPushed.getBorder();
+                // Если кнопка уже была нажата и элемент был добавлен (то есть имеет цвет рамки зеленый) мы убираем нормативы
+                if (color.getLineColor() == (Color.green)) {
+                    if (paint1xOr2xButtonPushed == null) {
+                        if (elementArmatureSide >= 0.6) {
+                            elementArmatureSide = elementArmatureSide - 0.6;
+                        } else {
+                            elementArmatureSide = 0.0;
+                        }
+                    }
+                    // Устанавливаем цвет кнопки на серый тем самым убрав ее из элемента
+                    but.getZerkaloButton().setBorder(BorderFactory.createLineBorder(Color.lightGray, 1));
+                    zercaloButtonPushed = null;
+                    addElementToList(clearCenter(panelAdd));
+                    panelAdd.updateUI();
+                } else {
+                    // Если кнопка была нажата, но элемент не был добавлен (то есть имеет цвет рамки красный) мы убираем нормативы
+                    if (paint1xOr2xButtonPushed == null) {
+                        if (elementArmatureSide >= 0.6) {
+                            elementArmatureSide = elementArmatureSide - 0.6;
+                        } else {
+                            elementArmatureSide = 0.0;
+                        }
+                    }
+                    // Устанавливаем цвет кнопки на серый тем самым убрав ее из элемента
+                    addElementToList(clearCenter(panelAdd));
+                    panelAdd.updateUI();
+                    but.getZerkaloButton().setBorder(BorderFactory.createLineBorder(Color.lightGray, 1));
+                    zercaloButtonPushed = null;
+                }
             }
-            zercaloButtonPushed = removeActionListener(but.getZerkaloButton());
-            but.getZerkaloButton().setBorder(BorderFactory.createLineBorder(Color.red, 1));
-        });
-        but.getButtonFrontWing().addActionListener(e -> {
-            haveGlass++;
-            glassButtonPushed = removeActionListener(but.getButtonFrontWing());
-            but.getButtonFrontWing().setBorder(BorderFactory.createLineBorder(Color.red, 1));
-        });
+        }); // зеркало
+        but.getButtonWindshield().addActionListener(e -> {
+            if (!sideButtonPushed.getText().equals("Остекление")) {
+                if (glassButtonPushed == null) {
+                    haveGlass++;
+                    glassButtonPushed = but.getButtonWindshield();
+                    but.getButtonWindshield().setBorder(BorderFactory.createLineBorder(Color.red, 1));
+                } else {
+                    haveGlass--;
+                    glassButtonPushed = null;
+                    but.getButtonWindshield().setBorder(BorderFactory.createLineBorder(Color.lightGray, 1));
+                }
+            }
+        }); // лобовое стекло
         but.getButtonRearWindow().addActionListener(e -> {
-            haveGlass++;
-            glassButtonPushed = removeActionListener(but.getButtonRearWindow());
-            but.getButtonRearWindow().setBorder(BorderFactory.createLineBorder(Color.red, 1));
-        });
+            if (!sideButtonPushed.getText().equals("Остекление")) {
+                if (glassButtonPushed == null) {
+                    haveGlass++;
+                    glassButtonPushed = but.getButtonRearWindow();
+                    but.getButtonRearWindow().setBorder(BorderFactory.createLineBorder(Color.red, 1));
+                } else {
+                    haveGlass--;
+                    glassButtonPushed = null;
+                    but.getButtonRearWindow().setBorder(BorderFactory.createLineBorder(Color.lightGray, 1));
+                }
+            }
+        }); // заднее стекло
+        checkEarlyPushedReplaceOrDisassembleButton();
     }
 
     private void addElementGlass(JPanel panelAdd) {
@@ -549,10 +684,10 @@ public class AddWorkPanel {
         panelGlass.add(new JLabel("Выбери стекло."), new GridBagConstraints(0, 0, 1, 1, 1, 1,
                 GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
                 new Insets(2, 2, 2, 2), 0, 10));
-        panelGlass.add(takeColor(removeActionListener(but.getButtonWindshield()), 2), new GridBagConstraints(0, 1, 1, 1, 1, 1,
+        panelGlass.add(takeColor(removeActionListenerTEST(but.getButtonWindshield()), 2), new GridBagConstraints(0, 1, 1, 1, 1, 1,
                 GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
                 new Insets(2, 2, 2, 2), 0, 0));
-        panelGlass.add(takeColor(removeActionListener(but.getButtonRearWindow()), 2), new GridBagConstraints(0, 2, 1, 1, 1, 1,
+        panelGlass.add(takeColor(removeActionListenerTEST(but.getButtonRearWindow()), 2), new GridBagConstraints(0, 2, 1, 1, 1, 1,
                 GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
                 new Insets(2, 2, 2, 2), 0, 0));
 
@@ -563,13 +698,13 @@ public class AddWorkPanel {
 
         but.getButtonWindshield().addActionListener(e -> {
             if (sideButtonPushed.getText().equals("Остекление")) {
-                elementButtonPushed = changeColorPushedButton(elementButtonPushed, removeActionListener(but.getButtonWindshield()), 2);
+                elementButtonPushed = changeColorPushedButton(elementButtonPushed, removeActionListenerTEST(but.getButtonWindshield()), 2);
                 addElementToList(clearCenter(panelAdd));
             }
         });
         but.getButtonRearWindow().addActionListener(e -> {
             if (sideButtonPushed.getText().equals("Остекление")) {
-                elementButtonPushed = changeColorPushedButton(elementButtonPushed, removeActionListener(but.getButtonRearWindow()), 2);
+                elementButtonPushed = changeColorPushedButton(elementButtonPushed, removeActionListenerTEST(but.getButtonRearWindow()), 2);
                 addElementToList(clearCenter(panelAdd));
             }
         });
@@ -590,7 +725,7 @@ public class AddWorkPanel {
         panelAddElementToList.add(new JLabel(" "), new GridBagConstraints(0, 1, 1, 1, 1, 1,
                 GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
                 new Insets(0, 0, 0, 0), 0, 0));
-        panelAddElementToList.add(takeColor(removeActionListener(but.getAddButton()), 1), new GridBagConstraints(0, 2, 1, 1, 1, 1,
+        panelAddElementToList.add(takeColor(removeActionListenerTEST(but.getAddButton()), 1), new GridBagConstraints(0, 2, 1, 1, 1, 1,
                 GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
                 new Insets(0, 2, 2, 2), 30, 0));
 
@@ -601,10 +736,11 @@ public class AddWorkPanel {
 
         but.getAddButton().addActionListener(o -> {
             Element element = createElement();
-            //sideButtonPushed.setBorder(BorderFactory.createLineBorder(Color.green, 1));
-            //elementButtonPushed.setBorder(BorderFactory.createLineBorder(Color.green, 1));
             if (elementList.isEmpty()) {
-                elementList.add(element);
+                // Если Элемент меняется, то к имени добавляем "замена".
+                // Применяем здесь, а не в createElement() по причине метода elementList.get(i).getName().contains(element.getName())
+                // Если применить в createElement() то при contains "**** ****.**** замена" getName с "**** ****.****" без замена он его не засчитает и вернет false
+                elementList.add(addToNameZamenaIfZamenaButtonPushed(element));
                 if (lineBorderColorMap.get(sideButtonPushed.getText()) != null) {
                     lineBorderColorMap.get(sideButtonPushed.getText()).put(elementButtonPushed.getText(), addColorOfAddWorks());
                 } else {
@@ -614,13 +750,16 @@ public class AddWorkPanel {
                 Integer q = null;
                 Element el = null;
                 for (int i = 0; i <= elementList.size() - 1; i++) {
-                    if (elementList.get(i).getName().equals(element.getName())) {
+                    if (elementList.get(i).getName().contains(element.getName())) {
                         q = i;
                         el = elementList.get(i);
                     }
                 }
                 if (q == null) {
-                    elementList.add(element);
+                    // Если Элемент меняется, то к имени добавляем "замена".
+                    // Применяем здесь, а не в createElement() по причине метода elementList.get(i).getName().contains(element.getName())
+                    // Если применить в createElement() то при contains "**** ****.**** замена" getName с "**** ****.****" без замена он его не засчитает и вернет false
+                    elementList.add(addToNameZamenaIfZamenaButtonPushed(element));
                     if (lineBorderColorMap.get(sideButtonPushed.getText()) != null) {
                         lineBorderColorMap.get(sideButtonPushed.getText()).put(elementButtonPushed.getText(), addColorOfAddWorks());
                     } else {
@@ -628,7 +767,10 @@ public class AddWorkPanel {
                     }
                 } else {
                     elementList.remove(el);
-                    elementList.add(element);
+                    // Если Элемент меняется, то к имени добавляем "замена".
+                    // Применяем здесь, а не в createElement() по причине метода elementList.get(i).getName().contains(element.getName())
+                    // Если применить в createElement() то при contains "**** ****.**** замена" getName с "**** ****.****" без замена он его не засчитает и вернет false
+                    elementList.add(addToNameZamenaIfZamenaButtonPushed(element));
                     if (lineBorderColorMap.get(sideButtonPushed.getText()) != null) {
                         lineBorderColorMap.get(sideButtonPushed.getText()).put(elementButtonPushed.getText(), addColorOfAddWorks());
                     } else {
@@ -636,6 +778,7 @@ public class AddWorkPanel {
                     }
                 }
             }
+            sendToStringInElementListTextViewing();
             clearCenter(panel).updateUI();
         });
     }
@@ -671,7 +814,7 @@ public class AddWorkPanel {
                                     button.setBorder(BorderFactory.createLineBorder(Color.green));
                                 }
                                 //Если есть кнопка ремонт, то делим ее на значение "ремонт" и "число"
-                                if (check.contains("Ремонт")) {
+                                if (check.contains("Ремонт") && button.getText().equals("Ремонт")) {
                                     button.setBorder(BorderFactory.createLineBorder(Color.green));
                                     String[] split = check.split(" ");
                                     // Возвращаем значение "elementRemont" для того чтобы отобразить сколько у данного элемента это значение
@@ -681,9 +824,7 @@ public class AddWorkPanel {
                                 }
                             }
                         }
-                        //listOfAddWorks = null;
                     }
-                    //panel3 = null;
                 }
                 break;
             default:
@@ -720,23 +861,24 @@ public class AddWorkPanel {
         }
         if (elementButtonPushed.getText().equals("Пер.Дверь") || elementButtonPushed.getText().equals("Зад.Дверь")) {
             if (elementButtonPushed.getText().contains("Пер.Дверь")) {
-                if (ruchkaButtonPushed != null) {
-                    color.add(ruchkaButtonPushed.getText());
-                    ruchkaButtonPushed.setBorder(BorderFactory.createLineBorder(Color.green, 1));
+                if (zercaloButtonPushed != null) {
+                    color.add(zercaloButtonPushed.getText());
+                    zercaloButtonPushed.setBorder(BorderFactory.createLineBorder(Color.green, 1));
                 }
             }
             if (moldingButtonPushed != null) {
                 color.add(moldingButtonPushed.getText());
                 moldingButtonPushed.setBorder(BorderFactory.createLineBorder(Color.green, 1));
             }
-            if (zercaloButtonPushed != null) {
-                color.add(zercaloButtonPushed.getText());
-                zercaloButtonPushed.setBorder(BorderFactory.createLineBorder(Color.green, 1));
+            if (ruchkaButtonPushed != null) {
+                color.add(ruchkaButtonPushed.getText());
+                ruchkaButtonPushed.setBorder(BorderFactory.createLineBorder(Color.green, 1));
             }
         }
         if (glassButtonPushed != null) {
             color.add(glassButtonPushed.getText());
             glassButtonPushed.setBorder(BorderFactory.createLineBorder(Color.green, 1));
+            glassButtonPushed = null;
         }
         return color;
     }
@@ -775,26 +917,11 @@ public class AddWorkPanel {
 
     private Element createElement() {
         Element element = new Element();
-        // Первое оформляем имя (левая правая сторона)
-        if (sideButtonPushed.getText().equals("Левая") || sideButtonPushed.getText().equals("Правая")) {
-            if (elementButtonPushed.getText().equals("Пер.Крыло") || elementButtonPushed.getText().equals("Зад.Крыло")) {
-                element.setName(sideButtonPushed.getText().substring(0, sideButtonPushed.getText().length() - 2) + "ое " + elementButtonPushed.getText());
-            } else if (elementButtonPushed.getText().equals("Пер.Дверь") || elementButtonPushed.getText().equals("Зад.Дверь")) {
-                element.setName(sideButtonPushed.getText() + " " + elementButtonPushed.getText());
-            } else {
-                element.setName(sideButtonPushed.getText().substring(0, sideButtonPushed.getText().length() - 2) + "ый " + elementButtonPushed.getText());
-            }
-            // Если Элемент меняется, то к имени добавляем "замена".
-            if(zamenaOrRsButtonPushed.getText().equals("Замена")){
-                element.setName(element.getName() + " " + zamenaOrRsButtonPushed.getText());
-            }
-            // Второе оформление имени остекление
-        } else if (sideButtonPushed.getText().equals("Остекление")) {
-            element.setName(elementButtonPushed.getText() + " " + sideButtonPushed.getText());
+        // С начало выставляем имя.
+        element.setName(createName());
+        // От сих пор начинаем проставлять нормативы. Если это стекло.
+        if (sideButtonPushed.getText().equals("Остекление")) {
             element.setGlass(2);
-            // Третье оформление имени центральная часть авто (сторону упускаем, оставляем только элемент)
-        } else {
-            element.setName(elementButtonPushed.getText());
         }
         // От сих пор начинаем проставлять нормативы. Если это не стекло.
         if (!sideButtonPushed.getText().equals("Остекление")) {
@@ -826,24 +953,102 @@ public class AddWorkPanel {
             if (haveGlass > 0) {
                 // Умножаем 2 так как норма на стекло 2
                 element.setGlass(haveGlass * 2);
-                if (haveGlass.equals(2)) {
+                if (haveGlass > 2) {
                     element.setNameGlass("Лобовое и Заднее" + " стекло c/у");
                 } else {
                     element.setNameGlass(glassButtonPushed.getText() + " стекло c/у");
                 }
             }
+            haveGlass = 0;
         }
         return element;
     }
 
-    private JButton removeActionListener(JButton button) {
+    private JButton removeActionListenerTEST(JButton button) {
         /* Очень глупое решение, но другого не нашел, суть его в том чтобы постоянно обновлять актионЛистенер
            Если его нет то, так как при каждом нажатии создаётся новая панель добавления и при
            нажатии "дабавить" актионЛистенер выполняется столько раз сколько была раз создана панель.*/
         ActionListener[] al = button.getActionListeners();
-        if (al.length > 0) {
-            but.getAddButton().removeActionListener(al[0]);
+        for (int i = 0; i < al.length; i++) {
+            button.removeActionListener(al[i]);
         }
         return button;
+    }
+
+    private void sendToStringInElementListTextViewing() {
+        elementListTextViewing.setText(Arrays.toString(elementList.toArray()).replaceAll("^\\[|\\]$", ""));
+    }
+
+    private Element addToNameZamenaIfZamenaButtonPushed(Element element) {
+        // Если Элемент меняется, то к имени добавляем "замена".
+        if (zamenaOrRsButtonPushed != null) {
+            if (zamenaOrRsButtonPushed.getText().equals("Замена")) {
+                element.setName(element.getName() + " " + zamenaOrRsButtonPushed.getText());
+            }
+        }
+        return element;
+    }
+
+    private String createName() {
+        String name;
+        // Первое оформляем имя (левая правая сторона)
+        if (sideButtonPushed.getText().equals("Левая") || sideButtonPushed.getText().equals("Правая")) {
+            if (elementButtonPushed.getText().equals("Пер.Крыло") || elementButtonPushed.getText().equals("Зад.Крыло")) {
+                name = sideButtonPushed.getText().substring(0, sideButtonPushed.getText().length() - 2) + "ое " + elementButtonPushed.getText();
+            } else if (elementButtonPushed.getText().equals("Пер.Дверь") || elementButtonPushed.getText().equals("Зад.Дверь")) {
+                name = sideButtonPushed.getText() + " " + elementButtonPushed.getText();
+            } else {
+                name = sideButtonPushed.getText().substring(0, sideButtonPushed.getText().length() - 2) + "ый " + elementButtonPushed.getText();
+            }
+            // Второе оформление имени остекление
+        } else if (sideButtonPushed.getText().equals("Остекление")) {
+            name = elementButtonPushed.getText() + " " + sideButtonPushed.getText();
+            // Третье оформление имени центральная часть авто (сторону упускаем, оставляем только элемент)
+        } else {
+            name = elementButtonPushed.getText();
+        }
+        return name;
+    }
+
+    private void checkEarlyPushedReplaceOrDisassembleButton() {
+        /*
+        Проверяем по цвету рамки какие кнопки были нажаты ранее.
+         */
+        LineBorder colorReplaceButton = (LineBorder) but.getReplaceButton().getBorder();
+        LineBorder colorDisassembleButton = (LineBorder) but.getDisassembleButton().getBorder();
+        LineBorder colorPaint1xButton = (LineBorder) but.getPaint1xButton().getBorder();
+        LineBorder colorPaint2xButton = (LineBorder) but.getPaint2xButton().getBorder();
+        LineBorder colorRuchkaButton = (LineBorder) (takeColor(but.getRuchkaButton(),3)).getBorder();
+        LineBorder colorMoldingButton = (LineBorder) (takeColor(but.getMoldingButton(),3)).getBorder();
+        LineBorder colorZerkaloButton = (LineBorder) (takeColor(but.getZerkaloButton(),3)).getBorder();
+        LineBorder colorRepair = (LineBorder) but.getRepairButton().getBorder();
+
+        if (colorReplaceButton.getLineColor().equals(Color.GREEN)) {
+            but.getReplaceButton().doClick();
+            if (colorPaint1xButton.getLineColor().equals(Color.GREEN)) {
+                but.getPaint1xButton().doClick();
+            }
+        }
+        if (colorDisassembleButton.getLineColor().equals( Color.GREEN)) {
+            but.getDisassembleButton().doClick();
+            if (colorPaint2xButton.getLineColor().equals( Color.GREEN)) {
+                but.getPaint2xButton().doClick();
+            }
+        }
+        if (colorRuchkaButton.getLineColor().equals(Color.GREEN)) {
+            ruchkaButtonPushed = but.getRuchkaButton();
+            ruchkaButtonPushed.setBorder(BorderFactory.createLineBorder(Color.red, 1));
+        }
+        if (colorMoldingButton.getLineColor().equals(Color.GREEN)) {
+            moldingButtonPushed = but.getMoldingButton();
+            moldingButtonPushed.setBorder(BorderFactory.createLineBorder(Color.red, 1));
+        }
+        if (colorZerkaloButton.getLineColor().equals(Color.GREEN)) {
+            zercaloButtonPushed = but.getZerkaloButton();
+            zercaloButtonPushed.setBorder(BorderFactory.createLineBorder(Color.red, 1));
+        }
+        if (colorRepair.getLineColor().equals(Color.GREEN)) {
+            but.getRepairButton().doClick();
+        }
     }
 }

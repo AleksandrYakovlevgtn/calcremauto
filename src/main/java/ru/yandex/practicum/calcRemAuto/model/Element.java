@@ -18,20 +18,21 @@ public class Element {
     int ruchka = 0;
     double remont = 0;
     double total = 0;
+
     @Override
     public String toString() {
-        return "Element{" +
-                "name='" + name + '\'' +
-                ", paintSide=" + paintSide +
-                ", armatureSide=" + armatureSide +
-                ", kuzDetReplaceSide=" + kuzDetReplaceSide +
-                ", glass=" + glass +
-                ", nameGlass='" + nameGlass + '\'' +
-                ", zerkalo=" + zerkalo +
-                ", molding=" + molding +
-                ", ruchka=" + ruchka +
-                ", remont=" + remont +
-                ", total=" + total +
-                '}';
+        String result = "-------------------------\n";
+        if (paintSide > 0 || glass > 0) result = result + name + "\n";
+        else if (paintSide <= 0 && glass <= 0) result = result + name + " не красим" + "\n";
+        if (nameGlass != null) result = result + nameGlass + "\n";
+        if (zerkalo > 0) result = result + "Зеркало окраска." + "\n";
+        if (ruchka > 0) result = result + "Ручка окраска." + "\n";
+        if (molding > 0) result = result + "Молдинг окраска." + "\n";
+        if (remont > 0) result = result + "Ремонт " + remont + "н/ч" + "\n";
+        result = result + "paintSide = " +  paintSide + "\n"
+                + "armatureSide = " + armatureSide + "\n"
+                + "kuzDetReplaceSide = " + kuzDetReplaceSide + "\n"
+                + "glass = " + glass + "\n";
+        return result;
     }
 }
