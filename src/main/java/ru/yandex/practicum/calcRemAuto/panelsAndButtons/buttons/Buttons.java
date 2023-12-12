@@ -36,12 +36,15 @@ public class Buttons {
     JButton engineCompartmentButton = new JButton("Моторный отсек");
     JButton backPanelButton = new JButton("Задняя панель");
     JButton addButton = new JButton("Добавить");
+    JButton removeButton = new JButton("Удалить");
     JButton replaceButton = new JButton("Замена");
     JButton disassembleButton = new JButton("P/C");
     JButton repairButton = new JButton("Ремонт");
     JButton zerkaloButton = new JButton("Зеркало");
     JButton ruchkaButton = new JButton("Ручка");
     JButton moldingButton = new JButton("Молдинг");
+    JButton expanderButton = new JButton("Расширитель");
+    JButton overlayButton = new JButton("Накладка");
     JButton paint1xButton = new JButton("Окраска с 1х");
     JButton paint2xButton = new JButton("2х");
     JTextField remontJText = new JTextField();

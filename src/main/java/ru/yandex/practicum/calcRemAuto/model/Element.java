@@ -16,6 +16,8 @@ public class Element {
     int zerkalo = 0;
     int molding = 0;
     int ruchka = 0;
+    int overlay = 0;
+    int expander =0;
     double remont = 0;
     double total = 0;
 
@@ -28,6 +30,8 @@ public class Element {
         if (zerkalo > 0) result = result + "Зеркало окраска." + "\n";
         if (ruchka > 0) result = result + "Ручка окраска." + "\n";
         if (molding > 0) result = result + "Молдинг окраска." + "\n";
+        if (expander > 0) result = result + "Расширитель окраска." + "\n";
+        if (overlay > 0) result = result + "Накладка окраска." + "\n";
         if (remont > 0) result = result + "Ремонт " + remont + "н/ч" + "\n";
         result = result + "paintSide = " +  paintSide + "\n"
                 + "armatureSide = " + armatureSide + "\n"
