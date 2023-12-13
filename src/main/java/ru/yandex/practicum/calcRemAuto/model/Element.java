@@ -17,13 +17,13 @@ public class Element {
     int molding = 0;
     int ruchka = 0;
     int overlay = 0;
-    int expander =0;
+    int expander = 0;
     double remont = 0;
-    double total = 0;
+    double total = ((paintSide + armatureSide + kuzDetReplaceSide + glass + zerkalo + molding + ruchka + expander + overlay + remont) * 750);
 
     @Override
     public String toString() {
-        String result = "-------------------------\n";
+        String result = " \n";
         if (paintSide > 0 || glass > 0) result = result + name + "\n";
         else if (paintSide <= 0 && glass <= 0) result = result + name + " не красим" + "\n";
         if (nameGlass != null) result = result + nameGlass + "\n";
@@ -33,10 +33,11 @@ public class Element {
         if (expander > 0) result = result + "Расширитель окраска." + "\n";
         if (overlay > 0) result = result + "Накладка окраска." + "\n";
         if (remont > 0) result = result + "Ремонт " + remont + "н/ч" + "\n";
-        result = result + "paintSide = " +  paintSide + "\n"
+        result = result + "paintSide = " + paintSide + "\n"
                 + "armatureSide = " + armatureSide + "\n"
                 + "kuzDetReplaceSide = " + kuzDetReplaceSide + "\n"
-                + "glass = " + glass + "\n";
+                + "glass = " + glass + "\n"
+                + ((paintSide + armatureSide + kuzDetReplaceSide + glass + zerkalo + molding + ruchka + expander + overlay + remont) * 750) + " руб.\n";
         return result;
     }
 }

@@ -416,7 +416,7 @@ public class AddWorkPanel {
         elementLeftRightSidePanel.add(remont, new GridBagConstraints(2, 3, 1, 1, 1, 1,
                 GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
                 new Insets(2, 2, 2, 2), 0, 0));
-        if (elementButtonPushed.getText().contains("Пер.Дверь") || elementButtonPushed.getText().contains("Зад.Дверь")) {
+        if (elementButtonPushed.getText().contains("Пер.Дверь") || elementButtonPushed.getText().contains("Зад.Дверь") || elementButtonPushed.getText().contains("Крышка баг.")) {
             if (elementButtonPushed.getText().contains("Пер.Дверь")) {
                 elementLeftRightSidePanel.add(takeColorOfButtons(removeActionListener(but.getZerkaloButton()), 3), new GridBagConstraints(1, 6, 1, 1, 1, 1,
                         GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
@@ -430,7 +430,7 @@ public class AddWorkPanel {
                     GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
                     new Insets(2, 2, 2, 2), 0, 0));
         }
-        if (elementButtonPushed.getText().contains("Порог")) {
+        if (elementButtonPushed.getText().contains("Порог") || elementButtonPushed.getText().contains("Пер.Бампер") || elementButtonPushed.getText().contains("Зад.Бампер")) {
             elementLeftRightSidePanel.add(takeColorOfButtons(removeActionListener(but.getOverlayButton()), 3), new GridBagConstraints(1, 4, 1, 1, 1, 1,
                     GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
                     new Insets(2, 2, 2, 2), 0, 0));
@@ -443,17 +443,23 @@ public class AddWorkPanel {
                     GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
                     new Insets(2, 2, 2, 0), 0, 0));
         }
-        if (elementButtonPushed.getText().contains("Зад.Крыло") || elementButtonPushed.getText().contains("Пер.Крыло") || elementButtonPushed.getText().contains("Крыша")) {
+        if (elementButtonPushed.getText().contains("Зад.Крыло") || elementButtonPushed.getText().contains("Пер.Крыло") || elementButtonPushed.getText().contains("Крыша") || elementButtonPushed.getText().contains("Крышка баг.")) {
             if (elementButtonPushed.getText().contains("Зад.Крыло") || elementButtonPushed.getText().contains("Пер.Крыло")) {
                 elementLeftRightSidePanel.add(takeColorOfButtons(removeActionListener(but.getExpanderButton()), 3), new GridBagConstraints(1, 4, 1, 1, 1, 1,
                         GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
                         new Insets(2, 2, 2, 0), 0, 0));
             }
             if (!elementButtonPushed.getText().contains("Пер.Крыло")) {
-                elementLeftRightSidePanel.add(new JLabel("    Остекление"), new GridBagConstraints(1, 5, 1, 1, 1, 1,
+                int gridY1 = 5;
+                int gridY2 = 6;
+                if (elementButtonPushed.getText().contains("Крышка баг.")) {
+                    gridY1 = 6;
+                    gridY2 = 7;
+                }
+                elementLeftRightSidePanel.add(new JLabel("    Остекление"), new GridBagConstraints(1, gridY1, 1, 1, 1, 1,
                         GridBagConstraints.EAST, GridBagConstraints.HORIZONTAL,
                         new Insets(2, 5, 2, 0), 0, 0));
-                elementLeftRightSidePanel.add(takeColorOfButtons(removeActionListener(but.getButtonRearWindow()), 3), new GridBagConstraints(1, 6, 1, 1, 1, 1,
+                elementLeftRightSidePanel.add(takeColorOfButtons(removeActionListener(but.getButtonRearWindow()), 3), new GridBagConstraints(1, gridY2, 1, 1, 1, 1,
                         GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
                         new Insets(2, 2, 2, 0), 0, 0));
             }
@@ -470,11 +476,20 @@ public class AddWorkPanel {
                 // При замене дверей идет окраска с 2-х сторон и надбавка к арматурщику.
                 but.getPaint2xButton().doClick();
                 elementArmatureSide = 2.6;
-            } else if (elementButtonPushed.getText().equals("Брус") || elementButtonPushed.getText().equals("Порог") || elementButtonPushed.getText().equals("Зад.Крыло")) {
-                // При замене приварной детали идет окраска с 1 стороны + 30% от кузовщика и надбавка к арматуре.
+            } else if (elementButtonPushed.getText().equals("Брус")
+                    || elementButtonPushed.getText().equals("Порог")
+                    || elementButtonPushed.getText().equals("Зад.Крыло")
+                    || elementButtonPushed.getText().equals("Моторный отсек")
+                    || elementButtonPushed.getText().equals("Задняя панель")) {
+                // При замене приварной детали идет окраска с 1 стороны +30% от кузовщика и надбавка к арматуре.
                 but.getPaint1xButton().doClick();
                 elementArmatureSide = 3.4;
                 elementKuzDetReplaceSide = 8.0;
+            } else if (elementButtonPushed.getText().equals("Крыша")) {
+                // При замене приварной крыше идет окраска с 1 стороны +30% от кузовщика и надбавка к арматуре.
+                but.getPaint1xButton().doClick();
+                elementArmatureSide = 4;
+                elementKuzDetReplaceSide = 12.0;
             } else {
                 // Во всех остальных случаях окраска с 1 стороны и обычный норматив арматурщику.
                 but.getPaint1xButton().doClick();
@@ -521,8 +536,20 @@ public class AddWorkPanel {
                         elementPaintSide = 3.0;
                     }
                 }
+            } else if (elementButtonPushed.getText().equals("Крыша")) {
+                if (zamenaOrRsButtonPushed.equals(but.getReplaceButton())) {
+                    // При замене крыши норматив окраски 6н\ч + 1н\ч от кузовщика за герметизацию швов
+                    elementPaintSide = 6.0 + 1;
+                } else {
+                    // При окраске без замены
+                    elementPaintSide = 6.0;
+                }
+            } else if (elementButtonPushed.getText().equals("Капот")
+                    || elementButtonPushed.getText().equals("Крышка баг.")) {
+                // если окраска с 1х капота или крышки багажника, то норматив 4.5.
+                elementPaintSide = 4.5;
             } else {
-                // Во всех остальных случаях просто 3н\ч
+                // Во всех остальных элементах окраска просто 3н\ч
                 elementPaintSide = 3.0;
             }
             addAndRemovePanel(clearCenter(panelAdd));
@@ -537,7 +564,21 @@ public class AddWorkPanel {
             if (zamenaOrRsButtonPushed == null) {
                 but.getDisassembleButton().doClick(); // Р/С
             }
-            elementPaintSide = 4.5;
+            if (elementButtonPushed.getText().equals("Крыша")) {
+                // если окраска с 2х крыши (хотя это и крайне невозможно), то норматив 6х1.5= 9.
+                elementPaintSide = 9.0;
+            } else if (elementButtonPushed.getText().equals("Брус")
+                    || elementButtonPushed.getText().equals("Порог")) {
+                // если окраска с 2х бруса или порога (хотя это и крайне невозможно), то норматив 2х1.5= 3.
+                elementPaintSide = 3.0;
+            } else if (elementButtonPushed.getText().equals("Капот")
+                    || elementButtonPushed.getText().equals("Крышка баг.")) {
+                // если окраска с 2х капота или крышки багажника, то норматив 6.
+                elementPaintSide = 6.0;
+            } else {
+                // При всех остальных элементах норматив 4.5
+                elementPaintSide = 4.5;
+            }
             addAndRemovePanel(clearCenter(panelAdd));
             panelAdd.updateUI();
         }); // окраска 2х
@@ -577,11 +618,6 @@ public class AddWorkPanel {
             }
         });  // ремонт
         but.getRuchkaButton().addActionListener(e -> {       // ручка
-            if (paint1xOr2xButtonPushed == null) {
-            /* Проверяем на прошлое нажатие основные кнопки, и в случае если они имеют зеленую рамку нажимаем их что бы
-               верно выставить нормативы.*/
-                checkEarlyPushedLeftAndRightWorksPanel();
-            }
             // Если окраска только ручки выставляем 0.6 арматура
             if (ruchkaButtonPushed == null) {
                 if (paint1xOr2xButtonPushed == null) {
@@ -630,11 +666,6 @@ public class AddWorkPanel {
             }
         });  // ручка
         but.getMoldingButton().addActionListener(e -> {
-            if (paint1xOr2xButtonPushed == null) {
-            /* Проверяем на прошлое нажатие основные кнопки, и в случае если они имеют зеленую рамку нажимаем их что бы
-               верно выставить нормативы.*/
-                checkEarlyPushedLeftAndRightWorksPanel();
-            }
             // Если окраска только молдинга выставляем 0.6 арматура
             if (moldingButtonPushed == null) {
                 if (paint1xOr2xButtonPushed == null) {
@@ -683,11 +714,6 @@ public class AddWorkPanel {
             }
         }); // молдинг
         but.getZerkaloButton().addActionListener(e -> {
-            if (paint1xOr2xButtonPushed == null) {
-            /* Проверяем на прошлое нажатие основные кнопки, и в случае если они имеют зеленую рамку нажимаем их что бы
-               верно выставить нормативы.*/
-                checkEarlyPushedLeftAndRightWorksPanel();
-            }
             // Если окраска только зеркала выставляем 0.6 арматура
             if (zercaloButtonPushed == null) {
                 if (paint1xOr2xButtonPushed == null) {
@@ -864,8 +890,9 @@ public class AddWorkPanel {
                     overlayButtonPushed = null;
                 }
             }
-        });   // Накладка порога
-        checkEarlyPushedLeftAndRightWorksPanel();
+        });   // Накладка
+
+        checkEarlyPushedButtonsWorksPanel();
         panelAdd.updateUI();
     } // Панель с работами
 
@@ -1022,21 +1049,17 @@ public class AddWorkPanel {
             color.add(remontButtonPushed.getText() + " " + elementRemont);
             remontButtonPushed.setBorder(BorderFactory.createLineBorder(Color.green, 1));
         }
-        if (elementButtonPushed.getText().equals("Пер.Дверь") || elementButtonPushed.getText().equals("Зад.Дверь")) {
-            if (elementButtonPushed.getText().contains("Пер.Дверь")) {
-                if (zercaloButtonPushed != null) {
-                    color.add(zercaloButtonPushed.getText());
-                    zercaloButtonPushed.setBorder(BorderFactory.createLineBorder(Color.green, 1));
-                }
-            }
-            if (moldingButtonPushed != null) {
-                color.add(moldingButtonPushed.getText());
-                moldingButtonPushed.setBorder(BorderFactory.createLineBorder(Color.green, 1));
-            }
-            if (ruchkaButtonPushed != null) {
-                color.add(ruchkaButtonPushed.getText());
-                ruchkaButtonPushed.setBorder(BorderFactory.createLineBorder(Color.green, 1));
-            }
+        if (zercaloButtonPushed != null) {
+            color.add(zercaloButtonPushed.getText());
+            zercaloButtonPushed.setBorder(BorderFactory.createLineBorder(Color.green, 1));
+        }
+        if (moldingButtonPushed != null) {
+            color.add(moldingButtonPushed.getText());
+            moldingButtonPushed.setBorder(BorderFactory.createLineBorder(Color.green, 1));
+        }
+        if (ruchkaButtonPushed != null) {
+            color.add(ruchkaButtonPushed.getText());
+            ruchkaButtonPushed.setBorder(BorderFactory.createLineBorder(Color.green, 1));
         }
         if (haveGlass > 0) {
             if (haveGlass == 1) {
@@ -1119,30 +1142,22 @@ public class AddWorkPanel {
                 element.setRemont(Double.parseDouble(rem));
             }
             // Если имя элемента входит в перечень, то добавляем ручки, молдинги и зеркала.
-            if (elementButtonPushed.getText().equals("Пер.Дверь") || elementButtonPushed.getText().equals("Зад.Дверь")) {
-                if (elementButtonPushed.getText().contains("Пер.Дверь")) {
-                    if (zercaloButtonPushed != null) {
-                        element.setZerkalo(1);
-                    }
-                }
-                if (ruchkaButtonPushed != null) {
-                    element.setRuchka(1);
-                }
-                if (moldingButtonPushed != null) {
-                    element.setMolding(1);
-                }
+            if (zercaloButtonPushed != null) {
+                element.setZerkalo(1);
+            }
+            if (ruchkaButtonPushed != null) {
+                element.setRuchka(1);
+            }
+            if (moldingButtonPushed != null) {
+                element.setMolding(1);
             }
             // Если имя элемента входит в перечень добавляем расширитель крыльев
-            if (elementButtonPushed.getText().equals("Пер.Крыло") || elementButtonPushed.getText().equals("Зад.Крыло")) {
-                if (expanderButtonPushed != null) {
-                    element.setExpander(2);
-                }
+            if (expanderButtonPushed != null) {
+                element.setExpander(2);
             }
-            // Если имя элемента порог, то добавляем накладку порога
-            if (elementButtonPushed.getText().equals("Порог")) {
-                if (overlayButtonPushed != null) {
-                    element.setOverlay(2);
-                }
+            // Если имя элемента входит в перечень, то добавляем накладку
+            if (overlayButtonPushed != null) {
+                element.setOverlay(2);
             }
             // Если у элемента есть стекло, то проверяем надо ли снимать.
             if (haveGlass > 0) {
@@ -1204,7 +1219,7 @@ public class AddWorkPanel {
         return name;
     }  // Создание имени элемента
 
-    private void checkEarlyPushedLeftAndRightWorksPanel() {
+    private void checkEarlyPushedButtonsWorksPanel() {
         /*
         Проверяем по цвету рамки какие кнопки были нажаты ранее.
          */
@@ -1230,7 +1245,7 @@ public class AddWorkPanel {
         if (colorRepair.getLineColor().equals(Color.GREEN)) {
             but.getRepairButton().doClick();
         }
-        if (elementButtonPushed.getText().contains("Пер.Дверь") || elementButtonPushed.getText().contains("Зад.Дверь")) {
+        if (elementButtonPushed.getText().contains("Пер.Дверь") || elementButtonPushed.getText().contains("Зад.Дверь") || elementButtonPushed.getText().contains("Крышка баг.")) {
             if (elementButtonPushed.getText().contains("Пер.Дверь")) {
                 LineBorder colorZerkaloButton = (LineBorder) but.getZerkaloButton().getBorder();
                 if (colorZerkaloButton.getLineColor().equals(Color.GREEN)) {
@@ -1252,7 +1267,7 @@ public class AddWorkPanel {
                 but.getExpanderButton().doClick();
             }
         }
-        if (elementButtonPushed.getText().contains("Зад.Крыло") || elementButtonPushed.getText().contains("Крыша")) {
+        if (elementButtonPushed.getText().contains("Зад.Крыло") || elementButtonPushed.getText().contains("Крыша") || elementButtonPushed.getText().contains("Крышка баг.")) {
             LineBorder colorRearWindow = (LineBorder) but.getButtonRearWindow().getBorder();
 
             if (colorRearWindow.getLineColor().equals(Color.GREEN)) {
@@ -1265,7 +1280,7 @@ public class AddWorkPanel {
                 but.getButtonWindshield().doClick();
             }
         }
-        if (elementButtonPushed.getText().contains("Порог")) {
+        if (elementButtonPushed.getText().contains("Порог") || elementButtonPushed.getText().contains("Пер.Бампер") || elementButtonPushed.getText().contains("Зад.Бампер")) {
             LineBorder colorWindow = (LineBorder) but.getOverlayButton().getBorder();
             if (colorWindow.getLineColor().equals(Color.GREEN)) {
                 but.getOverlayButton().doClick();
