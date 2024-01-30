@@ -13,6 +13,9 @@ public class Buttons {
     JButton buttonBack = new JButton("Назад");
     JButton buttonNext = new JButton("Далее");
     JButton buttonSave = new JButton("Сохранить");
+    JButton godButton = new JButton("   хорошо   ");
+    JButton yesButton = new JButton("да");
+    JButton noButton = new JButton("нет");
     JButton buttonNullWried = new JButton("Не заполнены поля!");
     JButton buttonLeft = new JButton("Левая");
     JButton buttonRight = new JButton("Правая");

@@ -2,134 +2,179 @@ package ru.yandex.practicum.calcRemAuto.panelsAndButtons.panels;
 
 import ru.yandex.practicum.calcRemAuto.model.Client;
 import ru.yandex.practicum.calcRemAuto.panelsAndButtons.buttons.Buttons;
+import ru.yandex.practicum.calcRemAuto.panelsAndButtons.frame.StartFrame;
 
 import javax.swing.*;
 import javax.swing.border.LineBorder;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+import javax.swing.text.MaskFormatter;
 import java.awt.*;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.util.stream.Stream;
+import java.text.ParseException;
 
-public class AddClientPanel extends JFrame {
+public class AddClientPanel {
+
+    JTextField name = new JTextField();
+    JFormattedTextField numberFone;
+    JTextField numberAuto = new JTextField();
+    JTextField modelAuto = new JTextField();
     Buttons but = new Buttons();
-    AddWorkPanel workPanel = new AddWorkPanel();
 
-    public JPanel clientAdd(JPanel panel, Client client) {
-        panel.setLayout(new GridLayout(6, 2));
-        panel.setBounds(200, 150, 400, 200);
+    public void clientAdd(JPanel panel, Client client) {
+        panel.setLayout(new BorderLayout());
+        // Панель для полей ввода
+        JPanel addClienPanel = new JPanel(new GridBagLayout());
+        JPanel addClienPanelXYZPanel = new JPanel(new BorderLayout());
+        // Панель для кнопок "назад" и "вперед"
+        JPanel buttonsPanel = new JPanel(new GridBagLayout());
+        JPanel buttonsXYZPanel = new JPanel(new BorderLayout());
 
-        JTextField name = new JTextField();
-        JLabel nameLabel = new JLabel("Имя клиента.");
+        try {
+            MaskFormatter formatter = new MaskFormatter("+7(###)-###-##-##");
+            formatter.setPlaceholderCharacter(' ');
+            numberFone = new JFormattedTextField(formatter);
+        } catch (ParseException e) {
+            e.printStackTrace();
+            numberFone = new JFormattedTextField();
+        }
+
         name.addKeyListener(new KeyAdapter() {
             @Override
             public void keyTyped(KeyEvent e) {
-                // если количество символов меньше, то ввод не будет произведен.
-                if (name.getText().length() >= 10)
+                // Поле имени принимает только буквы и ограничено по длине символов 10.
+                char c = e.getKeyChar();
+                if (!Character.isLetter(c) || name.getText().length() >= 10) {
                     e.consume();
+                }
             }
         });
-
-        JTextField numberFone = new JTextField();
-        JLabel foneLabel = new JLabel("Телефон.");
-
-        numberFone.addKeyListener(new KeyAdapter() {
-            @Override
-            public void keyTyped(KeyEvent e) {
-                // если количество символов меньше, то ввод не будет произведен.
-                if (numberFone.getText().length() > 9)
-                    e.consume();
-            }
-        });
-
-        JTextField numberAuto = new JTextField();
-        JLabel numberAutoLabel = new JLabel("Гос/номер.");
-
         numberAuto.addKeyListener(new KeyAdapter() {
+            // Ввод гос/номера должен быть в формате
             @Override
             public void keyTyped(KeyEvent e) {
-                // если количество символов меньше, то ввод не будет произведен.
-                if (numberAuto.getText().length() >= 11)
+                char c = e.getKeyChar();
+                String text = numberAuto.getText();
+                if (text.length() == 0) {
+                    // Первый символ буква
+                    if (!Character.isLetter(c)) {
+                        e.consume();
+                    }
+                } else if (text.length() >= 1 && text.length() <= 3) {
+                    // Следующие 3 это цифры
+                    if (!Character.isDigit(c)) {
+                        e.consume();
+                    }
+                } else if (text.length() >= 4 && text.length() <= 5) {
+                    // Пятый и шестой символ буквы
+                    if (!Character.isLetter(c)) {
+                        e.consume();
+                    }
+                } else if (text.length() >= 6) {
+                    // Последние два или три опять цифры
+                    if (!Character.isDigit(c) || numberAuto.getText().length() >= 9) {
+                        e.consume();
+                    }
+                } else {
                     e.consume();
+                }
             }
         });
-        JTextField modelAuto = new JTextField();
-        JLabel modelLabel = new JLabel("Модель автомобиля.");
-
         modelAuto.addKeyListener(new KeyAdapter() {
             @Override
             public void keyTyped(KeyEvent e) {
-                // если количество символов меньше, то ввод не будет произведен.
-                if (modelAuto.getText().length() >= 11)
+                // Поле модель авто принимает только буквы и ограничено по длине символов 11.
+                char c = e.getKeyChar();
+                if (!Character.isLetter(c) || modelAuto.getText().length() >= 11)
                     e.consume();
             }
         });
+
+        // Панель с вводом данных по клиенту.
+        addClienPanel.add(new JLabel("Имя клиента."), new GridBagConstraints(0, 0, 1, 1, 1, 1,
+                GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
+                new Insets(2, 20, 2, 2), 0, 10));
+        addClienPanel.add(name, new GridBagConstraints(1, 0, 1, 1, 1, 1,
+                GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
+                new Insets(2, 2, 2, 200), 100, 10));
+        addClienPanel.add(new JLabel("Телефон."), new GridBagConstraints(0, 1, 1, 1, 1, 1,
+                GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
+                new Insets(2, 20, 2, 2), 0, 10));
+        addClienPanel.add(numberFone, new GridBagConstraints(1, 1, 1, 1, 1, 1,
+                GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
+                new Insets(2, 2, 2, 200), 100, 10));
+        addClienPanel.add(new JLabel("Гос/номер."), new GridBagConstraints(0, 2, 1, 1, 1, 1,
+                GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
+                new Insets(2, 20, 2, 2), 0, 10));
+        addClienPanel.add(numberAuto, new GridBagConstraints(1, 2, 1, 1, 1, 1,
+                GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
+                new Insets(2, 2, 2, 200), 100, 10));
+        addClienPanel.add(new JLabel("Модель автомобиля."), new GridBagConstraints(0, 3, 1, 1, 1, 1,
+                GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
+                new Insets(2, 20, 2, 2), 0, 10));
+        addClienPanel.add(modelAuto, new GridBagConstraints(1, 3, 1, 1, 1, 1,
+                GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
+                new Insets(2, 2, 2, 200), 100, 10));
+        // Панель с 2 кнопками
+        buttonsPanel.add(but.getButtonBack(), new GridBagConstraints(0, 0, 1, 1, 1, 1,
+                GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
+                new Insets(2, 2, 10, 2), 10, 0));
+        buttonsPanel.add(but.getButtonNext(), new GridBagConstraints(1, 0, 1, 1, 1, 1,
+                GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
+                new Insets(2, 2, 10, 10), 1, 0));
+
         changeColor(name, 3);
-        changeColor(numberFone, 9);
-        changeColor(numberAuto, 8);
+        changeColor(numberFone, 17);
+        changeColor(numberAuto, 7);
         changeColor(modelAuto, 3);
-        panel.add(nameLabel);
-        panel.add(name);
-        panel.add(foneLabel);
-        panel.add(numberFone);
-        panel.add(numberAutoLabel);
-        panel.add(numberAuto);
-        panel.add(modelLabel);
-        panel.add(modelAuto);
-        panel.add(but.getButtonBack());
+        // Отправляем на проверку клиента и если он не равен null печатаем его значения в поля ввода.
+        printIfHeDuNotNullClient(client);
+        // Панель с полем ввода мы устанавливаем в верхнею часть панели и кладем в центр основной панели.
+        addClienPanelXYZPanel.add(addClienPanel, BorderLayout.NORTH);
+        panel.add(addClienPanelXYZPanel, BorderLayout.CENTER);
+        // Панель с кнопками устанавливаем в правую часть панели и кладем в низ окна основной панели.
+        buttonsXYZPanel.add(buttonsPanel, BorderLayout.EAST);
+        panel.add(buttonsXYZPanel, BorderLayout.SOUTH);
 
         but.getButtonBack().addActionListener(e -> {
-            FirstPanel firstPanel = new FirstPanel();
             panel.removeAll();
+            FirstPanel firstPanel = new FirstPanel();
             firstPanel.firstPanel(panel);
         });
-        panel.add(but.getButtonNext());
-
         but.getButtonNext().addActionListener(e -> {
             try {
-                if ((((LineBorder) name.getBorder()).getLineColor().equals(Color.green))
-                        && (((LineBorder) numberFone.getBorder()).getLineColor().equals(Color.green))
-                        && (((LineBorder) numberAuto.getBorder()).getLineColor().equals(Color.green))
-                        && (((LineBorder) modelAuto.getBorder()).getLineColor().equals(Color.green))) {
+                boolean allBordersAreGreen = Stream.of(name, numberFone, numberAuto, modelAuto)
+                        .map(component -> (LineBorder) component.getBorder())
+                        .allMatch(border -> border.getLineColor().equals(Color.green));
+
+                if (allBordersAreGreen) {
+                    AddWorkPanel addWorkPanel = new AddWorkPanel();
+                    StartFrame startFrame = new StartFrame();
                     client.setName(name.getText());
                     client.setFoneNumber(numberFone.getText());
                     client.setNumberAuto(numberAuto.getText());
                     client.setModelAuto(modelAuto.getText());
                     panel.removeAll();
                     panel.updateUI();
-                    //workPanel.addWorks(panel,client);
+                    addWorkPanel.startPanel(panel, client, startFrame.getFrame());
                 }
             } catch (Exception o) {
-                JFrame bugFrame = new JFrame("Ошибка!");
-                JPanel bugPanel = new JPanel();
-
-                bugFrame.setSize(400, 200);
-                bugFrame.setLayout(null);
-                bugFrame.setLocationRelativeTo(null);
-                bugFrame.setVisible(true);
-
-                bugPanel.setBounds(100, 75, 200, 50);
-
-                bugPanel.add(but.getButtonNullWried());
-                bugFrame.add(bugPanel);
-                but.getButtonNullWried().addActionListener(e1 -> bugFrame.dispose());
+                JOptionPane.showMessageDialog(null, "Необходимо заполнить все поля!", "Ошибка", JOptionPane.ERROR_MESSAGE);
             }
         });
         panel.updateUI();
-        return panel;
-    }
-
+    } // Стартовое поле с графами ввода данных клиента
 
     private void changeColor(JTextField line, int numberOfMinSymbols) {
         line.getDocument().addDocumentListener(new DocumentListener() {
-
             @Override
             public void removeUpdate(DocumentEvent e) {
                 // в зависимости от количества символов цвет строки изменяется.
                 if (line.getText().length() < numberOfMinSymbols) {
                     line.setBorder(BorderFactory.createLineBorder(Color.red));
-                }
-                if (line.getText().length() > numberOfMinSymbols) {
+                } else {
                     line.setBorder(BorderFactory.createLineBorder(Color.green));
                 }
             }
@@ -139,8 +184,7 @@ public class AddClientPanel extends JFrame {
                 // в зависимости от количества символов цвет строки изменяется.
                 if (line.getText().length() < numberOfMinSymbols) {
                     line.setBorder(BorderFactory.createLineBorder(Color.red));
-                }
-                if (line.getText().length() > numberOfMinSymbols) {
+                } else {
                     line.setBorder(BorderFactory.createLineBorder(Color.green));
                 }
             }
@@ -150,11 +194,19 @@ public class AddClientPanel extends JFrame {
                 // в зависимости от количества символов цвет строки изменяется.
                 if (line.getText().length() < numberOfMinSymbols) {
                     line.setBorder(BorderFactory.createLineBorder(Color.red));
-                }
-                if (line.getText().length() > numberOfMinSymbols) {
+                } else {
                     line.setBorder(BorderFactory.createLineBorder(Color.green));
                 }
             }
         });
-    }
+    } // Изменение цвета граф ввода
+
+    private void printIfHeDuNotNullClient(Client client) {
+        if (client.getName() != null) {
+            name.setText(client.getName());
+            numberFone.setValue(client.getFoneNumber());
+            numberAuto.setText(client.getNumberAuto());
+            modelAuto.setText(client.getModelAuto());
+        }
+    } // При возврате из следующих полей отправляет в графы текст параметров клиента
 }

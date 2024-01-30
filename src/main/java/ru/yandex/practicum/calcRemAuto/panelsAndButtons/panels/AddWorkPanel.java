@@ -3,6 +3,7 @@ package ru.yandex.practicum.calcRemAuto.panelsAndButtons.panels;
 import ru.yandex.practicum.calcRemAuto.model.Client;
 import ru.yandex.practicum.calcRemAuto.model.Element;
 import ru.yandex.practicum.calcRemAuto.panelsAndButtons.buttons.Buttons;
+import ru.yandex.practicum.calcRemAuto.panelsAndButtons.frame.SaveDialog;
 
 import javax.swing.*;
 import javax.swing.border.LineBorder;
@@ -39,24 +40,21 @@ public class AddWorkPanel {
     JButton expanderButtonPushed;
     JButton overlayButtonPushed;
 
-    public JPanel startPanel(JPanel panel, Client client, JFrame frame) {
+    public void startPanel(JPanel panel, Client client, Frame startFrame) {
         elementListTextViewing.setLineWrap(true);
+        elementListTextViewing.setEditable(false);
+
         panel.removeAll();
-        JPanel panelStartAdd = new JPanel();
-        JPanel panelXYZ = new JPanel();
-        JPanel panelSaveAndBack = new JPanel();
-        JPanel panelXYZSaveAndBack = new JPanel();
-        JPanel panelAdd = new JPanel();
-        JPanel panelForTextArea = new JPanel();
+        panel.setLayout(new BorderLayout());
+
+        JPanel panelStartAdd = new JPanel(new GridBagLayout());
+        JPanel panelXYZ = new JPanel(new BorderLayout());
+        JPanel panelSaveAndBack = new JPanel(new GridBagLayout());
+        JPanel panelXYZSaveAndBack = new JPanel(new BorderLayout());
+        JPanel panelAdd = new JPanel(new BorderLayout());
+        JPanel panelForTextArea = new JPanel(new GridBagLayout());
         JPanel panelForTextAreaXY = new JPanel(new BorderLayout());
 
-        panelXYZ.setLayout(new BorderLayout());
-        panelXYZSaveAndBack.setLayout(new BorderLayout());
-        panel.setLayout(new BorderLayout());
-        panelAdd.setLayout(new BorderLayout());
-        panelSaveAndBack.setLayout(new GridBagLayout());
-        panelStartAdd.setLayout(new GridBagLayout());
-        panelForTextArea.setLayout(new GridBagLayout());
         // Добавляем начальные кнопки слева вверху
         panelStartAdd.add(new JLabel("Выбери сторону."), new GridBagConstraints(0, 0, 1, 1, 1, 1,
                 GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
@@ -113,7 +111,20 @@ public class AddWorkPanel {
             sideButtonPushed = changeColorPushedButton(sideButtonPushed, but.getButtonCenter(), 1);
             centerSidePanel(clearAll(panelAdd));
         });
-        return panel;
+
+        but.getButtonBack().addActionListener(e -> {
+            panel.removeAll();
+            AddClientPanel addClientPanel = new AddClientPanel();
+            addClientPanel.clientAdd(panel, client);
+        }); // Кнопка назад
+        but.getButtonSave().addActionListener(e -> {
+            if (elementList.isEmpty()) {
+                JOptionPane.showMessageDialog(null, "Не добавлен ни один элемент\nСохранить нечего!", "Ошибка", JOptionPane.INFORMATION_MESSAGE);
+            } else {
+                SaveDialog saveDialog = new SaveDialog(startFrame, client, elementList, lineBorderColorMap);
+                saveDialog.setVisible(true);
+            }
+        }); // Кнопка сохранить
     } // Начальная панель Стороны авто
 
     private void leftRightSidePanel(JPanel panelAdd) {
@@ -1119,7 +1130,7 @@ public class AddWorkPanel {
         elementArmatureSide = 0.0;
         elementPaintSide = 0.0;
         haveGlass = 0;
-    } // Стирание (null) нажатых в процессе кнопок
+    } // Стирание (приведя их к null) нажатых в процессе кнопок
 
     private Element createElement() {
         Element element = new Element();

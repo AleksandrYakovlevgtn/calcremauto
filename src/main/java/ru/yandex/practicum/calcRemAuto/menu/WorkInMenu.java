@@ -1,18 +1,15 @@
 package ru.yandex.practicum.calcRemAuto.menu;
 
-import ru.yandex.practicum.calcRemAuto.storage.CarService;
-
-import java.util.List;
 import java.util.Scanner;
 
 public class WorkInMenu {
     boolean t = true;
 
     Menu menu = new Menu();
-    CarService service = new CarService();
+    //CarService service = new CarService();
     Scanner scanner = new Scanner(System.in);
 
-    public void workInAdd() {
+    /*public void workInAdd() {
         System.out.println("Гос/номер авто.");
         String gosNumber = scanner.nextLine();
         menu.printAddWorks();
@@ -38,5 +35,5 @@ public class WorkInMenu {
                     System.out.println("Нет такой команды.");
             }
         }
-    }
+    }*/
 }

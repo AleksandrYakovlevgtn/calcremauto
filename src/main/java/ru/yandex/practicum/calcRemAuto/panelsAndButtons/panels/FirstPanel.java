@@ -12,36 +12,43 @@ import java.util.List;
 
 @Getter
 @Setter
-public class FirstPanel extends JFrame{
+public class FirstPanel {
     Buttons but = new Buttons();
-    Frame frame = new Frame();
     SearchPanel searchPanel = new SearchPanel();
-    AddClientPanel addPanel =new AddClientPanel();
     private List<JButton> buttons = new ArrayList<>();
-    public JPanel firstPanel(JPanel panel){
+
+    public void firstPanel(JPanel panel) {
+        AddClientPanel addClientPanel = new AddClientPanel();
         buttons.add(but.getButtonCalc());
         buttons.add(but.getButtonSearch());
         buttons.add(but.getButtonCloseApp());
 
-        panel.setBounds(300,100,200,200);
-        panel.setLayout(new GridLayout(3, 1));
+        panel.setLayout(new GridBagLayout());
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.insets = new Insets(5, 5, 5, 5);
 
-        buttons.forEach(panel::add);
-        panel.updateUI();
+        int buttonWidth = 150; // Размер кнопок
+
+        for (JButton button : buttons) {
+            button.setPreferredSize(new Dimension(buttonWidth, button.getPreferredSize().height));
+            panel.add(button, gbc);
+            gbc.gridy++;
+        }
 
         but.getButtonCloseApp().addActionListener(e -> System.exit(0));
         but.getButtonSearch().addActionListener(e -> {
-            panel.remove(0);
-            panel.remove(1);
+            panel.removeAll();
             panel.updateUI();
             searchPanel.SearchPanel(panel);
         });
         but.getButtonCalc().addActionListener(e -> {
             panel.removeAll();
-            panel.updateUI();
+            //panel.updateUI();
             Client client = new Client();
-            addPanel.clientAdd(panel,client);
+            addClientPanel.clientAdd(panel, client);
         });
-        return panel;
+        panel.updateUI();
     }
 }

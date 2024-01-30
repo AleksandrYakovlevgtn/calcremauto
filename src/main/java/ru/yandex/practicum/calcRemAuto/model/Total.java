@@ -1,18 +1,16 @@
 package ru.yandex.practicum.calcRemAuto.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@Getter
 public class Total {
-    private int malyr = 0;
-    private int armatyrchik = 0;
-    private int kuzovchik = 0;
-    private int master = 0;
-    private int total = 0;
+     Double malyr = 0.0;
+     Double armatyrchik = 0.0;
+     Double kuzovchik = 0.0;
+     Double master = 0.0;
+     Double total = 0.0;
 }
