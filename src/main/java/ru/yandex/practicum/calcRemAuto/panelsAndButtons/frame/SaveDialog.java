@@ -2,6 +2,7 @@ package ru.yandex.practicum.calcRemAuto.panelsAndButtons.frame;
 
 import ru.yandex.practicum.calcRemAuto.model.Client;
 import ru.yandex.practicum.calcRemAuto.model.Element;
+import ru.yandex.practicum.calcRemAuto.model.Prices;
 import ru.yandex.practicum.calcRemAuto.model.Total;
 import ru.yandex.practicum.calcRemAuto.panelsAndButtons.buttons.Buttons;
 import ru.yandex.practicum.calcRemAuto.storage.SaveInFail;
@@ -13,13 +14,15 @@ import java.util.Map;
 
 
 public class SaveDialog extends JDialog {
-    JTextArea previewTextArea = new JTextArea();
+    Prices prices = new Prices(); // Класс с ценами нормативов.
+    JTextArea previewTextArea = new JTextArea(); // Поле отображающие развернутую смету
+    private boolean answer; // Возвращаемое значение для выполнения действия в родительском окне (закрыть или оставить)
     String probels = "_____________________________"; // уравнивание текста через нижнее подчеркивание
     Client client;
-    List<Element> elements;
-    Total total = new Total();
-    Map<String, Map<String, List<String>>> lineBorderColorMap;
-    Buttons but = new Buttons();
+    List<Element> elements;  // Список элементов авто требующих ремонта.
+    Total total = new Total(); // Класс итого посчитанный из List<Element> elements
+    Map<String, Map<String, List<String>>> lineBorderColorMap; // Рабочая таблица с нажатыми кнопками для данного расчета
+    Buttons but = new Buttons(); // Кнопки
 
     public SaveDialog(Frame parentFrame, Client client, List<Element> elements, Map<String, Map<String, List<String>>> lineBorderColorMap) {
         super(parentFrame, "Проверка перед сохранением!", true);
@@ -43,15 +46,12 @@ public class SaveDialog extends JDialog {
         yesNoPanel.add(new JLabel("Сохранить? Или вернуться к редактированию? "), new GridBagConstraints(1, 0, 6, 1, 0, 0,
                 GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
                 new Insets(2, 2, 2, 2), 1, 1));
-
         yesNoPanel2.add(but.getYesButton(), new GridBagConstraints(0, 0, 1, 0, 0, 0,
                 GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
                 new Insets(2, 2, 2, 2), 4, 0));
-
         yesNoPanel2.add(but.getNoButton(), new GridBagConstraints(1, 0, 1, 0, 0, 0,
                 GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
                 new Insets(2, 2, 2, 2), 0, 0));
-
         yesNoPanel.add(yesNoPanel2, new GridBagConstraints(8, 0, 1, 1, 0, 0,
                 GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
                 new Insets(2, 2, 2, 2), 1, 1));
@@ -64,80 +64,21 @@ public class SaveDialog extends JDialog {
         String line = previewAddTextAndCreateTotal(client, elements); // Запуск метода отображения сметы
 
         but.getYesButton().addActionListener(e -> {
-            SaveInFail saveInFail = new SaveInFail(client,total, elements, lineBorderColorMap);
+            SaveInFail saveInFail = new SaveInFail(client, total, elements, lineBorderColorMap);
             saveInFail.save(line);
+            answer = true;
             dispose();
         });    // Кнопка да "сохранить" отправляет в класс SaveInFail уже на оформление папок и файлов.
 
-        but.getNoButton().addActionListener(e -> dispose()); // Кнопка нет "не сохранять" закрывает диалоговое окно.
-    }
-
-    /*public Client takeClient() {
-        return new Client("Алексей", "89602819781", "х316со198", "mazda");
-    }
-
-    public List<Element> takeElements() {
-        Element element1 = new Element("Левое Пер.Крыло", 3.4, 2, 0, 0, "", 0, 0, 0, 0, 0, 5.5, 0);
-        Element element2 = new Element("Правая Пер.Дверь Замена", 3.4, 2, 0, 0, "", 1, 0, 0, 0, 0, 0, 0);
-        List<Element> elements = new ArrayList<>();
-        elements.add(element1);
-        elements.add(element2);
-        return elements;
-    }
-
-    public Map<String, Map<String, List<String>>> takeMap() {
-        return new HashMap<>(Map.of("Левое", new HashMap<>(Map.of("Пер.Дверь", new ArrayList<>(List.of("Замена", "Окраска с 1х")))), "Правое", new HashMap<>(Map.of("Пер.Дверь", new ArrayList<>(List.of("Замена", "Окраска с 1х"))))));
-    }*/
-
-
-
-    /* public JFrame getSaveFrame() {
-
-        saveFrame.setSize(800, 600);
-        saveFrame.setLayout(new BorderLayout());
-        saveFrame.setLocationRelativeTo(null);
-        saveFrame.setVisible(true);
-        saveFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE); // Не забудь УБРАТЬ КАК ОТРЕДАКТИРУЮЕШЬ!!!!!!!!!!!!!!!!!!!
-
-        previewTextArea.setLineWrap(true);
-        previewTextArea.setEditable(false);
-
-        JPanel yesNoPanel = new JPanel(new GridBagLayout());
-        JPanel yesNoPanel2 = new JPanel(new GridBagLayout());
-        JPanel yesNoXYZPanel = new JPanel(new BorderLayout());
-        JPanel panelABC = new JPanel(new BorderLayout());
-
-        yesNoPanel.add(new JLabel("Сохранить? Или вернутся к редактированию? "), new GridBagConstraints(1, 0, 6, 1, 0, 0,
-                GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
-                new Insets(2, 2, 2, 2), 1, 1));
-
-        yesNoPanel2.add(but.getYesButton(), new GridBagConstraints(0, 0, 1, 0, 0, 0,
-                GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
-                new Insets(2, 2, 2, 2), 4, 0));
-
-        yesNoPanel2.add(but.getNoButton(), new GridBagConstraints(1, 0, 1, 0, 0, 0,
-                GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
-                new Insets(2, 2, 2, 2), 0, 0));
-
-        yesNoPanel.add(yesNoPanel2, new GridBagConstraints(8, 0, 1, 1, 0, 0,
-                GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
-                new Insets(2, 2, 2, 2), 1, 1));
-
-        yesNoXYZPanel.add(yesNoPanel, BorderLayout.NORTH);
-        panelABC.add(yesNoXYZPanel, BorderLayout.NORTH);
-        panelABC.add(previewTextArea, BorderLayout.CENTER);
-        saveFrame.add(panelABC, BorderLayout.CENTER);
-        String line = previewAddText(takeClient(), takeElements());
-        but.getYesButton().addActionListener(e -> {
-            SaveInFail saveInFail = new SaveInFail(takeClient(), total, takeElements(), takeMap());
-            saveInFail.save(line);
-        }); // Кнопка "да" при нажатии сохраняет расчет в файлы и закрывает окно.
         but.getNoButton().addActionListener(e -> {
-            saveFrame.dispose();
-        }); // Кнопка "нет" при нажатии закрываем окно и возвращаемся к выбору работ
+            answer = false;
+            dispose();
+        }); // Кнопка нет "не сохранять" закрывает диалоговое окно.
+    }
 
-        return saveFrame;
-    }*/
+    public boolean getAnswer() {
+        return answer;
+    } // метод возвращающий значение для выполнения действия в родительском окне (закрыть или оставить панель на окне)
 
     private String previewAddTextAndCreateTotal(Client client, List<Element> elements) {
         String line = "";
@@ -149,21 +90,22 @@ public class SaveDialog extends JDialog {
                     + elements.get(i).getRuchka()
                     + elements.get(i).getZerkalo()
                     + elements.get(i).getExpander()
-                    + elements.get(i).getOverlay()) * 750));
+                    + elements.get(i).getOverlay()) * prices.getMechanicHourlyRate()));
             total.setArmatyrchik((total.getArmatyrchik())
                     + ((elements.get(i).getArmatureSide()
-                    + elements.get(i).getGlass()) * 750));
-            total.setKuzovchik(total.getKuzovchik() + (elements.get(i).getKuzDetReplaceSide() * 750));
+                    + elements.get(i).getGlass()) * prices.getMechanicHourlyRate()));
+            total.setKuzovchik(total.getKuzovchik() + (elements.get(i).getKuzDetReplaceSide() * prices.getMechanicHourlyRate()));
             total.setMaster((total.getMaster())
                     + ((elements.get(i).getRemont()
                     + elements.get(i).getMolding()
                     + elements.get(i).getRuchka()
                     + elements.get(i).getZerkalo()
                     + elements.get(i).getExpander()
-                    + elements.get(i).getOverlay()) * 500)
-                    + (elements.get(i).getPaintSide() * 750)
-                    + (elements.get(i).getGlass() * 250)
-                    + (elements.get(i).getKuzDetReplaceSide() * 500));
+                    + elements.get(i).getOverlay()
+                    + elements.get(i).getPaintSide()
+                    + elements.get(i).getGlass()
+                    + elements.get(i).getKuzDetReplaceSide()
+                    + elements.get(i).getArmatureSide()) * prices.getMasterHourlyRate()));
             line += takeLine(elements.get(i));
         }
         total.setTotal(total.getTotal()

@@ -17,11 +17,11 @@ import java.text.ParseException;
 
 public class AddClientPanel {
 
-    JTextField name = new JTextField();
-    JFormattedTextField numberFone;
-    JTextField numberAuto = new JTextField();
-    JTextField modelAuto = new JTextField();
-    Buttons but = new Buttons();
+    JTextField name = new JTextField(); // Поле ввода имени клиента
+    JFormattedTextField numberFone;    // Поле ввода телефонного номера
+    JTextField numberAuto = new JTextField(); // Поле ввода гос/номера автомобиля клиента
+    JTextField modelAuto = new JTextField();  // Поле ввода модели автомобиля
+    Buttons but = new Buttons(); // Класс с кнопками
 
     public void clientAdd(JPanel panel, Client client) {
         panel.setLayout(new BorderLayout());
@@ -126,11 +126,11 @@ public class AddClientPanel {
                 new Insets(2, 2, 10, 10), 1, 0));
 
         changeColor(name, 3);
-        changeColor(numberFone, 17);
+        changeColorFoneNumber(numberFone, 11);
         changeColor(numberAuto, 7);
         changeColor(modelAuto, 3);
         // Отправляем на проверку клиента и если он не равен null печатаем его значения в поля ввода.
-        printIfHeDuNotNullClient(client);
+        printIfClientDuNotNull(client);
         // Панель с полем ввода мы устанавливаем в верхнею часть панели и кладем в центр основной панели.
         addClienPanelXYZPanel.add(addClienPanel, BorderLayout.NORTH);
         panel.add(addClienPanelXYZPanel, BorderLayout.CENTER);
@@ -201,7 +201,41 @@ public class AddClientPanel {
         });
     } // Изменение цвета граф ввода
 
-    private void printIfHeDuNotNullClient(Client client) {
+    private void changeColorFoneNumber(JTextField line, int numberOfMinSymbols) {
+        line.getDocument().addDocumentListener(new DocumentListener() {
+            @Override
+            public void removeUpdate(DocumentEvent e) {
+                // в зависимости от количества символов цвет строки изменяется.
+                if (line.getText().replaceAll("[^0-9]", "").length() < numberOfMinSymbols) {
+                    line.setBorder(BorderFactory.createLineBorder(Color.red));
+                } else {
+                    line.setBorder(BorderFactory.createLineBorder(Color.green));
+                }
+            }
+
+            @Override
+            public void insertUpdate(DocumentEvent e) {
+                // в зависимости от количества символов цвет строки изменяется.
+                if (line.getText().replaceAll("[^0-9]", "").length() < numberOfMinSymbols) {
+                    line.setBorder(BorderFactory.createLineBorder(Color.red));
+                } else {
+                    line.setBorder(BorderFactory.createLineBorder(Color.green));
+                }
+            }
+
+            @Override
+            public void changedUpdate(DocumentEvent e) {
+                // в зависимости от количества символов цвет строки изменяется.
+                if (line.getText().replaceAll("[^0-9]", "").length() < numberOfMinSymbols) {
+                    line.setBorder(BorderFactory.createLineBorder(Color.red));
+                } else {
+                    line.setBorder(BorderFactory.createLineBorder(Color.green));
+                }
+            }
+        });
+    } // Изменение цвета графы телефонного номера
+
+    private void printIfClientDuNotNull(Client client) {
         if (client.getName() != null) {
             name.setText(client.getName());
             numberFone.setValue(client.getFoneNumber());

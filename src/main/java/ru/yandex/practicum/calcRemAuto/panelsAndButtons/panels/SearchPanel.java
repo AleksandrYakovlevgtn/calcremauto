@@ -6,7 +6,7 @@ import javax.swing.*;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 
-public class SearchPanel extends JFrame {
+public class SearchPanel {
     Buttons but = new Buttons();
     public void SearchPanel(JPanel panel) {
         panel.removeAll();

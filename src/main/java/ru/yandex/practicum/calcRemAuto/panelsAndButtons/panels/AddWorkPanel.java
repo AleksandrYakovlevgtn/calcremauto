@@ -17,30 +17,31 @@ import java.util.List;
 public class AddWorkPanel {
     List<Element> elementList = new ArrayList<>(); // Список добавленных элементов
     Map<String, Map<String, List<String>>> lineBorderColorMap = new HashMap<>(); // Таблица с нажатыми кнопками добавленных элементов
-    Buttons but = new Buttons();
-    JPanel elementLeftRightSidePanel = new JPanel();
-    JPanel elementCenterSide = new JPanel();
-    JPanel panelGlass = new JPanel();
-    JTextField remont = but.getRemontJText();
-    JTextArea elementListTextViewing = new JTextArea(30, 19);
-    Double elementPaintSide = 0.0;
-    double elementArmatureSide = 0.0;
-    Double elementKuzDetReplaceSide = 0.0;
-    String elementRemont;
-    Integer haveGlass = 0;
-    JButton sideButtonPushed;
-    JButton elementButtonPushed;
-    JButton zamenaOrRsButtonPushed;
-    JButton paint1xOr2xButtonPushed;
-    JButton remontButtonPushed;
-    JButton ruchkaButtonPushed;
-    JButton moldingButtonPushed;
-    JButton zercaloButtonPushed;
-    JButton glassButtonPushed;
-    JButton expanderButtonPushed;
-    JButton overlayButtonPushed;
+    Buttons but = new Buttons(); // Кнопки
+    JPanel elementLeftRightSidePanel = new JPanel(); // Панель с элементами которые расположены по бокам авто
+    JPanel elementCenterSide = new JPanel();   // Панель с элементами расположенными по центру авто
+    JPanel panelGlass = new JPanel(); // Панель с остеклением авто
+    JTextField remont = but.getRemontJText(); // Графа ввода н\ч ремонта элемента
+    JTextArea elementListTextViewing = new JTextArea(30, 19); // Окно отображения добавленных в List<Element> elementList элементов
+    Double elementPaintSide = 0.0;  // Норматив окраски с одной или двух сторон
+    double elementArmatureSide = 0.0; // Норматив на арматурные работы
+    Double elementKuzDetReplaceSide = 0.0; // Норматив на кузовные работы (сварка, замена приварных деталей)
+    String elementRemont; // Норматив на ремонтные работы (шпаклевка)
+    Integer haveGlass = 0; // Значение есть ли на элементе остекление(вклеенное)
+    // Далее идет гряда кнопок которые мы инициализируем при нажатии
+    JButton sideButtonPushed; // Сторона
+    JButton elementButtonPushed; // Сам Элемент
+    JButton zamenaOrRsButtonPushed; // Замена или разборка/сборка
+    JButton paint1xOr2xButtonPushed; // Окраска с 1 или 2х сторон
+    JButton remontButtonPushed; // Кнопка ремонта
+    JButton ruchkaButtonPushed; // Ручка
+    JButton moldingButtonPushed; // Молдинг
+    JButton zercaloButtonPushed; // Зеркало
+    JButton glassButtonPushed; // Стекло
+    JButton expanderButtonPushed; // Расширитель
+    JButton overlayButtonPushed;  // Накладка
 
-    public void startPanel(JPanel panel, Client client, Frame startFrame) {
+    public void startPanel(JPanel panel, Client client, JFrame startFrame) {
         elementListTextViewing.setLineWrap(true);
         elementListTextViewing.setEditable(false);
 
@@ -123,6 +124,11 @@ public class AddWorkPanel {
             } else {
                 SaveDialog saveDialog = new SaveDialog(startFrame, client, elementList, lineBorderColorMap);
                 saveDialog.setVisible(true);
+                if (saveDialog.getAnswer()){
+                    FirstPanel firstPanel = new FirstPanel();
+                    panel.removeAll();
+                    firstPanel.firstPanel(panel);
+                }
             }
         }); // Кнопка сохранить
     } // Начальная панель Стороны авто

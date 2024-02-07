@@ -11,6 +11,8 @@ import lombok.experimental.FieldDefaults;
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class Element {
+    Prices prices = new Prices();
+    int hourlyRate = prices.getHourlyRate();
     String name;
     double paintSide = 0;
     double armatureSide = 0;
@@ -23,7 +25,7 @@ public class Element {
     int overlay = 0;
     int expander = 0;
     double remont = 0;
-    double total = ((paintSide + armatureSide + kuzDetReplaceSide + glass + zerkalo + molding + ruchka + expander + overlay + remont) * 750);
+    double total = ((paintSide + armatureSide + kuzDetReplaceSide + glass + zerkalo + molding + ruchka + expander + overlay + remont) * hourlyRate);
 
     @Override
     public String toString() {
@@ -41,7 +43,7 @@ public class Element {
                 + "armatureSide = " + armatureSide + "\n"
                 + "kuzDetReplaceSide = " + kuzDetReplaceSide + "\n"
                 + "glass = " + glass + "\n"
-                + ((paintSide + armatureSide + kuzDetReplaceSide + glass + zerkalo + molding + ruchka + expander + overlay + remont) * 750) + " руб.\n";
+                + ((paintSide + armatureSide + kuzDetReplaceSide + glass + zerkalo + molding + ruchka + expander + overlay + remont) * hourlyRate) + " руб.\n";
         return result;
     }
 }

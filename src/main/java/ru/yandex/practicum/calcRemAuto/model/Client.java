@@ -12,4 +12,12 @@ public class Client {
     String foneNumber;
     String numberAuto;
     String modelAuto;
+
+    @Override
+    public String toString() {
+        return "Клиент: " + name +
+                " телефон: " + foneNumber +
+                " гос/номер: " + numberAuto +
+                " модель авто: " + modelAuto;
+    }
 }

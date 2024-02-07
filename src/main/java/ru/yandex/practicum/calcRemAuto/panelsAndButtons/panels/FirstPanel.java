@@ -13,12 +13,10 @@ import java.util.List;
 @Getter
 @Setter
 public class FirstPanel {
-    Buttons but = new Buttons();
-    SearchPanel searchPanel = new SearchPanel();
-    private List<JButton> buttons = new ArrayList<>();
+    Buttons but = new Buttons(); // Кнопки
+    private List<JButton> buttons = new ArrayList<>(); // Список необходимых данной панели кнопок.
 
     public void firstPanel(JPanel panel) {
-        AddClientPanel addClientPanel = new AddClientPanel();
         buttons.add(but.getButtonCalc());
         buttons.add(but.getButtonSearch());
         buttons.add(but.getButtonCloseApp());
@@ -39,13 +37,15 @@ public class FirstPanel {
 
         but.getButtonCloseApp().addActionListener(e -> System.exit(0));
         but.getButtonSearch().addActionListener(e -> {
+            SearchPanel searchPanel = new SearchPanel();
             panel.removeAll();
             panel.updateUI();
             searchPanel.SearchPanel(panel);
         });
         but.getButtonCalc().addActionListener(e -> {
+            AddClientPanel addClientPanel = new AddClientPanel();
             panel.removeAll();
-            //panel.updateUI();
+            panel.updateUI();
             Client client = new Client();
             addClientPanel.clientAdd(panel, client);
         });
