@@ -1,31 +1,31 @@
 package ru.yandex.practicum.calcRemAuto.storage;
 
+import lombok.NoArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import ru.yandex.practicum.calcRemAuto.model.Client;
 import ru.yandex.practicum.calcRemAuto.model.Element;
+import ru.yandex.practicum.calcRemAuto.model.Prices;
 import ru.yandex.practicum.calcRemAuto.model.Total;
-import ru.yandex.practicum.calcRemAuto.panelsAndButtons.buttons.Buttons;
 
-import javax.swing.*;
 import java.io.*;
 import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.List;
 
 @Slf4j
+@NoArgsConstructor
 public class SaveInFail {
-    Buttons but = new Buttons();
+    Prices prices = new Prices();
     Client client;
     Map<String, Map<String, List<String>>> lineBorderColorMap;
     Total total;
     List<Element> elements;
-    static String nameStartDirectory = ("Works"); // Начальная директория
+    public static String nameStartDirectory = ("Works"); // Начальная директория
     String nameAutomobileDirectory; // директория начальная/госНомер
 
     public SaveInFail(Client client, Total total, List<Element> elements, Map<String, Map<String, List<String>>> lineBorderColorMap) {
@@ -76,11 +76,17 @@ public class SaveInFail {
             out.close();
             dataClient.close();
             dataTotal.close();
-            //searchAndDeleteFolder(client.getNumberAuto().toUpperCase());
 
         } catch (FileNotFoundException | FileAlreadyExistsException o) {
             log.error(o.getMessage());
         }
+    }
+
+    public void loud(File file) {
+        client = loadClient(String.valueOf(file));
+        total = loadTotal(String.valueOf(file));
+        lineBorderColorMap = loadMap(String.valueOf(file));
+        elements = loadElementsList(String.valueOf(file));
     }
 
     private String toStringElement(Element element) {
@@ -100,6 +106,36 @@ public class SaveInFail {
         return String.join(",", words);
     }
 
+    @SneakyThrows
+    private List<Element> loadElementsList(String officialDirectory) {
+        List<Element> elements = new ArrayList<>();
+        //BufferedReader br = new BufferedReader(new FileReader(officialDirectory + "officialDirectory + /служебная/список_элементов.txt"));
+        FileReader fileReader = new FileReader(officialDirectory + "/служебная/список_элементов.txt");
+        BufferedReader bufferedReader = new BufferedReader(fileReader);
+
+        String line;
+        while ((line = bufferedReader.readLine()) != null) {
+            String[] parts = line.split(",");
+            Element element = new Element();
+            element.setName(parts[0]);
+            element.setPaintSide(Double.parseDouble(parts[1]));
+            element.setArmatureSide(Double.parseDouble(parts[2]));
+            element.setKuzDetReplaceSide(Double.parseDouble(parts[3]));
+            element.setGlass(Integer.parseInt(parts[4]));
+            element.setNameGlass(parts[5]);
+            element.setZerkalo(Integer.parseInt(parts[6]));
+            element.setMolding(Integer.parseInt(parts[7]));
+            element.setRuchka(Integer.parseInt(parts[8]));
+            element.setOverlay(Integer.parseInt(parts[9]));
+            element.setExpander(Integer.parseInt(parts[10]));
+            element.setRemont(Double.parseDouble(parts[11]));
+            element.setTotal(0);
+
+            elements.add(element);
+        }
+        return elements;
+    }
+
     private String toStringTotal(Total total) {
         String[] words = {String.valueOf(total.getMalyr()),
                 String.valueOf(total.getArmatyrchik()),
@@ -107,6 +143,23 @@ public class SaveInFail {
                 String.valueOf(total.getMaster()),
                 String.valueOf(total.getTotal())};
         return String.join(",", words);
+    }
+
+    @SneakyThrows
+    private Total loadTotal(String officialDirectory) {
+        FileReader fileReader = new FileReader(officialDirectory + "/служебная/итого.txt");
+        BufferedReader bufferedReader = new BufferedReader(fileReader);
+        String[] parts = bufferedReader.readLine().split(",");
+        if (parts.length == 5) {
+            double malyr = Double.parseDouble(parts[0]);
+            double armatyrchik = Double.parseDouble(parts[1]);
+            double kuzovchik = Double.parseDouble(parts[2]);
+            double master = Double.parseDouble(parts[3]);
+            double total = Double.parseDouble(parts[4]);
+            return new Total(malyr, armatyrchik, kuzovchik, master, total);
+        } else {
+            return new Total();
+        }
     }
 
     private String toStringClient(Client client) {
@@ -118,10 +171,27 @@ public class SaveInFail {
     }
 
     @SneakyThrows
+    private Client loadClient(String officialDirectory) {
+        FileReader fileReader = new FileReader(officialDirectory + "/служебная/клиент.txt");
+        BufferedReader bufferedReader = new BufferedReader(fileReader);
+        String[] parts = bufferedReader.readLine().split(",");
+        if (parts.length == 4) {
+            String name = parts[0];
+            String phoneNumber = parts[1];
+            String numberAuto = parts[2];
+            String modelAuto = parts[3];
+            return new Client(name, phoneNumber, numberAuto, modelAuto);
+        } else {
+            return new Client("", "", "", "");
+        }
+    }
+
+    @SneakyThrows
     private void saveListElements(String dateDirectory, String officialDirectory) throws FileNotFoundException, FileAlreadyExistsException {
         PrintWriter dataElementList = new PrintWriter(officialDirectory + "/список_элементов.txt"); // файл с сохраненным списком элементов
         PrintWriter malyr = new PrintWriter(dateDirectory + "/маляр.txt"); // смета упрощенная для маляра
         PrintWriter armoterchik = new PrintWriter(dateDirectory + "/арматурщик.txt"); // смета упрощенная для арматурщика
+        PrintWriter kuzovchik = new PrintWriter(dateDirectory + "/кузовщик.txt"); // смета упрощенная для кузовщика
 
         for (Element element : elements) {
             /*
@@ -133,9 +203,7 @@ public class SaveInFail {
             dataElementList.write(toStringElement(element) + "\n");
 
             if (total.getKuzovchik() > 0) {
-                PrintWriter kuzovchik = new PrintWriter(dateDirectory + "/кузовщик.txt"); // смета упрощенная для кузовщика
-                kuzovchik.write(element.getName() + " " + element.getKuzDetReplaceSide() + "н/ч " + (element.getKuzDetReplaceSide() * 750) + "руб.\n");
-                kuzovchik.close();
+                kuzovchik.write(element.getName() + " " + element.getKuzDetReplaceSide() + "н/ч " + (element.getKuzDetReplaceSide() * prices.getMechanicHourlyRate()) + "руб.\n");
             }
             if (element.getRemont() > 0) malyr.write(" ремонт: " + element.getRemont() + "н/ч");
             if (element.getRuchka() > 0) {
@@ -168,181 +236,68 @@ public class SaveInFail {
                     + element.getZerkalo()
                     + element.getMolding()
                     + element.getOverlay()
-                    + element.getExpander()) * 750) + "руб.\n");
+                    + element.getExpander()) * prices.getMechanicHourlyRate()) + "руб.\n");
             if (element.getGlass() > 0) {
-                armoterchik.write(element.getNameGlass());
+                if (element.getNameGlass() != null) {
+                    armoterchik.write(element.getNameGlass());
+                } else {
+                    armoterchik.write(element.getName());
+                }
             }
-            armoterchik.write(" итого: " + (int) ((element.getArmatureSide() + element.getGlass()) * 750) + "руб.\n");
+            armoterchik.write(" итого: " + (int) ((element.getArmatureSide() + element.getGlass()) * prices.getMechanicHourlyRate()) + "руб.\n");
         }
+        malyr.write("Итог: " + total.getMalyr());
+        armoterchik.write("Итог: " + total.getArmatyrchik());
+        kuzovchik.write("Итог: " + total.getKuzovchik());
         malyr.close();
         armoterchik.close();
+        kuzovchik.close();
         dataElementList.close();
     }
 
+    @SneakyThrows
     private void saveMap(String officialDirectory) {
-        try {
-            // Блок кода написан при помощи chatGPD
-            FileWriter fileWriter = new FileWriter(officialDirectory + "/таблица_работ.txt");
-            BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
+        FileWriter fileWriter = new FileWriter(officialDirectory + "/таблица_работ.txt");
+        BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
 
-            for (Map.Entry<String, Map<String, List<String>>> entry : lineBorderColorMap.entrySet()) {
-                bufferedWriter.write(entry.getKey() + "\n");
-                for (Map.Entry<String, List<String>> innerEntry : entry.getValue().entrySet()) {
-                    bufferedWriter.write(innerEntry.getKey() + "\n");
-                    for (String color : innerEntry.getValue()) {
-                        bufferedWriter.write(color + "\n");
-                    }
-                }
-                bufferedWriter.write("---\n");
-            }
-            bufferedWriter.close();
-            // Конец блока кода написанного при помощи chatGPD
-        } catch (IOException e) {
-            log.error(e.getMessage());
-            throw new RuntimeException(e);
-        }
-    }
-
-    private Map<String, Map<String, List<String>>> loudMap(String officialDirectory) {
-        // Блок кода написан при помощи chatGPD
-        Map<String, Map<String, List<String>>> restoredMap = new HashMap<>();
-        try {
-            FileReader fileReader = new FileReader(officialDirectory + "/таблица_работ.txt");
-            BufferedReader bufferedReader = new BufferedReader(fileReader);
-
-            String line;
-            String mapKey = null;
-            String innerMapKey = null;
-            List<String> colorList = new ArrayList<>();
-            while ((line = bufferedReader.readLine()) != null) {
-                if (!line.equals("---")) {
-                    if (innerMapKey != null) {
-                        colorList.add(line);
-                    } else if (mapKey != null) {
-                        innerMapKey = line;
-                        colorList = new ArrayList<>();
-                    } else {
-                        mapKey = line;
-                    }
-                } else {
-                    if (mapKey != null && innerMapKey != null) {
-                        restoredMap.put(mapKey, Collections.singletonMap(innerMapKey, colorList));
-                    }
-                    mapKey = null;
-                    innerMapKey = null;
-                    colorList = null;
+        for (Map.Entry<String, Map<String, List<String>>> entry : lineBorderColorMap.entrySet()) {
+            bufferedWriter.write("---\n");
+            bufferedWriter.write(entry.getKey() + "\n");
+            for (Map.Entry<String, List<String>> innerEntry : entry.getValue().entrySet()) {
+                bufferedWriter.write("----\n");
+                bufferedWriter.write(innerEntry.getKey() + "\n");
+                bufferedWriter.write("-----\n");
+                for (String color : innerEntry.getValue()) {
+                    bufferedWriter.write(color + "\n");
                 }
             }
-            bufferedReader.close();
-        } catch (IOException e) {
-            e.printStackTrace();
         }
-        return restoredMap;
+        bufferedWriter.close();
     }
 
-    public void searchAndDeleteFolder(String folderName) {
-        File folder = new File(nameStartDirectory + "/" + folderName); // Здесь указывается начальная директория поиска
-
-        if (folder.exists() && folder.isDirectory()) {
-            File[] subFolders = folder.listFiles(File::isDirectory);
-
-            if (subFolders != null && subFolders.length > 0) {
-                StringBuilder message = new StringBuilder("На автомобиль " + folderName + " есть ранние расчеты:\n");
-
-                for (File subFolder : subFolders) {
-                    message.append(subFolder.getName()).append("\n");
-                }
-
-                message.append("\nХотите просмотреть?");
-                int option = JOptionPane.showConfirmDialog(null, message, "Поиск", JOptionPane.YES_NO_OPTION);
-
-                if (option == JOptionPane.YES_OPTION) {
-                    selectAction(subFolders);
-                }
+    @SneakyThrows
+    private Map<String, Map<String, List<String>>> loadMap(String officialDirectory) {
+        Map<String, Map<String, List<String>>> loadedMap = new HashMap<>();
+        FileReader fileReader = new FileReader(officialDirectory + "/служебная/таблица_работ.txt");
+        BufferedReader bufferedReader = new BufferedReader(fileReader);
+        String line;
+        String key1 = null;
+        String key2 = null;
+        List<String> values = new ArrayList<>();
+        while ((line = bufferedReader.readLine()) != null) {
+            if (line.equals("---")) {
+                key1 = bufferedReader.readLine();
+                loadedMap.put(key1, new HashMap<>());
+            } else if (line.equals("----")) {
+                key2 = bufferedReader.readLine();
+                loadedMap.get(key1).put(key2, new ArrayList<>());
+            } else if (line.equals("-----")) {
+                values = loadedMap.get(key1).get(key2);
             } else {
-                JOptionPane.showMessageDialog(null, "Ранних расчетов автомобиля  " + folderName + " не найдено.");
-            }
-        } else {
-            JOptionPane.showMessageDialog(null, folderName + " не верное имя папки.");
-        }
-    } // Метод поиска папок !расчетов! для просмотра и дальнейшей возможности удаления.
-
-    public void selectAction(File[] subFolders) {
-        String[] folderNames = Arrays.stream(subFolders)
-                .map(folder -> folder.getName().substring(0, Math.min(folder.getName().length(), 10))) // Измените крайнее значение на нужную вам длину
-                .toArray(String[]::new); // Сокращаем вывод папки до значения даты
-
-        String[] options = new String[]{"Открыть", "Удалить", "Отмена"}; // Кнопки действий
-
-        Object chosenFolder = JOptionPane.showInputDialog(null, "От какой даты открыть расчет?",
-                "Просмотр", JOptionPane.PLAIN_MESSAGE, null,
-                folderNames, subFolders[0]); // Окно выбора даты расчета
-        String chosenFolderPath = (chosenFolder != null) ? chosenFolder.toString() : "";
-
-        if (chosenFolder != null) {
-            try {
-                // Укажите путь к файлу
-                File file = new File(nameAutomobileDirectory + "/" + chosenFolderPath + "/" + "смета.txt");
-                // Создать экземпляр Scanner для чтения файла
-                Scanner scanner = new Scanner(file);
-                // Переменная для хранения содержимого файла
-                StringBuilder fileContent = new StringBuilder();
-
-                while (scanner.hasNextLine()) {
-                    String data = scanner.nextLine();
-                    fileContent.append(data).append("\n");
-                }
-                // Закрыть Scanner
-                scanner.close();
-                // Отобразить содержимое файла в диалоговом окне
-                int selections = JOptionPane.showOptionDialog(null, fileContent.toString(),
-                        "Содержимое файла.", JOptionPane.DEFAULT_OPTION,
-                        JOptionPane.QUESTION_MESSAGE, null, new String[]{options[1], options[2]}, options[0]); // окно действия
-
-                if (selections == 0) { // Код, который выполнится при нажатии "Удалить"
-                    System.out.println("********************");
-                    String filePath = file.getPath();
-                    Path path = Paths.get(filePath);
-                    // Получение родительского каталога (без названия файла)
-                    Path parentPath = path.getParent();
-
-                    int confirm = JOptionPane.showConfirmDialog(null, "Вы уверенны что хотите удалить расчет от  " + chosenFolder + "?",
-                            "Подтверждение удаления.", JOptionPane.YES_NO_OPTION);
-
-                    if (confirm == JOptionPane.YES_OPTION) {
-                        // Удаление файла или папки
-                        boolean success = deleteFileOrDirectory(parentPath.toFile());
-                        // Показываем диалоговое окно после успешного удаления
-                        if (success) {
-                            JOptionPane.showMessageDialog(null, "Расчет от " + chosenFolder + " удален.", "Успех", JOptionPane.INFORMATION_MESSAGE);
-                        } else {
-                            JOptionPane.showMessageDialog(null, "Не удалось удалить расчет от " + chosenFolder + ".", "Ошибка", JOptionPane.ERROR_MESSAGE);
-                        }
-                    }
-                }
-            } catch (FileNotFoundException e) {
-                System.out.println("Ошибка: Файл не найден.");
+                values.add(line);
             }
         }
-    } // Метод выбора действий метода !searchAndDeleteFolder!
-
-    private static boolean deleteFileOrDirectory(File fileOrDirectory) {
-        if (fileOrDirectory.exists()) {
-            if (fileOrDirectory.isDirectory()) {
-                // Если это директория, удаляем все файлы внутри
-                File[] files = fileOrDirectory.listFiles();
-                if (files != null) {
-                    for (File file : files) {
-                        // Рекурсивно вызываем удаление для каждого файла
-                        deleteFileOrDirectory(file);
-                    }
-                }
-            }
-            // Удаление файла или папки
-            return fileOrDirectory.delete();
-        } else {
-            System.out.println("Файл или папка не существует: " + fileOrDirectory.getPath());
-            return false;
-        }
-    } // Метод удаления папки расчета конкретного автомобиля по дате(имени папки).
+        bufferedReader.close();
+        return loadedMap;
+    }
 }

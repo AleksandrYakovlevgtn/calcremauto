@@ -5,13 +5,15 @@ import lombok.experimental.FieldDefaults;
 
 @Getter
 @Setter
+@NoArgsConstructor
+@AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class Total {
-    Double malyr = 0.0;
-    Double armatyrchik = 0.0;
-    Double kuzovchik = 0.0;
-    Double master = 0.0;
-    Double total = 0.0;
+    double malyr = 0;
+    double armatyrchik = 0;
+    double kuzovchik = 0;
+    double master = 0;
+    double total = 0;
 
     @Override
     public String toString() {

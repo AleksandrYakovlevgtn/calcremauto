@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Scanner;
 
 public class Menu {
-    public void printTitle() {
+    /*public void printTitle() {
         System.out.println("1 --- Добавить машину.");
         System.out.println("2 --- Обновить машину в ремонте.");
         System.out.println("3 --- Найти машину по гос номеру.");
@@ -42,5 +42,5 @@ public class Menu {
                System.out.println("Итого : " + ((Total) works).getTotal());
            }
        }
-    }
+    }*/
 }
