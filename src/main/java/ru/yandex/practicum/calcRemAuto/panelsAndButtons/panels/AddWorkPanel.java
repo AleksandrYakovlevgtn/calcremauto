@@ -127,7 +127,7 @@ public class AddWorkPanel {
                 if (saveDialog.getAnswer()){
                     FirstPanel firstPanel = new FirstPanel();
                     panel.removeAll();
-                    firstPanel.firstPanel(panel);
+                    firstPanel.createFirstPanel(panel);
                 }
             }
         }); // Кнопка сохранить
@@ -1318,4 +1318,11 @@ public class AddWorkPanel {
             elementList.remove(el);
         }
     } // Удаление из Списка элементов "element"
+    public void load(List<Element>elementList,Map<String, Map<String, List<String>>> lineBorderColorMap,Client client,JPanel panel){
+        this.elementList = elementList;
+        this.lineBorderColorMap = lineBorderColorMap;
+        JFrame parentFrame = (JFrame) SwingUtilities.getWindowAncestor(panel);
+        startPanel(panel,client,parentFrame);
+        sendToStringInElementListTextViewing();
+    }
 }

@@ -141,7 +141,7 @@ public class AddClientPanel {
         but.getButtonBack().addActionListener(e -> {
             panel.removeAll();
             FirstPanel firstPanel = new FirstPanel();
-            firstPanel.firstPanel(panel);
+            firstPanel.createFirstPanel(panel);
         });
         but.getButtonNext().addActionListener(e -> {
             try {

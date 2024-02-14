@@ -16,7 +16,7 @@ public class FirstPanel {
     Buttons but = new Buttons(); // Кнопки
     private List<JButton> buttons = new ArrayList<>(); // Список необходимых данной панели кнопок.
 
-    public void firstPanel(JPanel panel) {
+    public void createFirstPanel(JPanel panel) {
         buttons.add(but.getButtonCalc());
         buttons.add(but.getButtonSearch());
         buttons.add(but.getButtonCloseApp());
@@ -40,7 +40,7 @@ public class FirstPanel {
             SearchPanel searchPanel = new SearchPanel();
             panel.removeAll();
             panel.updateUI();
-            searchPanel.SearchPanel(panel);
+            searchPanel.createSearchPanel(panel);
         });
         but.getButtonCalc().addActionListener(e -> {
             AddClientPanel addClientPanel = new AddClientPanel();

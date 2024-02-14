@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.experimental.FieldDefaults;
 
 @Data
-@AllArgsConstructor // *********
+@AllArgsConstructor
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class Element {
@@ -25,25 +25,34 @@ public class Element {
     int overlay = 0;
     int expander = 0;
     double remont = 0;
-    double total = ((paintSide + armatureSide + kuzDetReplaceSide + glass + zerkalo + molding + ruchka + expander + overlay + remont) * hourlyRate);
+    double total;
+
+    {
+        calculateTotal();
+    }
+
+    private void calculateTotal() {
+        total = ((paintSide + armatureSide + kuzDetReplaceSide + glass + zerkalo + molding + ruchka + expander + overlay + remont) * hourlyRate);
+    }
 
     @Override
     public String toString() {
-        String result = " \n";
-        if (paintSide > 0 || glass > 0) result = result + name + "\n";
-        else if (paintSide <= 0 && glass <= 0) result = result + name + " не красим" + "\n";
-        if (nameGlass != null) result = result + nameGlass + "\n";
-        if (zerkalo > 0) result = result + "Зеркало окраска." + "\n";
-        if (ruchka > 0) result = result + "Ручка окраска." + "\n";
-        if (molding > 0) result = result + "Молдинг окраска." + "\n";
-        if (expander > 0) result = result + "Расширитель окраска." + "\n";
-        if (overlay > 0) result = result + "Накладка окраска." + "\n";
-        if (remont > 0) result = result + "Ремонт " + remont + "н/ч" + "\n";
-        result = result + "paintSide = " + paintSide + "\n"
-                + "armatureSide = " + armatureSide + "\n"
-                + "kuzDetReplaceSide = " + kuzDetReplaceSide + "\n"
-                + "glass = " + glass + "\n"
-                + ((paintSide + armatureSide + kuzDetReplaceSide + glass + zerkalo + molding + ruchka + expander + overlay + remont) * hourlyRate) + " руб.\n";
-        return result;
+        StringBuilder result = new StringBuilder(" \n");
+        if (paintSide > 0 || glass > 0) result.append(name).append("\n");
+        else if (paintSide <= 0 && glass <= 0) result.append(name).append(" не красим").append("\n");
+        if (nameGlass != null && !nameGlass.equals("null")) result.append(nameGlass).append("\n");
+        if (zerkalo > 0) result.append("Зеркало окраска.").append("\n");
+        if (ruchka > 0) result.append("Ручка окраска.").append("\n");
+        if (molding > 0) result.append("Молдинг окраска.").append("\n");
+        if (expander > 0) result.append("Расширитель окраска.").append("\n");
+        if (overlay > 0) result.append("Накладка окраска.").append("\n");
+        if (remont > 0) result.append("Ремонт ").append(remont).append("н/ч").append("\n");
+        result.append("малярные работы = ").append(paintSide).append("\n")
+                .append("арматурные работы = ").append(armatureSide).append("\n")
+                .append("зам.куз.детали = ").append(kuzDetReplaceSide).append("\n")
+                .append("работы с остеклением = ").append(glass).append("\n");
+        calculateTotal();
+        result.append(total).append(" руб.\n");
+        return result.toString();
     }
 }
