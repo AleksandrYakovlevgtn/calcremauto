@@ -11,7 +11,6 @@ import ru.yandex.practicum.calcRemAuto.panelsAndButtons.panels.AddWorkPanel;
 
 import javax.swing.*;
 import java.io.*;
-import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
@@ -23,24 +22,24 @@ import java.util.Map;
 
 @Slf4j
 @NoArgsConstructor
-public class SaveInFail {
+public class WorkWithFile {
     private final Prices prices = new Prices();
-    private Client client;
-    private Map<String, Map<String, List<String>>> lineBorderColorMap;
-    private Total total;
-    private List<Element> elements;
-    public static final String NAME_START_DIRECTORY = "Расчеты";
+    private Client client; // Класс с данными клиента, инициируется из конструктора и load (загрузка).
+    private Map<String, Map<String, List<String>>> lineBorderColorMap; // Таблица с нажатыми кнопками, инициируется из конструктора и load (загрузка).
+    private Total total; // Класс итого, инициируется из конструктора и load (загрузка).
+    private List<Element> elements; // Список добавленных элементов, инициируется из конструктора и load (загрузка).
+    public static final String NAME_START_DIRECTORY = "Расчеты"; // Папка начальной директории в которую сохраняются расчеты.
     String NAME_AUTOMOBILE_DIRECTORY; // директория начальная/госНомер
-    String DATE_DIRECTORY;
-    String OFFICIAL_DIRECTORY;
+    String DATE_DIRECTORY; // директория начальная/госНомер/дата_расчета
+    String OFFICIAL_DIRECTORY; // директория начальная/госНомер/дата_расчета/служебная Для записи служебных данных.
 
-    public SaveInFail(Client client, Total total, List<Element> elements, Map<String, Map<String, List<String>>> lineBorderColorMap) {
+    public WorkWithFile(Client client, Total total, List<Element> elements, Map<String, Map<String, List<String>>> lineBorderColorMap) {
         this.client = client;
         this.lineBorderColorMap = lineBorderColorMap;
         this.total = total;
         this.elements = elements;
         NAME_AUTOMOBILE_DIRECTORY = NAME_START_DIRECTORY + "/" + client.getNumberAuto().toUpperCase();
-    }
+    } // Конструктор
 
     @SneakyThrows
     public void save(String text) {
@@ -60,23 +59,21 @@ public class SaveInFail {
             saveListElements(DATE_DIRECTORY, OFFICIAL_DIRECTORY);
             saveMap(OFFICIAL_DIRECTORY);
 
-        } catch (FileNotFoundException | FileAlreadyExistsException e) {
-            log.error(e.getMessage());
         }
-    }
+    } // Метод сохранения который через другие методы сохраняет все в файлы .txt
 
     private void createDirectories() throws IOException {
         createDirectoryIfNeeded(NAME_START_DIRECTORY);
         createDirectoryIfNeeded(NAME_AUTOMOBILE_DIRECTORY);
         createDirectoryIfNeeded(DATE_DIRECTORY);
         createDirectoryIfNeeded(OFFICIAL_DIRECTORY);
-    }
+    } // Метод для распределения создания папок
 
     private void createDirectoryIfNeeded(String directory) throws IOException {
         if (!Files.exists(Path.of(directory))) {
             Files.createDirectory(Path.of(directory));
         }
-    }
+    } // Проверка и создание папок
 
     public void load(File file, JPanel panel) {
         client = loadClient(String.valueOf(file));
@@ -85,82 +82,20 @@ public class SaveInFail {
         elements = loadElementsList(String.valueOf(file));
         AddWorkPanel addWorkPanel = new AddWorkPanel();
         addWorkPanel.load(elements, lineBorderColorMap, client, panel);
-    }
+    } // Загрузка из файла
 
     private String toStringElement(Element element) {
         String[] words = {element.getName(), String.valueOf(element.getPaintSide()), String.valueOf(element.getArmatureSide()),
                 String.valueOf(element.getKuzDetReplaceSide()), String.valueOf(element.getGlass()), element.getNameGlass(),
                 String.valueOf(element.getZerkalo()), String.valueOf(element.getMolding()), String.valueOf(element.getRuchka()),
                 String.valueOf(element.getOverlay()), String.valueOf(element.getExpander()), String.valueOf(element.getRemont()),
-                String.valueOf(element.getTotal())};
+                String.valueOf(element.getTotal()),
+                element.getHoDoRemont()};
         return String.join(",", words);
-    }
+    } // Метод разбития Элемента в строки для сохранения в файл
 
     @SneakyThrows
-    private List<Element> loadElementsList(String officialDirectory) {
-        List<Element> elements = new ArrayList<>();
-        FileReader fileReader = new FileReader(officialDirectory + "/служебная/список_элементов.txt");
-        BufferedReader bufferedReader = new BufferedReader(fileReader);
-
-        String line;
-        while ((line = bufferedReader.readLine()) != null) {
-            String[] parts = line.split(",");
-            Element element = new Element();
-            element.setName(parts[0]);
-            element.setPaintSide(Double.parseDouble(parts[1]));
-            element.setArmatureSide(Double.parseDouble(parts[2]));
-            element.setKuzDetReplaceSide(Double.parseDouble(parts[3]));
-            element.setGlass(Integer.parseInt(parts[4]));
-            element.setNameGlass(parts[5]);
-            element.setZerkalo(Integer.parseInt(parts[6]));
-            element.setMolding(Integer.parseInt(parts[7]));
-            element.setRuchka(Integer.parseInt(parts[8]));
-            element.setOverlay(Integer.parseInt(parts[9]));
-            element.setExpander(Integer.parseInt(parts[10]));
-            element.setRemont(Double.parseDouble(parts[11]));
-            element.setTotal(0);
-
-            elements.add(element);
-        }
-        return elements;
-    }
-
-    private String toStringTotal(Total total) {
-        return String.format("%s,%s,%s,%s,%s", total.getMalyr(), total.getArmatyrchik(), total.getKuzovchik(),
-                total.getMaster(), total.getTotal());
-    }
-
-    @SneakyThrows
-    private Total loadTotal(String officialDirectory) {
-        try (BufferedReader bufferedReader = new BufferedReader(new FileReader(officialDirectory + "/служебная/итого.txt"))) {
-            String[] parts = bufferedReader.readLine().split(",");
-            if (parts.length == 5) {
-                return new Total(Double.parseDouble(parts[0]), Double.parseDouble(parts[1]),
-                        Double.parseDouble(parts[2]), Double.parseDouble(parts[3]), Double.parseDouble(parts[4]));
-            } else {
-                return new Total();
-            }
-        }
-    }
-
-    private String toStringClient(Client client) {
-        return String.format("%s,%s,%s,%s", client.getName(), client.getFoneNumber(), client.getNumberAuto(), client.getModelAuto());
-    }
-
-    @SneakyThrows
-    private Client loadClient(String officialDirectory) {
-        try (BufferedReader bufferedReader = new BufferedReader(new FileReader(officialDirectory + "/служебная/клиент.txt"))) {
-            String[] parts = bufferedReader.readLine().split(",");
-            if (parts.length == 4) {
-                return new Client(parts[0], parts[1], parts[2], parts[3]);
-            } else {
-                return new Client("", "", "", "");
-            }
-        }
-    }
-
-    @SneakyThrows
-    private void saveListElements(String dateDirectory, String officialDirectory) throws FileNotFoundException, FileAlreadyExistsException {
+    private void saveListElements(String dateDirectory, String officialDirectory) {
         try (PrintWriter dataElementList = new PrintWriter(officialDirectory + "/список_элементов.txt");
              PrintWriter malyr = new PrintWriter(dateDirectory + "/маляр.txt");
              PrintWriter armoterchik = new PrintWriter(dateDirectory + "/арматурщик.txt");
@@ -172,11 +107,23 @@ public class SaveInFail {
 
                 dataElementList.write(toStringElement(element) + "\n");
 
-                if (total.getKuzovchik() > 0) {
-                    kuzovchik.write(element.getName() + " " + element.getKuzDetReplaceSide() + "н/ч " +
-                            (element.getKuzDetReplaceSide() * prices.getMechanicHourlyRate()) + "руб.\n");
+                if (element.getKuzDetReplaceSide() > 0 || element.getHoDoRemont().equals("кузовщик")) {
+                    String line = element.getName();
+                    if (element.getHoDoRemont().equals("кузовщик")) {
+                        line = line + (" ремонт: " + element.getRemont() + "н/ч " + element.getRemont() * prices.getMechanicHourlyRate()) + "руб.\n";
+                    } else if (element.getKuzDetReplaceSide() > 0) {
+                        line = line + (" замена: " + element.getKuzDetReplaceSide() + "н/ч " + element.getKuzDetReplaceSide() * prices.getMechanicHourlyRate()) + "руб.\n";
+                    }
+                    kuzovchik.write(line);
                 }
-                if (element.getRemont() > 0) malyr.write(" ремонт: " + element.getRemont() + "н/ч");
+                if (element.getRemont() > 0) {
+                    if (element.getHoDoRemont().equals("маляр")) {
+                        malyr.write(" ремонт: " + element.getRemont() + "н/ч");
+                    }
+                    if (element.getHoDoRemont().equals("арматурщик")) {
+                        armoterchik.write(" ремонт: " + element.getRemont() + "н/ч");
+                    }
+                }
                 if (element.getRuchka() > 0) {
                     malyr.write(" ручка");
                     armoterchik.write(" ручка");
@@ -201,9 +148,13 @@ public class SaveInFail {
                     malyr.write(" окраска");
                     armoterchik.write(" c/у под окрас");
                 }
-                malyr.write(" итого: " + (int) ((element.getPaintSide() + element.getRemont() + element.getRuchka() +
+                int line = (int) ((element.getPaintSide() + element.getRuchka() +
                         element.getZerkalo() + element.getMolding() + element.getOverlay() + element.getExpander()) *
-                        prices.getMechanicHourlyRate()) + "руб.\n");
+                        prices.getMechanicHourlyRate());
+                if (element.getHoDoRemont().equals("маляр")) {
+                    line = line + (int) (element.getRemont() * prices.getMechanicHourlyRate());
+                }
+                malyr.write(" итого: " + line + "руб.\n");
                 if (element.getGlass() > 0) {
                     if (element.getNameGlass() != null) {
                         armoterchik.write(element.getNameGlass());
@@ -211,14 +162,83 @@ public class SaveInFail {
                         armoterchik.write(element.getName());
                     }
                 }
-                armoterchik.write(" итого: " + (int) ((element.getArmatureSide() + element.getGlass()) *
-                        prices.getMechanicHourlyRate()) + "руб.\n");
+                line = 0;
+                line = (int) ((element.getArmatureSide() + element.getGlass()) *
+                        prices.getMechanicHourlyRate());
+                if (element.getHoDoRemont().equals("арматурщик")) {
+                    line = line + (int) (element.getRemont() * prices.getMechanicHourlyRate());
+                }
+                armoterchik.write(" итого: " + line + "руб.\n");
             }
             malyr.write("Итог: " + total.getMalyr());
             armoterchik.write("Итог: " + total.getArmatyrchik());
             kuzovchik.write("Итог: " + total.getKuzovchik());
         }
-    }
+    } // Метод сохранения List<Element> elements
+
+    @SneakyThrows
+    private List<Element> loadElementsList(String officialDirectory) {
+        List<Element> elements = new ArrayList<>();
+        FileReader fileReader = new FileReader(officialDirectory + "/служебная/список_элементов.txt");
+        BufferedReader bufferedReader = new BufferedReader(fileReader);
+
+        String line;
+        while ((line = bufferedReader.readLine()) != null) {
+            String[] parts = line.split(",");
+            Element element = new Element();
+            element.setName(parts[0]);
+            element.setPaintSide(Double.parseDouble(parts[1]));
+            element.setArmatureSide(Double.parseDouble(parts[2]));
+            element.setKuzDetReplaceSide(Double.parseDouble(parts[3]));
+            element.setGlass(Integer.parseInt(parts[4]));
+            element.setNameGlass(parts[5]);
+            element.setZerkalo(Integer.parseInt(parts[6]));
+            element.setMolding(Integer.parseInt(parts[7]));
+            element.setRuchka(Integer.parseInt(parts[8]));
+            element.setOverlay(Integer.parseInt(parts[9]));
+            element.setExpander(Integer.parseInt(parts[10]));
+            element.setRemont(Double.parseDouble(parts[11]));
+            element.setHoDoRemont(parts[13]);
+            element.setTotal(0);
+
+            elements.add(element);
+        }
+        return elements;
+    } // Метод загрузки из файла List<Element> elements
+
+    private String toStringTotal(Total total) {
+        return String.format("%s,%s,%s,%s,%s", total.getMalyr(), total.getArmatyrchik(), total.getKuzovchik(),
+                total.getMaster(), total.getTotal());
+    } // Метод разбития Total в строки для сохранения в файл
+
+    @SneakyThrows
+    private Total loadTotal(String officialDirectory) {
+        try (BufferedReader bufferedReader = new BufferedReader(new FileReader(officialDirectory + "/служебная/итого.txt"))) {
+            String[] parts = bufferedReader.readLine().split(",");
+            if (parts.length == 5) {
+                return new Total(Double.parseDouble(parts[0]), Double.parseDouble(parts[1]),
+                        Double.parseDouble(parts[2]), Double.parseDouble(parts[3]), Double.parseDouble(parts[4]));
+            } else {
+                return new Total();
+            }
+        }
+    } // Метод загрузки из файла Total
+
+    private String toStringClient(Client client) {
+        return String.format("%s,%s,%s,%s", client.getName(), client.getFoneNumber(), client.getNumberAuto(), client.getModelAuto());
+    } // Метод разбития Client в строки для сохранения в файл
+
+    @SneakyThrows
+    private Client loadClient(String officialDirectory) {
+        try (BufferedReader bufferedReader = new BufferedReader(new FileReader(officialDirectory + "/служебная/клиент.txt"))) {
+            String[] parts = bufferedReader.readLine().split(",");
+            if (parts.length == 4) {
+                return new Client(parts[0], parts[1], parts[2], parts[3]);
+            } else {
+                return new Client("", "", "", "");
+            }
+        }
+    } // Метод загрузки из файла Client
 
     @SneakyThrows
     private void saveMap(String officialDirectory) {
@@ -236,7 +256,7 @@ public class SaveInFail {
                 }
             }
         }
-    }
+    } // Метод сохранения Map<String, Map<String, List<String>>> lineBorderColorMap в файл
 
     @SneakyThrows
     private Map<String, Map<String, List<String>>> loadMap(String officialDirectory) {
@@ -266,5 +286,5 @@ public class SaveInFail {
             }
         }
         return loadedMap;
-    }
+    } // Метод загрузки из файла Map<String, Map<String, List<String>>> lineBorderColorMap
 }

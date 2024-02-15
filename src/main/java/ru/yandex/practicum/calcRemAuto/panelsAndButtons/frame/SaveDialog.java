@@ -1,11 +1,8 @@
 package ru.yandex.practicum.calcRemAuto.panelsAndButtons.frame;
 
-import ru.yandex.practicum.calcRemAuto.model.Client;
-import ru.yandex.practicum.calcRemAuto.model.Element;
-import ru.yandex.practicum.calcRemAuto.model.Prices;
-import ru.yandex.practicum.calcRemAuto.model.Total;
+import ru.yandex.practicum.calcRemAuto.model.*;
 import ru.yandex.practicum.calcRemAuto.panelsAndButtons.buttons.Buttons;
-import ru.yandex.practicum.calcRemAuto.storage.SaveInFail;
+import ru.yandex.practicum.calcRemAuto.storage.WorkWithFile;
 
 import javax.swing.*;
 import java.awt.*;
@@ -15,6 +12,7 @@ import java.util.Map;
 
 public class SaveDialog extends JDialog {
     Prices prices = new Prices(); // Класс с ценами нормативов.
+    Mechanics mechanics = new Mechanics();
     JTextArea previewTextArea = new JTextArea(); // Поле отображающие развернутую смету
     private boolean answer; // Возвращаемое значение для выполнения действия в родительском окне (закрыть или оставить)
     String probels = "_____________________________"; // уравнивание текста через нижнее подчеркивание
@@ -64,11 +62,11 @@ public class SaveDialog extends JDialog {
         String line = previewAddTextAndCreateTotal(client, elements); // Запуск метода отображения сметы
 
         but.getYesButton().addActionListener(e -> {
-            SaveInFail saveInFail = new SaveInFail(client, total, elements, lineBorderColorMap);
-            saveInFail.save(line);
+            WorkWithFile workWithFaile = new WorkWithFile(client, total, elements, lineBorderColorMap);
+            workWithFaile.save(line);
             answer = true;
             dispose();
-        });    // Кнопка да "сохранить" отправляет в класс SaveInFail уже на оформление папок и файлов.
+        });    // Кнопка да "сохранить" отправляет в класс WorkWithFile уже на оформление папок и файлов.
 
         but.getNoButton().addActionListener(e -> {
             answer = false;
@@ -81,61 +79,94 @@ public class SaveDialog extends JDialog {
     } // метод возвращающий значение для выполнения действия в родительском окне (закрыть или оставить панель на окне)
 
     private String previewAddTextAndCreateTotal(Client client, List<Element> elements) {
-        String line = "";
-        for (int i = 0; i < elements.size(); i++) {
-            total.setMalyr((total.getMalyr())
-                    + ((elements.get(i).getPaintSide()
-                    + elements.get(i).getRemont()
-                    + elements.get(i).getMolding()
-                    + elements.get(i).getRuchka()
-                    + elements.get(i).getZerkalo()
-                    + elements.get(i).getExpander()
-                    + elements.get(i).getOverlay()) * prices.getMechanicHourlyRate()));
-            total.setArmatyrchik((total.getArmatyrchik())
-                    + ((elements.get(i).getArmatureSide()
-                    + elements.get(i).getGlass()) * prices.getMechanicHourlyRate()));
-            total.setKuzovchik(total.getKuzovchik() + (elements.get(i).getKuzDetReplaceSide() * prices.getMechanicHourlyRate()));
-            total.setMaster((total.getMaster())
-                    + ((elements.get(i).getRemont()
-                    + elements.get(i).getMolding()
-                    + elements.get(i).getRuchka()
-                    + elements.get(i).getZerkalo()
-                    + elements.get(i).getExpander()
-                    + elements.get(i).getOverlay()
-                    + elements.get(i).getPaintSide()
-                    + elements.get(i).getGlass()
-                    + elements.get(i).getKuzDetReplaceSide()
-                    + elements.get(i).getArmatureSide()) * prices.getMasterHourlyRate()));
-            line += takeLine(elements.get(i));
-        }
-        total.setTotal(total.getTotal()
-                + total.getArmatyrchik()
-                + total.getMalyr()
-                + total.getKuzovchik()
-                + total.getMaster());
+        // StringBuilder для хранения строк
+        StringBuilder line = new StringBuilder();
 
-        previewTextArea.setText(client.toString() + "\n");
-        previewTextArea.setText(previewTextArea.getText() + total.toString() + "\n");
-        previewTextArea.setText(previewTextArea.getText() + line);
+        // Итерация по элементам
+        for (Element element : elements) {
+            // Обновление total на основе текущего элемента и добавление строки для текущего элемента
+            updateTotalValues(element);
+            line.append(takeLine(element));
+        }
+
+        // Обновление общего значения total
+        updateTotal();
+
+        // Установка текста в previewTextArea на основе клиента, total и строк
+        previewTextArea.setText(buildPreviewText(client, line));
         return previewTextArea.getText();
-    } // Отображение созданной через метод "takeLine" сметы.
+    }
+
+    private double calculateMalyr(Element element) {
+        Double total = (element.getPaintSide()  + element.getMolding()
+                + element.getRuchka() + element.getZerkalo() + element.getExpander()
+                + element.getOverlay()) * prices.getMechanicHourlyRate();
+        if(element.getHoDoRemont().equals("маляр")){
+            total = total + (element.getRemont() * prices.getMechanicHourlyRate());
+        }
+        return total;
+
+    }// Метод для расчета значения Маляр на основе текущего элемента
+
+    private double calculateArmatyrchik(Element element) {
+        Double total =(element.getArmatureSide() + element.getGlass()) * prices.getMechanicHourlyRate();
+        if(element.getHoDoRemont().equals("арматурщик")){
+            total = total + (element.getRemont() * prices.getMechanicHourlyRate());
+        }
+        return total;
+    } // Метод для расчета значения Арматурщик на основе текущего элемента
+
+    private double calculateKuzovchik(Element element) {
+        Double total = element.getKuzDetReplaceSide() * prices.getMechanicHourlyRate();
+        if(element.getHoDoRemont().equals("кузовщик")){
+            total = total + (element.getRemont() * prices.getMechanicHourlyRate());
+        }
+        return total;
+    }// Метод для расчета значения Кузовщик на основе текущего элемента
+
+    private double calculateMaster(Element element) {
+        return (element.getRemont() + element.getMolding() + element.getRuchka()
+                + element.getZerkalo() + element.getExpander() + element.getOverlay()
+                + element.getPaintSide() + element.getGlass() + element.getKuzDetReplaceSide()
+                + element.getArmatureSide()) * prices.getMasterHourlyRate();
+    }// Метод для расчета значения Мастер на основе текущего элемента
+
+    private void updateTotalValues(Element element) {
+        total.setMalyr(total.getMalyr() + calculateMalyr(element));
+        total.setArmatyrchik(total.getArmatyrchik() + calculateArmatyrchik(element));
+        total.setKuzovchik(total.getKuzovchik() + calculateKuzovchik(element));
+        total.setMaster(total.getMaster() + calculateMaster(element));
+    } // Метод для обновления значений total на основе текущего элемента
+
+    private void updateTotal() {
+        total.setTotal(total.getTotal() + total.getArmatyrchik() + total.getMalyr() + total.getKuzovchik() + total.getMaster());
+    }// Метод для обновления общего значения total
+
+    private String buildPreviewText(Client client, StringBuilder line) {
+        return client.toString()
+                + "\n" + "Автомаляр: " + mechanics.getMalyr() + " Арматурщик: " + mechanics.getArmoturchik() + " Кузовщик: " + mechanics.getKuzovchik()
+                + "\n" + total.toString() + "\n" + line.toString();
+    }// Метод для построения окончательной строки текста для previewTextArea
 
     private String takeLine(Element element) {
-        String line = element.getName();
-        line = line + probels.substring(element.getName().length());
+        StringBuilder line = new StringBuilder(element.getName());
+        line.append(probels.substring(element.getName().length()));
         if (!element.getName().contains("Остекление")) {
-            line += " окраска: " + element.getPaintSide() + " н/ч."
-                    + " ремонт: " + element.getRemont() + " н/ч."
-                    + " замена кузовной детали: " + element.getKuzDetReplaceSide() + " н/ч."
-                    + " р/с: " + element.getArmatureSide() + " н/ч. ";
-            if (element.getGlass() > 0) line += element.getNameGlass();
-            if (element.getZerkalo() > 0) line += " зеркало ";
-            if (element.getMolding() > 0) line += " молдинг ";
-            if (element.getRuchka() > 0) line += " ручка ";
-            if (element.getZerkalo() > 0 || element.getMolding() > 0 || element.getRuchka() > 0) line += " окраска.";
-            if (element.getExpander() > 0) line += " расширитель окраска: " + element.getExpander() + " н/ч.";
-            if (element.getOverlay() > 0) line += " накладка окраска: " + element.getOverlay() + " н/ч.";
+            line.append(" окраска: ").append(element.getPaintSide()).append(" н/ч.")
+                    .append(" ремонт: ").append(element.getRemont()).append(" н/ч.")
+                    .append(" замена кузовной детали: ").append(element.getKuzDetReplaceSide()).append(" н/ч.")
+                    .append(" р/с: ").append(element.getArmatureSide()).append(" н/ч. ");
+            if (element.getGlass() > 0) line.append(element.getNameGlass());
+            if (element.getZerkalo() > 0) line.append(" зеркало ");
+            if (element.getMolding() > 0) line.append(" молдинг ");
+            if (element.getRuchka() > 0) line.append(" ручка ");
+            if (element.getZerkalo() > 0 || element.getMolding() > 0 || element.getRuchka() > 0)
+                line.append(" окраска.");
+            if (element.getExpander() > 0)
+                line.append(" расширитель окраска: ").append(element.getExpander()).append(" н/ч.");
+            if (element.getOverlay() > 0)
+                line.append(" накладка окраска: ").append(element.getOverlay()).append(" н/ч.");
         }
-        return line += "\n";
+        return line.append("\n").toString();
     } // Создание текста отображения сметы
 }

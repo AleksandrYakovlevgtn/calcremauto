@@ -15,9 +15,9 @@ import java.util.Arrays;
 import java.util.Scanner;
 import java.util.stream.Stream;
 import ru.yandex.practicum.calcRemAuto.panelsAndButtons.buttons.Buttons;
-import ru.yandex.practicum.calcRemAuto.storage.SaveInFail;
+import ru.yandex.practicum.calcRemAuto.storage.WorkWithFile;
 
-import static ru.yandex.practicum.calcRemAuto.storage.SaveInFail.NAME_START_DIRECTORY;
+import static ru.yandex.practicum.calcRemAuto.storage.WorkWithFile.NAME_START_DIRECTORY;
 
 public class SearchPanel {
     private static final String FILE_NAME = "смета.txt";
@@ -25,7 +25,7 @@ public class SearchPanel {
     JPanel panel;
     private final Buttons but = new Buttons();
     private final JTextField search = new JTextField(10);
-    private String automobileDirectory;
+    private String AUTOMOBILE_DIRECTORY;
 
     public void createSearchPanel(JPanel panel) {
         this.panel = panel;
@@ -73,7 +73,7 @@ public class SearchPanel {
                         .allMatch(border -> border.getLineColor().equals(Color.green));
 
                 if (allBordersAreGreen) {
-                    automobileDirectory = NAME_START_DIRECTORY + "/" + search.getText().toUpperCase();
+                    AUTOMOBILE_DIRECTORY = NAME_START_DIRECTORY + "/" + search.getText().toUpperCase();
                     searchAndDeleteFolder(search.getText());
                 } else {
                     showErrorDialog("Неверный формат гос/номера!");
@@ -179,7 +179,7 @@ public class SearchPanel {
 
         if (chosenFolder != null) {
             try {
-                File file = new File(automobileDirectory + "/" + chosenFolderPath + "/" + FILE_NAME);
+                File file = new File(AUTOMOBILE_DIRECTORY + "/" + chosenFolderPath + "/" + FILE_NAME);
                 Scanner scanner = new Scanner(file);
                 StringBuilder fileContent = new StringBuilder();
 
@@ -193,9 +193,9 @@ public class SearchPanel {
                 int selection = showOptionDialog(fileContent.toString());
 
                 if (selection == 0) {
-                    SaveInFail saveInFail = new SaveInFail();
-                    File fileX = new File(automobileDirectory + "/" + chosenFolderPath);
-                    saveInFail.load(fileX,panel);
+                    WorkWithFile workWithFaile = new WorkWithFile();
+                    File fileX = new File(AUTOMOBILE_DIRECTORY + "/" + chosenFolderPath);
+                    workWithFaile.load(fileX,panel);
                 }
                 if (selection == 1) {
                     String filePath = file.getPath();

@@ -21,6 +21,7 @@ public class AddWorkPanel {
     JPanel elementLeftRightSidePanel = new JPanel(); // Панель с элементами которые расположены по бокам авто
     JPanel elementCenterSide = new JPanel();   // Панель с элементами расположенными по центру авто
     JPanel panelGlass = new JPanel(); // Панель с остеклением авто
+    private JComboBox<String> remontComboBox;
     JTextField remont = but.getRemontJText(); // Графа ввода н\ч ремонта элемента
     JTextArea elementListTextViewing = new JTextArea(30, 19); // Окно отображения добавленных в List<Element> elementList элементов
     Double elementPaintSide = 0.0;  // Норматив окраски с одной или двух сторон
@@ -124,7 +125,7 @@ public class AddWorkPanel {
             } else {
                 SaveDialog saveDialog = new SaveDialog(startFrame, client, elementList, lineBorderColorMap);
                 saveDialog.setVisible(true);
-                if (saveDialog.getAnswer()){
+                if (saveDialog.getAnswer()) {
                     FirstPanel firstPanel = new FirstPanel();
                     panel.removeAll();
                     firstPanel.createFirstPanel(panel);
@@ -914,6 +915,11 @@ public class AddWorkPanel {
     } // Панель с работами
 
     private void addAndRemovePanel(JPanel panel) {
+        Dimension buttonSize = new Dimension(58, 20);
+        remontComboBox = new JComboBox<>(new String[]{"маляр", "кузовщик", "арматурщик"});
+        remontComboBox.setSelectedIndex(0);
+        remontComboBox.setBackground(Color.WHITE);
+        remontComboBox.setPreferredSize(buttonSize);
 
         JPanel addAndRemovePanel = new JPanel(new GridBagLayout());
         JPanel panelXY = new JPanel(new BorderLayout());
@@ -924,13 +930,19 @@ public class AddWorkPanel {
                 new Insets(0, 0, 0, 0), 0, 0));
         addAndRemovePanel.add(new JLabel(" "), new GridBagConstraints(0, 1, 1, 1, 1, 1,
                 GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
-                new Insets(0, 0, 0, 0), 0, 0));
+                new Insets(0, 2, 0, 2), 0, 0));
         addAndRemovePanel.add(takeColorOfButtons(removeActionListener(but.getAddButton()), 1), new GridBagConstraints(0, 2, 1, 1, 1, 1,
                 GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
                 new Insets(0, 2, 2, 2), 30, 0));
         addAndRemovePanel.add(takeColorOfButtons(removeActionListener(but.getRemoveButton()), 1), new GridBagConstraints(0, 3, 1, 1, 1, 1,
                 GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
-                new Insets(0, 2, 2, 2), 30, 0));
+                new Insets(2, 2, 2, 2), 30, 0));
+        if (remontButtonPushed != null) {
+            // Добавляем JComboBox только если кнопка remontButtonPushed активирована
+            addAndRemovePanel.add(remontComboBox, new GridBagConstraints(0, 4, 1, 1, 1, 1,
+                    GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
+                    new Insets(2, 2, 2, 2), 30, 0));
+        }
 
 
         panelXY.add(addAndRemovePanel, BorderLayout.NORTH);
@@ -1157,6 +1169,7 @@ public class AddWorkPanel {
                 String rem;
                 rem = new StringBuilder(elementRemont).insert(elementRemont.length() - 1, ".").toString();
                 element.setRemont(Double.parseDouble(rem));
+                element.setHoDoRemont((String) remontComboBox.getSelectedItem());
             }
             // Если имя элемента входит в перечень, то добавляем ручки, молдинги и зеркала.
             if (zercaloButtonPushed != null) {
@@ -1318,11 +1331,12 @@ public class AddWorkPanel {
             elementList.remove(el);
         }
     } // Удаление из Списка элементов "element"
-    public void load(List<Element>elementList,Map<String, Map<String, List<String>>> lineBorderColorMap,Client client,JPanel panel){
+
+    public void load(List<Element> elementList, Map<String, Map<String, List<String>>> lineBorderColorMap, Client client, JPanel panel) {
         this.elementList = elementList;
         this.lineBorderColorMap = lineBorderColorMap;
         JFrame parentFrame = (JFrame) SwingUtilities.getWindowAncestor(panel);
-        startPanel(panel,client,parentFrame);
+        startPanel(panel, client, parentFrame);
         sendToStringInElementListTextViewing();
     }
 }

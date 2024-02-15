@@ -26,6 +26,7 @@ public class Element {
     int expander = 0;
     double remont = 0;
     double total;
+    String hoDoRemont="null";
 
     {
         calculateTotal();

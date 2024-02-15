@@ -1,6 +1,7 @@
 package ru.yandex.practicum.calcRemAuto.panelsAndButtons.frame;
 
 import lombok.Getter;
+import ru.yandex.practicum.calcRemAuto.model.Mechanics;
 import ru.yandex.practicum.calcRemAuto.model.Prices;
 
 import java.awt.*;
@@ -12,11 +13,17 @@ import javax.swing.*;
 public class JMenuFrame extends JDialog {
     JMenuBar menuBar = new JMenuBar(); // Верхняя панель с выпадающим окном
     JMenu settingsMenu = new JMenu("Настройки"); // Элемент на выпадающем окне
-    JMenuItem changeRatesItem = new JMenuItem("Изменить стоимость"); // Открывающееся окно элемента из выпадающей панели
+    JMenuItem changeRatesItem = new JMenuItem("Изменить стоимость"); // Подпункт для указания стоимости н/ч
+    JMenuItem setMechanicsItem = new JMenuItem("Указать фамилии механиков"); // Подпункт для указания фамилий механиков
     private int hourlyRate; // Стоимость общего н/ч
     private int mechanicHourlyRate; // Стоимость норматива механика
     private int masterHourlyRate;  // Стоимость норматива мастера
+    private String malyr;
+    private String armoturchik;
+    private String kuzovchik;
+
     Prices prices = new Prices();  // Класс с ценами
+    Mechanics mechanics = new Mechanics(); // Класс с фамилиями механиков
 
     public JMenuFrame(JFrame parentFrame) {
         super(parentFrame, "Изменение стоимости н/ч!", true);
@@ -31,13 +38,19 @@ public class JMenuFrame extends JDialog {
         mechanicHourlyRate = prices.getMechanicHourlyRate();
         masterHourlyRate = prices.getMasterHourlyRate();
 
-        changeRatesItem.addActionListener(e -> openFrame(parentFrame));
+        malyr = mechanics.getMalyr();
+        armoturchik = mechanics.getArmoturchik();
+        kuzovchik = mechanics.getKuzovchik();
+
+        changeRatesItem.addActionListener(e -> openRatesFrame(parentFrame));
+        setMechanicsItem.addActionListener(e -> openMechanicsFrame(parentFrame));
 
         settingsMenu.add(changeRatesItem);
+        settingsMenu.add(setMechanicsItem);
         menuBar.add(settingsMenu);
     }  // Начальная настройка параметров
 
-    private void openFrame(Frame parentFrame) {
+    private void openRatesFrame(Frame parentFrame) {
 
         setLayout(new GridBagLayout());
 
@@ -73,9 +86,43 @@ public class JMenuFrame extends JDialog {
         pack();
         setLocationRelativeTo(parentFrame);
         setVisible(true);
-        //prices.writeRatesToFile(hourlyRate,mechanicHourlyRate,masterHourlyRate);
-    } // Создание окна с элементами
+    } // Создание окна с ценами н/ч
+    private void openMechanicsFrame(Frame parentFrame) {
+        setLayout(new GridBagLayout());
 
+        JTextField painterField = new JTextField(malyr);
+        JTextField reinforcementWorkerField = new JTextField(armoturchik);
+        JTextField bodyWorkerField = new JTextField(kuzovchik);
+
+        JButton saveMechanicsButton = new JButton("Сохранить");
+        JButton cancelMechanicsButton = new JButton("Отмена");
+
+        add(new JLabel("Маляр:"), createGridBagConstraints(1, 0, 1, 1));
+        add(painterField, createGridBagConstraints(2, 0, 1, 1));
+        add(new JLabel("Арматурщик:"), createGridBagConstraints(1, 1, 1, 1));
+        add(reinforcementWorkerField, createGridBagConstraints(2, 1, 1, 1));
+        add(new JLabel("Кузовщик:"), createGridBagConstraints(1, 2, 1, 1));
+        add(bodyWorkerField, createGridBagConstraints(2, 2, 1, 1));
+        add(saveMechanicsButton, createGridBagConstraints(1, 3, 1, 1));
+        add(cancelMechanicsButton, createGridBagConstraints(2, 3, 1, 1));
+
+        saveMechanicsButton.addActionListener(saveEvent -> {
+            malyr = painterField.getText();
+            armoturchik = reinforcementWorkerField.getText();
+            kuzovchik = bodyWorkerField.getText();
+            mechanics.writeRatesToFile(malyr,armoturchik,kuzovchik);
+            deleteComponentsFromJDialog();
+            dispose();
+        });
+        cancelMechanicsButton.addActionListener(cancelEvent -> {
+            deleteComponentsFromJDialog();
+            dispose();
+        });
+
+        pack();
+        setLocationRelativeTo(parentFrame);
+        setVisible(true);
+    }
     private void deleteComponentsFromJDialog() {
         Container contentPane = getContentPane();
         // Получение всех компонентов, расположенных на панели содержимого JDialog

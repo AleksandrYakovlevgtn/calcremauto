@@ -10,28 +10,28 @@ import java.io.*;
 @Getter
 @Setter
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public final class Prices {
-    boolean read = false; // Прочитан файл или нет
-    int hourlyRate; // Стоимость норма часа
-    int mechanicHourlyRate; // Ставка механика
-    int masterHourlyRate; // Ставка мастера
+public class Mechanics {
+    boolean read = false;
+    String malyr;
+    String armoturchik;
+    String kuzovchik;
 
-    public int getHourlyRate() {
-        readOrNotReadItFile();
-        return hourlyRate;
+    public String getMalyr() {
+        readMechanicsFile();
+        return malyr;
     }
 
-    public int getMechanicHourlyRate() {
-        readOrNotReadItFile();
-        return mechanicHourlyRate;
+    public String getArmoturchik() {
+        readMechanicsFile();
+        return armoturchik;
     }
 
-    public int getMasterHourlyRate() {
-        readOrNotReadItFile();
-        return masterHourlyRate;
+    public String getKuzovchik() {
+        readMechanicsFile();
+        return kuzovchik;
     }
 
-    public void readOrNotReadItFile() {
+    public void readMechanicsFile() {
         if (!read) {
             readRatesFromFile();
             read = true;
@@ -43,40 +43,43 @@ public final class Prices {
             File directory = new File("Системные");
 
             if (!directory.exists()) {
-                writeRatesToFile(0, 0, 0); // Отправляем на создание папки и файла если не существуют.
+                writeRatesToFile("", "", ""); // Отправляем на создание папки и файла если не существуют.
             }
 
-            File file = new File(directory, "Стоимость_нормативов.txt");
+            File file = new File(directory, "Механики.txt");
+            if (!file.exists()) {
+                file.createNewFile(); // Создаем файл если не существует
+            }
 
             try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
-                hourlyRate = Integer.parseInt(reader.readLine());
-                mechanicHourlyRate = Integer.parseInt(reader.readLine());
-                masterHourlyRate = Integer.parseInt(reader.readLine());
+                malyr = reader.readLine();
+                armoturchik = reader.readLine();
+                kuzovchik = reader.readLine();
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
     } // Чтение из файла параметров
 
-    public void writeRatesToFile(int hourlyRate, int mechanicHourlyRate, int masterHourlyRate) {
+    public void writeRatesToFile(String malyr, String armoturchik, String kuzovchik) {
         try {
             File directory = new File("Системные");
             if (!directory.exists()) {
                 directory.mkdirs(); // Создаем папку если не существует
             }
 
-            File file = new File(directory, "Стоимость_нормативов.txt");
+            File file = new File(directory, "Механики.txt");
             if (!file.exists()) {
                 file.createNewFile(); // Создаем файл если не существует
             }
 
             try (FileWriter writer = new FileWriter(file)) {
-                this.hourlyRate = hourlyRate;
-                this.mechanicHourlyRate = mechanicHourlyRate;
-                this.masterHourlyRate = masterHourlyRate;
-                writer.write(hourlyRate + "\n");
-                writer.write(mechanicHourlyRate + "\n");
-                writer.write(masterHourlyRate + "\n");
+                this.malyr = malyr;
+                this.armoturchik = armoturchik;
+                this.kuzovchik = kuzovchik;
+                writer.write(malyr + "\n");
+                writer.write(armoturchik + "\n");
+                writer.write(kuzovchik + "\n");
             } catch (IOException e) {
                 e.printStackTrace();
             }
