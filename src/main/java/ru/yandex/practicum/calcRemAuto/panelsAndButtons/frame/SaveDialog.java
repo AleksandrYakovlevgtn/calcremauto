@@ -1,8 +1,10 @@
 package ru.yandex.practicum.calcRemAuto.panelsAndButtons.frame;
 
+
 import ru.yandex.practicum.calcRemAuto.model.*;
 import ru.yandex.practicum.calcRemAuto.panelsAndButtons.buttons.Buttons;
 import ru.yandex.practicum.calcRemAuto.storage.WorkWithFile;
+import ru.yandex.practicum.calcRemAuto.telegram.TelegramFileSenderBot;
 
 import javax.swing.*;
 import java.awt.*;
@@ -64,6 +66,14 @@ public class SaveDialog extends JDialog {
         but.getYesButton().addActionListener(e -> {
             WorkWithFile workWithFaile = new WorkWithFile(client, total, elements, lineBorderColorMap);
             workWithFaile.save(line);
+            int result = JOptionPane.showConfirmDialog(
+                    SaveDialog.this, // this должно ссылаться на ваш JFrame
+                    "Отправить смету в telegram?",
+                    "Подтверждение",
+                    JOptionPane.YES_NO_OPTION);
+            if (result == JOptionPane.YES_OPTION) {
+                sendSmeta(workWithFaile.getDATE_DIRECTORY());
+            }
             answer = true;
             dispose();
         });    // Кнопка да "сохранить" отправляет в класс WorkWithFile уже на оформление папок и файлов.
@@ -73,6 +83,11 @@ public class SaveDialog extends JDialog {
             dispose();
         }); // Кнопка нет "не сохранять" закрывает диалоговое окно.
     }
+
+    private void sendSmeta(String path) {
+        TelegramFileSenderBot telegramFileSenderBot = new TelegramFileSenderBot();
+        telegramFileSenderBot.sendFile(path);
+    } // Метод отправки в телеграм смет
 
     public boolean getAnswer() {
         return answer;
@@ -98,10 +113,10 @@ public class SaveDialog extends JDialog {
     }
 
     private double calculateMalyr(Element element) {
-        Double total = (element.getPaintSide()  + element.getMolding()
+        double total = (element.getPaintSide() + element.getMolding()
                 + element.getRuchka() + element.getZerkalo() + element.getExpander()
                 + element.getOverlay()) * prices.getMechanicHourlyRate();
-        if(element.getHoDoRemont().equals("маляр")){
+        if (element.getHoDoRemont().equals("маляр")) {
             total = total + (element.getRemont() * prices.getMechanicHourlyRate());
         }
         return total;
@@ -109,16 +124,16 @@ public class SaveDialog extends JDialog {
     }// Метод для расчета значения Маляр на основе текущего элемента
 
     private double calculateArmatyrchik(Element element) {
-        Double total =(element.getArmatureSide() + element.getGlass()) * prices.getMechanicHourlyRate();
-        if(element.getHoDoRemont().equals("арматурщик")){
+        double total = (element.getArmatureSide() + element.getGlass()) * prices.getMechanicHourlyRate();
+        if (element.getHoDoRemont().equals("арматурщик")) {
             total = total + (element.getRemont() * prices.getMechanicHourlyRate());
         }
         return total;
     } // Метод для расчета значения Арматурщик на основе текущего элемента
 
     private double calculateKuzovchik(Element element) {
-        Double total = element.getKuzDetReplaceSide() * prices.getMechanicHourlyRate();
-        if(element.getHoDoRemont().equals("кузовщик")){
+        double total = element.getKuzDetReplaceSide() * prices.getMechanicHourlyRate();
+        if (element.getHoDoRemont().equals("кузовщик")) {
             total = total + (element.getRemont() * prices.getMechanicHourlyRate());
         }
         return total;
@@ -155,7 +170,8 @@ public class SaveDialog extends JDialog {
             line.append(" окраска: ").append(element.getPaintSide()).append(" н/ч.")
                     .append(" ремонт: ").append(element.getRemont()).append(" н/ч.")
                     .append(" замена кузовной детали: ").append(element.getKuzDetReplaceSide()).append(" н/ч.")
-                    .append(" р/с: ").append(element.getArmatureSide()).append(" н/ч. ");
+                    .append(" р/с: ").append(element.getArmatureSide()).append(" н/ч. ")
+                    .append(" Итого: ").append(element.getTotal()).append(" руб.");
             if (element.getGlass() > 0) line.append(element.getNameGlass());
             if (element.getZerkalo() > 0) line.append(" зеркало ");
             if (element.getMolding() > 0) line.append(" молдинг ");

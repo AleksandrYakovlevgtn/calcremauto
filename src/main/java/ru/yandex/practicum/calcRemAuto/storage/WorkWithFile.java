@@ -1,35 +1,33 @@
 package ru.yandex.practicum.calcRemAuto.storage;
 
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import ru.yandex.practicum.calcRemAuto.model.Client;
-import ru.yandex.practicum.calcRemAuto.model.Element;
-import ru.yandex.practicum.calcRemAuto.model.Prices;
-import ru.yandex.practicum.calcRemAuto.model.Total;
+import ru.yandex.practicum.calcRemAuto.model.*;
 import ru.yandex.practicum.calcRemAuto.panelsAndButtons.panels.AddWorkPanel;
 
 import javax.swing.*;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 @Slf4j
+@Getter
 @NoArgsConstructor
 public class WorkWithFile {
     private final Prices prices = new Prices();
+    NameDirectories directories = new NameDirectories();
+    ExcelUpdater exel = new ExcelUpdater();
     private Client client; // Класс с данными клиента, инициируется из конструктора и load (загрузка).
     private Map<String, Map<String, List<String>>> lineBorderColorMap; // Таблица с нажатыми кнопками, инициируется из конструктора и load (загрузка).
     private Total total; // Класс итого, инициируется из конструктора и load (загрузка).
     private List<Element> elements; // Список добавленных элементов, инициируется из конструктора и load (загрузка).
-    public static final String NAME_START_DIRECTORY = "Расчеты"; // Папка начальной директории в которую сохраняются расчеты.
-    String NAME_AUTOMOBILE_DIRECTORY; // директория начальная/госНомер
+    String GOS_NUMBER; // директория начальная/госНомер
     String DATE_DIRECTORY; // директория начальная/госНомер/дата_расчета
     String OFFICIAL_DIRECTORY; // директория начальная/госНомер/дата_расчета/служебная Для записи служебных данных.
 
@@ -38,19 +36,20 @@ public class WorkWithFile {
         this.lineBorderColorMap = lineBorderColorMap;
         this.total = total;
         this.elements = elements;
-        NAME_AUTOMOBILE_DIRECTORY = NAME_START_DIRECTORY + "/" + client.getNumberAuto().toUpperCase();
+        GOS_NUMBER = directories.getNAME_START_DIRECTORY() + directories.getSlash() + client.getNumberAuto().toUpperCase();
     } // Конструктор
 
     @SneakyThrows
     public void save(String text) {
-        DATE_DIRECTORY = NAME_AUTOMOBILE_DIRECTORY + "/" + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy_MM_dd"));
-        OFFICIAL_DIRECTORY = DATE_DIRECTORY + "/служебная";
+        DATE_DIRECTORY = GOS_NUMBER + directories.getSlash() + directories.getDATE_DIRECTORY();
+        OFFICIAL_DIRECTORY = DATE_DIRECTORY + directories.getSlash() + directories.getOFFICIAL_DIRECTORY();
+        exel.updateExcelFile(client);
 
         createDirectories();
 
-        try (PrintWriter out = new PrintWriter(DATE_DIRECTORY + "/смета.txt");
-             PrintWriter dataClient = new PrintWriter(OFFICIAL_DIRECTORY + "/клиент.txt");
-             PrintWriter dataTotal = new PrintWriter(OFFICIAL_DIRECTORY + "/итого.txt")) {
+        try (PrintWriter out = new PrintWriter(DATE_DIRECTORY + directories.getSlash() + directories.getSMETA() + directories.getTxt());
+             PrintWriter dataClient = new PrintWriter(OFFICIAL_DIRECTORY + directories.getSlash() + directories.getCLIENT() + directories.getTxt());
+             PrintWriter dataTotal = new PrintWriter(OFFICIAL_DIRECTORY + directories.getSlash() + directories.getITOGO() + directories.getTxt())) {
 
             out.println(text);
             dataClient.write(toStringClient(client));
@@ -58,13 +57,12 @@ public class WorkWithFile {
 
             saveListElements(DATE_DIRECTORY, OFFICIAL_DIRECTORY);
             saveMap(OFFICIAL_DIRECTORY);
-
         }
     } // Метод сохранения который через другие методы сохраняет все в файлы .txt
 
     private void createDirectories() throws IOException {
-        createDirectoryIfNeeded(NAME_START_DIRECTORY);
-        createDirectoryIfNeeded(NAME_AUTOMOBILE_DIRECTORY);
+        createDirectoryIfNeeded(directories.getNAME_START_DIRECTORY());
+        createDirectoryIfNeeded(GOS_NUMBER);
         createDirectoryIfNeeded(DATE_DIRECTORY);
         createDirectoryIfNeeded(OFFICIAL_DIRECTORY);
     } // Метод для распределения создания папок
@@ -96,10 +94,10 @@ public class WorkWithFile {
 
     @SneakyThrows
     private void saveListElements(String dateDirectory, String officialDirectory) {
-        try (PrintWriter dataElementList = new PrintWriter(officialDirectory + "/список_элементов.txt");
-             PrintWriter malyr = new PrintWriter(dateDirectory + "/маляр.txt");
-             PrintWriter armoterchik = new PrintWriter(dateDirectory + "/арматурщик.txt");
-             PrintWriter kuzovchik = new PrintWriter(dateDirectory + "/кузовщик.txt")) {
+        try (PrintWriter dataElementList = new PrintWriter(officialDirectory + directories.getSlash() + directories.getLIST_OF_ELEMENTS() + directories.getTxt());
+             PrintWriter malyr = new PrintWriter(dateDirectory + directories.getSlash() + directories.getMALYAR() + directories.getTxt());
+             PrintWriter armoterchik = new PrintWriter(dateDirectory + directories.getSlash() + directories.getARMOTURCHIK() + directories.getTxt());
+             PrintWriter kuzovchik = new PrintWriter(dateDirectory + directories.getSlash() + directories.getKUZOVCHIK() + directories.getTxt())) {
 
             for (Element element : elements) {
                 malyr.write(element.getName() + " " + element.getPaintSide() + "н/ч");
@@ -177,9 +175,10 @@ public class WorkWithFile {
     } // Метод сохранения List<Element> elements
 
     @SneakyThrows
-    private List<Element> loadElementsList(String officialDirectory) {
+    private List<Element> loadElementsList(String nameStartDirectory) {
         List<Element> elements = new ArrayList<>();
-        FileReader fileReader = new FileReader(officialDirectory + "/служебная/список_элементов.txt");
+        FileReader fileReader = new FileReader(nameStartDirectory + directories.getSlash() + directories.getOFFICIAL_DIRECTORY() +
+                directories.getSlash() + directories.getLIST_OF_ELEMENTS() + directories.getTxt());
         BufferedReader bufferedReader = new BufferedReader(fileReader);
 
         String line;
@@ -213,7 +212,9 @@ public class WorkWithFile {
 
     @SneakyThrows
     private Total loadTotal(String officialDirectory) {
-        try (BufferedReader bufferedReader = new BufferedReader(new FileReader(officialDirectory + "/служебная/итого.txt"))) {
+        try (BufferedReader bufferedReader = new BufferedReader(new FileReader(officialDirectory +
+                directories.getSlash() + directories.getOFFICIAL_DIRECTORY() +
+                directories.getSlash() + directories.getITOGO() + directories.getTxt()))) {
             String[] parts = bufferedReader.readLine().split(",");
             if (parts.length == 5) {
                 return new Total(Double.parseDouble(parts[0]), Double.parseDouble(parts[1]),
@@ -242,7 +243,8 @@ public class WorkWithFile {
 
     @SneakyThrows
     private void saveMap(String officialDirectory) {
-        try (BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(officialDirectory + "/таблица_работ.txt"))) {
+        try (BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(officialDirectory +
+                directories.getSlash() + directories.getMAP_OF_WORKS() + directories.getTxt()))) {
             for (Map.Entry<String, Map<String, List<String>>> entry : lineBorderColorMap.entrySet()) {
                 bufferedWriter.write("---\n");
                 bufferedWriter.write(entry.getKey() + "\n");
@@ -261,7 +263,9 @@ public class WorkWithFile {
     @SneakyThrows
     private Map<String, Map<String, List<String>>> loadMap(String officialDirectory) {
         Map<String, Map<String, List<String>>> loadedMap = new HashMap<>();
-        try (BufferedReader bufferedReader = new BufferedReader(new FileReader(officialDirectory + "/служебная/таблица_работ.txt"))) {
+        try (BufferedReader bufferedReader = new BufferedReader(new FileReader(officialDirectory +
+                directories.getSlash() + directories.getOFFICIAL_DIRECTORY() +
+                directories.getSlash() + directories.getMAP_OF_WORKS() + directories.getTxt()))) {
             String line;
             String key1 = null;
             String key2 = null;

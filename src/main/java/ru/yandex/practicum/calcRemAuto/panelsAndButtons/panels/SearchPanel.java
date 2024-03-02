@@ -14,18 +14,21 @@ import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Scanner;
 import java.util.stream.Stream;
+
+import ru.yandex.practicum.calcRemAuto.model.NameDirectories;
 import ru.yandex.practicum.calcRemAuto.panelsAndButtons.buttons.Buttons;
 import ru.yandex.practicum.calcRemAuto.storage.WorkWithFile;
+import ru.yandex.practicum.calcRemAuto.telegram.TelegramFileSenderBot;
 
-import static ru.yandex.practicum.calcRemAuto.storage.WorkWithFile.NAME_START_DIRECTORY;
 
 public class SearchPanel {
-    private static final String FILE_NAME = "смета.txt";
-    private static final String[] OPTIONS = {"Открыть", "Удалить","Назад", "Отмена"};
+    NameDirectories directories = new NameDirectories();
+    private final String FILE_NAME = directories.getSMETA() + directories.getTxt();  //  Имя файла "смета.txt"
+    private static final String[] OPTIONS = {"Открыть", "Удалить", "Назад", "Telegram", "Отмена"};  // Кнопки
     JPanel panel;
-    private final Buttons but = new Buttons();
-    private final JTextField search = new JTextField(10);
-    private String AUTOMOBILE_DIRECTORY;
+    private final Buttons but = new Buttons(); // Класс с кнопками
+    private final JTextField search = new JTextField(10); // Поле ввода гос/номера
+    private String AUTOMOBILE_DIRECTORY; // Директория до расчетов "расчеты/госНомер"
 
     public void createSearchPanel(JPanel panel) {
         this.panel = panel;
@@ -73,7 +76,7 @@ public class SearchPanel {
                         .allMatch(border -> border.getLineColor().equals(Color.green));
 
                 if (allBordersAreGreen) {
-                    AUTOMOBILE_DIRECTORY = NAME_START_DIRECTORY + "/" + search.getText().toUpperCase();
+                    AUTOMOBILE_DIRECTORY = directories.getNAME_START_DIRECTORY() + directories.getSlash() + search.getText().toUpperCase();
                     searchAndDeleteFolder(search.getText());
                 } else {
                     showErrorDialog("Неверный формат гос/номера!");
@@ -82,7 +85,7 @@ public class SearchPanel {
                 showErrorDialog("Необходимо заполнить поле гос/номера!");
             }
         });
-    }
+    } // Создание окна поиска
 
     private void addKeyListener() {
         search.addKeyListener(new KeyAdapter() {
@@ -111,7 +114,7 @@ public class SearchPanel {
                 }
             }
         });
-    }
+    } // Создание и добавление слушателя поля ввода гос/номера для правильного приема символов
 
     private void addDocumentListener() {
         search.getDocument().addDocumentListener(new DocumentListener() {
@@ -130,7 +133,7 @@ public class SearchPanel {
                 updateBorderColor();
             }
         });
-    }
+    } // Создание слушателя поля ввода для отображения цвета рамки
 
     private void updateBorderColor() {
         if (search.getText().length() < 8) {
@@ -138,10 +141,10 @@ public class SearchPanel {
         } else {
             search.setBorder(BorderFactory.createLineBorder(Color.green));
         }
-    }
+    } // Метод обновления цвета рамки
 
     private void searchAndDeleteFolder(String folderName) {
-        File folder = new File(NAME_START_DIRECTORY + "/" + folderName);
+        File folder = new File(directories.getNAME_START_DIRECTORY() + directories.getSlash() + folderName);
 
         if (folder.exists() && folder.isDirectory()) {
             File[] subFolders = folder.listFiles(File::isDirectory);
@@ -167,12 +170,7 @@ public class SearchPanel {
         } else {
             showMessageDialog("Ранних расчетов автомобиля  " + folderName + " не найдено.");
         }
-    }
-
-    private Object showInputDialog(String message, String[] folderNames, File defaultFolder) {
-        return JOptionPane.showInputDialog(null, message, "Просмотр", JOptionPane.PLAIN_MESSAGE, null,
-                folderNames, defaultFolder);
-    }
+    } // Открытие диалогового поля выбора расчета из найденных по гос/номера
 
     private void selectAction(Object chosenFolder) {
         String chosenFolderPath = (chosenFolder != null) ? chosenFolder.toString() : "";
@@ -195,14 +193,14 @@ public class SearchPanel {
                 if (selection == 0) {
                     WorkWithFile workWithFaile = new WorkWithFile();
                     File fileX = new File(AUTOMOBILE_DIRECTORY + "/" + chosenFolderPath);
-                    workWithFaile.load(fileX,panel);
+                    workWithFaile.load(fileX, panel);
                 }
                 if (selection == 1) {
                     String filePath = file.getPath();
                     Path path = Paths.get(filePath);
                     Path parentPath = path.getParent();
 
-                    int confirm = showConfirmDialog(chosenFolder);
+                    int confirm = showConfirmDialog(chosenFolder, "Вы уверенны что хотите удалить расчет от  ");
 
                     if (confirm == JOptionPane.YES_OPTION) {
                         boolean success = deleteFileOrDirectory(parentPath.toFile());
@@ -214,24 +212,27 @@ public class SearchPanel {
                         }
                     }
                 }
-                if(selection == 2){
+                if (selection == 2) {
                     searchAndDeleteFolder(search.getText());
+                }
+                if (selection == 3) {
+                    int result = showConfirmDialog(chosenFolder, "Отправить смету в telegram?");
+                    if (result == JOptionPane.YES_OPTION) {
+                        sendSmeta(chosenFolderPath);
+                    } else {
+                        searchAndDeleteFolder(search.getText());
+                    }
                 }
             } catch (FileNotFoundException e) {
                 showErrorDialog("Ошибка: Файл не найден.");
             }
         }
-    }
+    }  // Обработка выбора метода "searchAndDeleteFolder"
 
-    private int showOptionDialog(String fileContent) {
-        return JOptionPane.showOptionDialog(null, fileContent, "Содержимое файла.", JOptionPane.DEFAULT_OPTION,
-                JOptionPane.QUESTION_MESSAGE, null, OPTIONS, OPTIONS[0]);
-    }
-
-    private int showConfirmDialog(Object chosenFolder) {
-        return JOptionPane.showConfirmDialog(null, "Вы уверенны что хотите удалить расчет от  " + chosenFolder + "?",
-                "Подтверждение удаления.", JOptionPane.YES_NO_OPTION);
-    }
+    private void sendSmeta(String path) {
+        TelegramFileSenderBot telegramFileSenderBot = new TelegramFileSenderBot();
+        telegramFileSenderBot.sendFile(AUTOMOBILE_DIRECTORY + "/" + path);
+    } // Отправка в телеграм смет
 
     private static boolean deleteFileOrDirectory(File fileOrDirectory) {
         if (fileOrDirectory.exists()) {
@@ -248,17 +249,32 @@ public class SearchPanel {
             showErrorDialog("Файл или папка не существует: " + fileOrDirectory.getPath());
             return false;
         }
-    }
+    } // Метод удаления папки расчета
+
+    private Object showInputDialog(String message, String[] folderNames, File defaultFolder) {
+        return JOptionPane.showInputDialog(null, message, "Просмотр", JOptionPane.PLAIN_MESSAGE, null,
+                folderNames, defaultFolder);
+    } // Показ диалогового
+
+    private int showOptionDialog(String fileContent) {
+        return JOptionPane.showOptionDialog(null, fileContent, "Содержимое файла.", JOptionPane.DEFAULT_OPTION,
+                JOptionPane.QUESTION_MESSAGE, null, OPTIONS, OPTIONS[0]);
+    } // Показ диалогового
+
+    private int showConfirmDialog(Object chosenFolder, String text) {
+        return JOptionPane.showConfirmDialog(null, text + chosenFolder + "?",
+                "Подтверждение удаления.", JOptionPane.YES_NO_OPTION);
+    } // Показ диалогового
 
     private static void showMessageDialog(String message) {
         JOptionPane.showMessageDialog(null, message);
-    }
+    } // Показ диалогового
 
     private static void showInformationDialog(String message) {
         JOptionPane.showMessageDialog(null, message, "Успех", JOptionPane.INFORMATION_MESSAGE);
-    }
+    } // Показ диалогового
 
     private static void showErrorDialog(String message) {
         JOptionPane.showMessageDialog(null, message, "Ошибка", JOptionPane.ERROR_MESSAGE);
-    }
+    } // Показ диалогового
 }

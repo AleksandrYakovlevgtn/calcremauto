@@ -48,7 +48,7 @@ public class Mechanics {
 
             File file = new File(directory, "Механики.txt");
             if (!file.exists()) {
-                file.createNewFile(); // Создаем файл если не существует
+                writeRatesToFile("", "", ""); // Создаем файл если не существует
             }
 
             try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
