@@ -1,6 +1,5 @@
 package ru.yandex.practicum.calcRemAuto.panelsAndButtons.frame;
 
-
 import ru.yandex.practicum.calcRemAuto.model.*;
 import ru.yandex.practicum.calcRemAuto.panelsAndButtons.buttons.Buttons;
 import ru.yandex.practicum.calcRemAuto.storage.WorkWithFile;
@@ -11,10 +10,10 @@ import java.awt.*;
 import java.util.List;
 import java.util.Map;
 
-
 public class SaveDialog extends JDialog {
     Prices prices = new Prices(); // Класс с ценами нормативов.
     Mechanics mechanics = new Mechanics();
+    JCheckBox checkBoxSendToTelegram = new JCheckBox("Отправить в telegram смету?"); // Чек галка отправки в telegram
     JTextArea previewTextArea = new JTextArea(); // Поле отображающие развернутую смету
     private boolean answer; // Возвращаемое значение для выполнения действия в родительском окне (закрыть или оставить)
     String probels = "_____________________________"; // уравнивание текста через нижнее подчеркивание
@@ -35,6 +34,7 @@ public class SaveDialog extends JDialog {
         setSize(800, 600);
         setLocationRelativeTo(parentFrame);
 
+        checkBoxSendToTelegram.setSelected(true); // По умолчанию галка установленна.
         previewTextArea.setLineWrap(true);
         previewTextArea.setEditable(false);
 
@@ -55,6 +55,9 @@ public class SaveDialog extends JDialog {
         yesNoPanel.add(yesNoPanel2, new GridBagConstraints(8, 0, 1, 1, 0, 0,
                 GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
                 new Insets(2, 2, 2, 2), 1, 1));
+        yesNoPanel.add(checkBoxSendToTelegram, new GridBagConstraints(9, 0, 1, 1, 0, 0,
+                GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
+                new Insets(2, 2, 2, 2), 1, 1));
 
         yesNoXYZPanel.add(yesNoPanel, BorderLayout.NORTH);
         panelABC.add(yesNoXYZPanel, BorderLayout.NORTH);
@@ -64,17 +67,12 @@ public class SaveDialog extends JDialog {
         String line = previewAddTextAndCreateTotal(client, elements); // Запуск метода отображения сметы
 
         but.getYesButton().addActionListener(e -> {
+            answer = true;
             WorkWithFile workWithFaile = new WorkWithFile(client, total, elements, lineBorderColorMap);
             workWithFaile.save(line);
-            int result = JOptionPane.showConfirmDialog(
-                    SaveDialog.this, // this должно ссылаться на ваш JFrame
-                    "Отправить смету в telegram?",
-                    "Подтверждение",
-                    JOptionPane.YES_NO_OPTION);
-            if (result == JOptionPane.YES_OPTION) {
+            if (checkBoxSendToTelegram.isSelected()) { // Если галку не сняли, то отправляем смету в telegram
                 sendSmeta(workWithFaile.getDATE_DIRECTORY());
             }
-            answer = true;
             dispose();
         });    // Кнопка да "сохранить" отправляет в класс WorkWithFile уже на оформление папок и файлов.
 
@@ -120,7 +118,6 @@ public class SaveDialog extends JDialog {
             total = total + (element.getRemont() * prices.getMechanicHourlyRate());
         }
         return total;
-
     }// Метод для расчета значения Маляр на основе текущего элемента
 
     private double calculateArmatyrchik(Element element) {

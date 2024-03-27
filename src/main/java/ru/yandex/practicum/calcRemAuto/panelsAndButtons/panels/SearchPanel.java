@@ -17,6 +17,7 @@ import java.util.stream.Stream;
 
 import ru.yandex.practicum.calcRemAuto.model.NameDirectories;
 import ru.yandex.practicum.calcRemAuto.panelsAndButtons.buttons.Buttons;
+import ru.yandex.practicum.calcRemAuto.storage.OpenFolder;
 import ru.yandex.practicum.calcRemAuto.storage.WorkWithFile;
 import ru.yandex.practicum.calcRemAuto.telegram.TelegramFileSenderBot;
 
@@ -24,7 +25,7 @@ import ru.yandex.practicum.calcRemAuto.telegram.TelegramFileSenderBot;
 public class SearchPanel {
     NameDirectories directories = new NameDirectories();
     private final String FILE_NAME = directories.getSMETA() + directories.getTxt();  //  Имя файла "смета.txt"
-    private static final String[] OPTIONS = {"Открыть", "Удалить", "Назад", "Telegram", "Отмена"};  // Кнопки
+    private static final String[] OPTIONS = {"Открыть папку", "Пересчитать", "Удалить", "Назад", "Telegram", "Отмена"};  // Кнопки
     JPanel panel;
     private final Buttons but = new Buttons(); // Класс с кнопками
     private final JTextField search = new JTextField(10); // Поле ввода гос/номера
@@ -189,13 +190,17 @@ public class SearchPanel {
                 scanner.close();
 
                 int selection = showOptionDialog(fileContent.toString());
-
                 if (selection == 0) {
+                    OpenFolder openFolder = new OpenFolder();
+                    openFolder.open(AUTOMOBILE_DIRECTORY + "/" + chosenFolderPath);
+                }
+
+                if (selection == 1) {
                     WorkWithFile workWithFaile = new WorkWithFile();
                     File fileX = new File(AUTOMOBILE_DIRECTORY + "/" + chosenFolderPath);
                     workWithFaile.load(fileX, panel);
                 }
-                if (selection == 1) {
+                if (selection == 2) {
                     String filePath = file.getPath();
                     Path path = Paths.get(filePath);
                     Path parentPath = path.getParent();
@@ -212,10 +217,10 @@ public class SearchPanel {
                         }
                     }
                 }
-                if (selection == 2) {
+                if (selection == 3) {
                     searchAndDeleteFolder(search.getText());
                 }
-                if (selection == 3) {
+                if (selection == 4) {
                     int result = showConfirmDialog(chosenFolder, "Отправить смету в telegram?");
                     if (result == JOptionPane.YES_OPTION) {
                         sendSmeta(chosenFolderPath);

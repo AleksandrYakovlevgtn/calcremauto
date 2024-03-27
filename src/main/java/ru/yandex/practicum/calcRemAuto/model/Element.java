@@ -18,7 +18,7 @@ public class Element {
     double armatureSide = 0;
     double kuzDetReplaceSide = 0;
     int glass = 0;
-    String nameGlass;
+    String nameGlass = "null";
     int zerkalo = 0;
     int molding = 0;
     int ruchka = 0;
@@ -26,7 +26,7 @@ public class Element {
     int expander = 0;
     double remont = 0;
     double total;
-    String hoDoRemont="null";
+    String hoDoRemont = "null";
 
     {
         calculateTotal();

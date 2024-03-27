@@ -43,9 +43,11 @@ public class WorkWithFile {
     public void save(String text) {
         DATE_DIRECTORY = GOS_NUMBER + directories.getSlash() + directories.getDATE_DIRECTORY();
         OFFICIAL_DIRECTORY = DATE_DIRECTORY + directories.getSlash() + directories.getOFFICIAL_DIRECTORY();
-        exel.updateExcelFile(client);
 
         createDirectories();
+        OpenFolder openFolder = new OpenFolder();
+        openFolder.open(DATE_DIRECTORY);
+        exel.createOrderExelFile(client,elements,DATE_DIRECTORY);
 
         try (PrintWriter out = new PrintWriter(DATE_DIRECTORY + directories.getSlash() + directories.getSMETA() + directories.getTxt());
              PrintWriter dataClient = new PrintWriter(OFFICIAL_DIRECTORY + directories.getSlash() + directories.getCLIENT() + directories.getTxt());
@@ -60,7 +62,7 @@ public class WorkWithFile {
         }
     } // Метод сохранения который через другие методы сохраняет все в файлы .txt
 
-    private void createDirectories() throws IOException {
+    public void createDirectories() throws IOException {
         createDirectoryIfNeeded(directories.getNAME_START_DIRECTORY());
         createDirectoryIfNeeded(GOS_NUMBER);
         createDirectoryIfNeeded(DATE_DIRECTORY);
@@ -93,7 +95,7 @@ public class WorkWithFile {
     } // Метод разбития Элемента в строки для сохранения в файл
 
     @SneakyThrows
-    private void saveListElements(String dateDirectory, String officialDirectory) {
+    public void saveListElements(String dateDirectory, String officialDirectory) {
         try (PrintWriter dataElementList = new PrintWriter(officialDirectory + directories.getSlash() + directories.getLIST_OF_ELEMENTS() + directories.getTxt());
              PrintWriter malyr = new PrintWriter(dateDirectory + directories.getSlash() + directories.getMALYAR() + directories.getTxt());
              PrintWriter armoterchik = new PrintWriter(dateDirectory + directories.getSlash() + directories.getARMOTURCHIK() + directories.getTxt());

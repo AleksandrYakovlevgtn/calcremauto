@@ -23,6 +23,7 @@ public class JMenuFrame extends JDialog {
     private String malyr;
     private String armoturchik;
     private String kuzovchik;
+    private String master;
     private String botUserName;
     private String botToken;
     private String chatId;
@@ -47,6 +48,7 @@ public class JMenuFrame extends JDialog {
         malyr = mechanics.getMalyr();
         armoturchik = mechanics.getArmoturchik();
         kuzovchik = mechanics.getKuzovchik();
+        master = mechanics.getMaster();
 
         botUserName = botInfo.getBotUserName();
         botToken = botInfo.getBotToken();
@@ -106,6 +108,7 @@ public class JMenuFrame extends JDialog {
         JTextField painterField = new JTextField(malyr);
         JTextField reinforcementWorkerField = new JTextField(armoturchik);
         JTextField bodyWorkerField = new JTextField(kuzovchik);
+        JTextField masterField = new JTextField(master);
 
         JButton saveMechanicsButton = new JButton("Сохранить");
         JButton cancelMechanicsButton = new JButton("Отмена");
@@ -116,14 +119,17 @@ public class JMenuFrame extends JDialog {
         add(reinforcementWorkerField, createGridBagConstraints(2, 1, 1, 1));
         add(new JLabel("Кузовщик:"), createGridBagConstraints(1, 2, 1, 1));
         add(bodyWorkerField, createGridBagConstraints(2, 2, 1, 1));
-        add(saveMechanicsButton, createGridBagConstraints(1, 3, 1, 1));
-        add(cancelMechanicsButton, createGridBagConstraints(2, 3, 1, 1));
+        add(new JLabel("Мастер:"), createGridBagConstraints(1, 3, 1, 1));
+        add(masterField, createGridBagConstraints(2, 3, 1, 1));
+        add(saveMechanicsButton, createGridBagConstraints(1, 4, 1, 1));
+        add(cancelMechanicsButton, createGridBagConstraints(2, 4, 1, 1));
 
         saveMechanicsButton.addActionListener(saveEvent -> {
             malyr = painterField.getText();
             armoturchik = reinforcementWorkerField.getText();
             kuzovchik = bodyWorkerField.getText();
-            mechanics.writeRatesToFile(malyr, armoturchik, kuzovchik);
+            master = masterField.getText();
+            mechanics.writeRatesToFile(malyr, armoturchik, kuzovchik, master);
             deleteComponentsFromJDialog();
             dispose();
         });
@@ -137,7 +143,7 @@ public class JMenuFrame extends JDialog {
         setVisible(true);
     } // Окно с фамилиями механиков.
 
-    private void openTelegramSettingsFrame(Frame parentFrame){
+    private void openTelegramSettingsFrame(Frame parentFrame) {
         setLayout(new GridBagLayout());
 
         JTextField botUserNameField = new JTextField(botUserName);

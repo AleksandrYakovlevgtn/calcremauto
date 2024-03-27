@@ -10,15 +10,16 @@ import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import ru.yandex.practicum.calcRemAuto.model.NameDirectories;
 import ru.yandex.practicum.calcRemAuto.model.TelegramBotInfo;
 
+import javax.swing.*;
 import java.io.File;
 
 @Slf4j
 public class TelegramFileSenderBot extends TelegramLongPollingBot {
     TelegramBotInfo telegramBotInfo = new TelegramBotInfo();
     NameDirectories directories = new NameDirectories();
-    private final String BOT_USERNAME = telegramBotInfo.getBotUserName(); //"KuzovnoyCehBot";
-    private final String BOT_TOKEN = telegramBotInfo.getBotToken(); //"6740921975:AAHJpf5b0itEboDQkAPSFaMudKE7ak-2low";
-    private final String USER_ID = telegramBotInfo.getChatId(); //"-1002030721306"; //    {203509655 Мой}  {-1002030721306 Флудильня}  -1002030721306
+    private final String BOT_USERNAME = telegramBotInfo.getBotUserName();
+    private final String BOT_TOKEN = telegramBotInfo.getBotToken();
+    private final String USER_ID = telegramBotInfo.getChatId();
 
     public void sendFile(String filePath) {
         String[] parts = filePath.split("/");
@@ -39,10 +40,10 @@ public class TelegramFileSenderBot extends TelegramLongPollingBot {
 
             try {
                 execute(sendDocument);
-                log.info("File sent successfully!");
+                log.info("Сметы отправлены удачно!");
             } catch (TelegramApiException e) {
-                e.printStackTrace();
-                log.error("Failed to send file.");
+                JOptionPane.showMessageDialog(null, e.getMessage(), "Ошибка", JOptionPane.ERROR_MESSAGE);
+                log.error("Ошибка отправки смет.");
             }
         }
     }
@@ -53,25 +54,16 @@ public class TelegramFileSenderBot extends TelegramLongPollingBot {
         message.setText(text);
         try {
             execute(message);
-            log.info("Caption sent successfully!");
+            log.info("Заголовок отправлен!");
         } catch (TelegramApiException e) {
-            e.printStackTrace();
-            log.error("Failed to send caption.");
+            JOptionPane.showMessageDialog(null, e.getMessage(), "Ошибка", JOptionPane.ERROR_MESSAGE);
+            log.error("Ошибка отправки заголовка.");
         }
     }
 
     @Override
     public void onUpdateReceived(Update update) {
-        // Обработка входящих обновлений (например, сообщений от пользователей)
-        if (update.hasMessage() && update.getMessage().hasText()) {
-
-            String receivedText = update.getMessage().getText();
-
-            // Ваш код обработки входящих сообщений здесь
-
-            // Пример отправки ответа
-            sendMessage("Вы отправили: " + receivedText);
-        }
+        log.info("Что то хотели но не реализованно" + update.getMessage());
     }
 
     @Override

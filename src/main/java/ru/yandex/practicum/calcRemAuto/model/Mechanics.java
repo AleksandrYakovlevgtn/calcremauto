@@ -15,6 +15,7 @@ public class Mechanics {
     String malyr;
     String armoturchik;
     String kuzovchik;
+    String master;
 
     public String getMalyr() {
         readMechanicsFile();
@@ -31,6 +32,12 @@ public class Mechanics {
         return kuzovchik;
     }
 
+    public String getMaster() {
+        readMechanicsFile();
+        return master;
+    }
+
+
     public void readMechanicsFile() {
         if (!read) {
             readRatesFromFile();
@@ -43,25 +50,26 @@ public class Mechanics {
             File directory = new File("Системные");
 
             if (!directory.exists()) {
-                writeRatesToFile("", "", ""); // Отправляем на создание папки и файла если не существуют.
+                writeRatesToFile("", "", "", ""); // Отправляем на создание папки и файла если не существуют.
             }
 
             File file = new File(directory, "Механики.txt");
             if (!file.exists()) {
-                writeRatesToFile("", "", ""); // Создаем файл если не существует
+                writeRatesToFile("", "", "", ""); // Создаем файл если не существует
             }
 
             try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
                 malyr = reader.readLine();
                 armoturchik = reader.readLine();
                 kuzovchik = reader.readLine();
+                master = reader.readLine();
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
     } // Чтение из файла параметров
 
-    public void writeRatesToFile(String malyr, String armoturchik, String kuzovchik) {
+    public void writeRatesToFile(String malyr, String armoturchik, String kuzovchik, String master) {
         try {
             File directory = new File("Системные");
             if (!directory.exists()) {
@@ -77,9 +85,11 @@ public class Mechanics {
                 this.malyr = malyr;
                 this.armoturchik = armoturchik;
                 this.kuzovchik = kuzovchik;
+                this.master = master;
                 writer.write(malyr + "\n");
                 writer.write(armoturchik + "\n");
                 writer.write(kuzovchik + "\n");
+                writer.write(master + "\n");
             } catch (IOException e) {
                 e.printStackTrace();
             }

@@ -45,9 +45,10 @@ public final class Prices {
             if (!directory.exists()) {
                 writeRatesToFile(0, 0, 0); // Отправляем на создание папки и файла если не существуют.
             }
-
             File file = new File(directory, "Стоимость_нормативов.txt");
-
+            if (!file.exists()) {
+                writeRatesToFile(0,0,0);
+            }
             try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
                 hourlyRate = Integer.parseInt(reader.readLine());
                 mechanicHourlyRate = Integer.parseInt(reader.readLine());

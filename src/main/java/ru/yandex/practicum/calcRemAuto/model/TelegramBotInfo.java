@@ -43,12 +43,11 @@ public class TelegramBotInfo {
             File directory = new File("Системные");
 
             if (!directory.exists()) {
-                writeTelegramToFile("", "", ""); // Отправляем на создание папки и файла если не существуют.
+                writeTelegramToFile("0", "0", "0"); // Отправляем на создание папки и файла если не существуют.
             }
-
             File file = new File(directory, "Telegram.txt");
             if (!file.exists()) {
-                writeTelegramToFile("", "", ""); // Создаем файл если не существует
+                writeTelegramToFile("0", "0", "0"); // Создаем файл если не существует
             }
 
             try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
