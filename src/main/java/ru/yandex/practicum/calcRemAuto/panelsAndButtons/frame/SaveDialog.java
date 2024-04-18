@@ -22,13 +22,15 @@ public class SaveDialog extends JDialog {
     Total total = new Total(); // Класс итого посчитанный из List<Element> elements
     Map<String, Map<String, List<String>>> lineBorderColorMap; // Рабочая таблица с нажатыми кнопками для данного расчета
     Buttons but = new Buttons(); // Кнопки
+    Lkm lkm;
 
-    public SaveDialog(Frame parentFrame, Client client, List<Element> elements, Map<String, Map<String, List<String>>> lineBorderColorMap) {
+    public SaveDialog(Frame parentFrame, Client client, List<Element> elements, Map<String, Map<String, List<String>>> lineBorderColorMap, Lkm lkm, int lkmTotalPrice) {
         super(parentFrame, "Проверка перед сохранением!", true);
 
         this.client = client;
         this.elements = elements;
         this.lineBorderColorMap = lineBorderColorMap;
+        this.lkm = lkm;
 
         setLayout(new BorderLayout());
         setSize(800, 600);
@@ -64,12 +66,12 @@ public class SaveDialog extends JDialog {
         panelABC.add(previewTextArea, BorderLayout.CENTER);
         add(panelABC, BorderLayout.CENTER);
 
-        String line = previewAddTextAndCreateTotal(client, elements); // Запуск метода отображения сметы
+        String line = previewAddTextAndCreateTotal(client, elements, lkmTotalPrice); // Запуск метода отображения сметы
 
         but.getYesButton().addActionListener(e -> {
             answer = true;
-            WorkWithFile workWithFaile = new WorkWithFile(client, total, elements, lineBorderColorMap);
-            workWithFaile.save(line);
+            WorkWithFile workWithFaile = new WorkWithFile(client, total, elements, lineBorderColorMap,lkm);
+            workWithFaile.save(line,lkmTotalPrice);
             if (checkBoxSendToTelegram.isSelected()) { // Если галку не сняли, то отправляем смету в telegram
                 sendSmeta(workWithFaile.getDATE_DIRECTORY());
             }
@@ -91,7 +93,7 @@ public class SaveDialog extends JDialog {
         return answer;
     } // метод возвращающий значение для выполнения действия в родительском окне (закрыть или оставить панель на окне)
 
-    private String previewAddTextAndCreateTotal(Client client, List<Element> elements) {
+    private String previewAddTextAndCreateTotal(Client client, List<Element> elements, int lkmTotalPrice) {
         // StringBuilder для хранения строк
         StringBuilder line = new StringBuilder();
 
@@ -106,7 +108,7 @@ public class SaveDialog extends JDialog {
         updateTotal();
 
         // Установка текста в previewTextArea на основе клиента, total и строк
-        previewTextArea.setText(buildPreviewText(client, line));
+        previewTextArea.setText(buildPreviewText(client, line, lkmTotalPrice));
         return previewTextArea.getText();
     }
 
@@ -154,10 +156,11 @@ public class SaveDialog extends JDialog {
         total.setTotal(total.getTotal() + total.getArmatyrchik() + total.getMalyr() + total.getKuzovchik() + total.getMaster());
     }// Метод для обновления общего значения total
 
-    private String buildPreviewText(Client client, StringBuilder line) {
+    private String buildPreviewText(Client client, StringBuilder line, int lkmTotalPrice) {
         return client.toString()
                 + "\n" + "Автомаляр: " + mechanics.getMalyr() + " Арматурщик: " + mechanics.getArmoturchik() + " Кузовщик: " + mechanics.getKuzovchik()
-                + "\n" + total.toString() + "\n" + line.toString();
+                + "\n" + total.toString() + " ЛКМ: " + lkmTotalPrice + " Итого: " + (total.getTotal() + lkmTotalPrice)
+                + "\n" + line.toString();
     }// Метод для построения окончательной строки текста для previewTextArea
 
     private String takeLine(Element element) {

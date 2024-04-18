@@ -19,5 +19,7 @@ public class NameDirectories {
     String KUZOVCHIK = "кузовщик";
     String LIST_OF_ELEMENTS = "список_элементов";
     String MAP_OF_WORKS = "таблица_работ";
+    String LKM = "Лкм";
+    String LKM_NEEDED = "Лкм_необходимый";
     String txt = ".txt";
 }

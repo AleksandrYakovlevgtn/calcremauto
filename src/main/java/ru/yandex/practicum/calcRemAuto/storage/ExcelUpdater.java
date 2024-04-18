@@ -26,7 +26,7 @@ public class ExcelUpdater {
     int targetRowNum = 22; // Номер строки, под которой вставить скопированную строку (нумерация с 0)
     int total = 0; // Значение для подсчета итого и дальнейшей вставки
 
-    public void createOrderExelFile(Client client, List<Element> elements, String path) {
+    public void createOrderExelFile(Client client, List<Element> elements, int lkmTotalPrice, String path) {
         try {
             String originalFilePath = "Системные/Болванка.xlsx"; // путь по которому лежит болванка
             String newFilePath = path + "/ЗаказНаряд.xlsx "; // Путь по которому новый файл сохраняется. Путь калькуляции
@@ -38,9 +38,9 @@ public class ExcelUpdater {
             writeDate(sheet);   // заполняем дату расчета
             writeClient(sheet, client); // заполняем данные по клиенту
             calkNeededRows(sheet, elements); // высчитываем необходимое количество строк для работ и отправляем в заполнение этих строк работами.
-            writeTotal(sheet);  // заполняем итоговую сумму ремонта
-            Row row = sheet.getRow(targetRowNum); // берем строку для удаления
-            sheet.removeRow(row); // удаляем строку (мне так нравится)
+            writeTotal(sheet, lkmTotalPrice);  // заполняем итоговую сумму ремонта
+            Row row = sheet.getRow(targetRowNum); // берем строку для лкм
+            writeLkm(row,lkmTotalPrice); // Записываем стоимость Лакокрасочных материалов
 
             // Сохранение в новый файл
             FileOutputStream newFileOutputStream = new FileOutputStream(newFilePath);
@@ -263,11 +263,26 @@ public class ExcelUpdater {
         }
     } // заполняет строки работами
 
-    private void writeTotal(Sheet sheet) {
+    private void writeLkm(Row row, int lkmTotalPrice) {
+        int numWork = 1;
+        int nameOfWork = 8;
+        int narmotive = 25;
+        int totalPrice = 39;
+        Cell cell = row.getCell(numWork);
+        cell.setCellValue("-");
+        cell = row.getCell(nameOfWork);
+        cell.setCellValue("Лакокрасочные материалы");
+        cell = row.getCell(narmotive);
+        cell.setCellValue("1");
+        cell = row.getCell(totalPrice);
+        cell.setCellValue(lkmTotalPrice);
+    } // Заполняем строку ЛКМ
+
+    private void writeTotal(Sheet sheet, int lkmTotalPrice) {
         int totalPrice = 40;
         Row row = sheet.getRow(targetRowNum + 1);
         Cell cell = row.getCell(totalPrice);
-        cell.setCellValue(total);
+        cell.setCellValue(total + lkmTotalPrice);
     } // заполняет итоговою сумму ремонта
 
     private void writeMaster(Sheet sheet) {

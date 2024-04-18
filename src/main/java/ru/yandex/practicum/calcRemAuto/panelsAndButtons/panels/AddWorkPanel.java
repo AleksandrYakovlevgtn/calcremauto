@@ -2,6 +2,8 @@ package ru.yandex.practicum.calcRemAuto.panelsAndButtons.panels;
 
 import ru.yandex.practicum.calcRemAuto.model.Client;
 import ru.yandex.practicum.calcRemAuto.model.Element;
+import ru.yandex.practicum.calcRemAuto.model.Lkm;
+import ru.yandex.practicum.calcRemAuto.model.LkmPrices;
 import ru.yandex.practicum.calcRemAuto.panelsAndButtons.buttons.Buttons;
 import ru.yandex.practicum.calcRemAuto.panelsAndButtons.frame.SaveDialog;
 
@@ -25,6 +27,7 @@ public class AddWorkPanel {
     JTextField remont = but.getRemontJText(); // Графа ввода н\ч ремонта элемента
     JTextArea elementListTextViewing = new JTextArea(30, 19); // Окно отображения добавленных в List<Element> elementList элементов
     Double elementPaintSide = 0.0;  // Норматив окраски с одной или двух сторон
+    double elementPaintAllForLkm = 0.0; //
     double elementArmatureSide = 0.0; // Норматив на арматурные работы
     Double elementKuzDetReplaceSide = 0.0; // Норматив на кузовные работы (сварка, замена приварных деталей)
     String elementRemont; // Норматив на ремонтные работы (шпаклевка)
@@ -41,6 +44,9 @@ public class AddWorkPanel {
     JButton glassButtonPushed; // Стекло
     JButton expanderButtonPushed; // Расширитель
     JButton overlayButtonPushed;  // Накладка
+    Lkm lkm = new Lkm();
+    LkmPrices lkmPrices = new LkmPrices();
+    int lkmTotalPrice = 0;
 
     public void startPanel(JPanel panel, Client client, JFrame startFrame) {
         elementListTextViewing.setLineWrap(true);
@@ -123,7 +129,7 @@ public class AddWorkPanel {
             if (elementList.isEmpty()) {
                 JOptionPane.showMessageDialog(null, "Не добавлен ни один элемент\nСохранить нечего!", "Ошибка", JOptionPane.INFORMATION_MESSAGE);
             } else {
-                SaveDialog saveDialog = new SaveDialog(startFrame, client, elementList, lineBorderColorMap);
+                SaveDialog saveDialog = new SaveDialog(startFrame, client, elementList, lineBorderColorMap,lkm,lkmTotalPrice);
                 saveDialog.setVisible(true);
                 if (saveDialog.getAnswer()) {
                     FirstPanel firstPanel = new FirstPanel();
@@ -132,7 +138,7 @@ public class AddWorkPanel {
                 }
             }
         }); // Кнопка сохранить
-    } // Начальная панель Стороны авто
+    } // Начальная панель Стороны авто + назад и сохранить
 
     private void leftRightSidePanel(JPanel panelAdd) {
         JPanel panelXYZ = new JPanel();
@@ -1165,6 +1171,7 @@ public class AddWorkPanel {
             element.setKuzDetReplaceSide(elementKuzDetReplaceSide);
             // Если нажата кнопка ремонта, то добавляем, добавив "." перед последним символом
             // переведя в двоичное число
+            elementPaintAllForLkm += elementPaintSide;
             if (remontButtonPushed != null) {
                 String rem;
                 rem = new StringBuilder(elementRemont).insert(elementRemont.length() - 1, ".").toString();
@@ -1174,20 +1181,25 @@ public class AddWorkPanel {
             // Если имя элемента входит в перечень, то добавляем ручки, молдинги и зеркала.
             if (zercaloButtonPushed != null) {
                 element.setZerkalo(1);
+                elementPaintAllForLkm += 1;
             }
             if (ruchkaButtonPushed != null) {
                 element.setRuchka(1);
+                elementPaintAllForLkm += 1;
             }
             if (moldingButtonPushed != null) {
                 element.setMolding(1);
+                elementPaintAllForLkm += 1;
             }
             // Если имя элемента входит в перечень добавляем расширитель крыльев
             if (expanderButtonPushed != null) {
                 element.setExpander(2);
+                elementPaintAllForLkm += 2;
             }
             // Если имя элемента входит в перечень, то добавляем накладку
             if (overlayButtonPushed != null) {
                 element.setOverlay(2);
+                elementPaintAllForLkm += 2;
             }
             // Если у элемента есть стекло, то проверяем надо ли снимать.
             if (haveGlass > 0) {
@@ -1200,6 +1212,7 @@ public class AddWorkPanel {
                 }
             }
         }
+        calcLkm(element);
         return element;
     }  // Создание элемента
 
@@ -1215,7 +1228,7 @@ public class AddWorkPanel {
     } // Удаление у кнопки ActionListener дабы удалить удвоенность нажатий
 
     private void sendToStringInElementListTextViewing() {
-        elementListTextViewing.setText(Arrays.toString(elementList.toArray()).replaceAll("^\\[|\\]$", ""));
+        elementListTextViewing.setText("ЛКМ Итого: " + lkmTotalPrice + "руб.\n" + Arrays.toString(elementList.toArray()).replaceAll("^\\[|\\]$", ""));
     }  // Вывод на окно просмотра добавленных элементов
 
     private Element addToNameZamenaIfZamenaButtonPushed(Element element) {
@@ -1332,11 +1345,75 @@ public class AddWorkPanel {
         }
     } // Удаление из Списка элементов "element"
 
-    public void load(List<Element> elementList, Map<String, Map<String, List<String>>> lineBorderColorMap, Client client, JPanel panel) {
+    public void load(List<Element> elementList, Map<String, Map<String, List<String>>> lineBorderColorMap, Client client,Lkm lkm, JPanel panel) {
         this.elementList = elementList;
         this.lineBorderColorMap = lineBorderColorMap;
+        this.lkm = lkm;
+        calcLkmPrice();
         JFrame parentFrame = (JFrame) SwingUtilities.getWindowAncestor(panel);
         startPanel(panel, client, parentFrame);
         sendToStringInElementListTextViewing();
     }
+
+    private void calcLkm(Element element) {
+        if (!element.getName().contains("Остекление")) {
+            lkm.plusOneCircles(); // Добавляем круги всех +1
+            lkm.setNapkin(lkm.getNapkin() + 3); // Добавляем салфетку
+            int remForStrip = (int) Math.ceil(element.getRemont() * 0.2); // считаем коэффициент ремонта
+            for (int i = 0; i < remForStrip; i++) { // По коэффициенту высчитываем необходимое количество полосок
+                lkm.plusStrip(); // Добавляем полоски +1
+                lkm.setNapkin(lkm.getNapkin() + 1); // Добавляем салфетку
+            }
+            // По коэффициенту высчитываем необходимое количество шпатлевки
+            if (remForStrip == 1) {
+                lkm.setPuttyUniversal(lkm.getPuttyUniversal() + 0.3); // Универсальная
+            } else if (remForStrip == 2) {
+                lkm.setPuttyFiber(lkm.getPuttyFiber() + 0.2);         // Волокнистая
+                lkm.setPuttyUniversal(lkm.getPuttyUniversal() + 0.5); // Универсальная
+            } else if (remForStrip >= 3) {
+                lkm.setPuttyFiber(lkm.getPuttyFiber() + 0.4);        // Волокнистая
+                lkm.setPuttyUniversal(lkm.getPuttyUniversal() + 0.7);// Универсальная
+            }
+            // Добавляем скотчБрайт образив из расчета 0.2 на элемент
+            lkm.setScotchBrite(lkm.getScotchBrite() + 0.2);
+            // Добавляем скотч малярный из расчета 0.5 на элемент и не более 1 на весь авто
+            if (lkm.getStickyTape() < 1) {
+                lkm.setStickyTape(lkm.getStickyTape() + 0.5);
+            }
+            // Добавляем пленку укрывочную 7 метров на авто
+            lkm.setCoveringFilm(7);
+            // Если есть замена приварного элемента добавляем 1 герметик
+            if (element.getKuzDetReplaceSide() > 0) {
+                lkm.setHermetic(1);
+            }
+            // Добавляем обезжириватель
+            lkm.setSiliconRemover(lkm.getSiliconRemover() + 0.2);
+            // Добавляем Грунт 200гр на элемент
+            lkm.setPriming(elementPaintAllForLkm / 15);
+            // Добавляем Лак 300гр на элемент
+            lkm.setClear(elementPaintAllForLkm / 10);
+            // Добавляем Краску 300гр на элемент
+            lkm.setBasePaint(elementPaintAllForLkm / 10);
+            // Добавляем Разбавитель 15% на грунт и лак, 50% на краску
+            lkm.setBaseDilution((0.5 * lkm.getBasePaint()) + (0.15 * (lkm.getPriming() + lkm.getClear())));
+        }
+        calcLkmPrice();
+    } // Метод подсчета необходимых ЛКМ материалов
+
+    private void calcLkmPrice() {
+        int circle = lkm.getP80() + lkm.getP180() + lkm.getP280() + lkm.getP400() + lkm.getP500();
+        int strips = lkm.getStripP80() + lkm.getStripP120() + lkm.getStripP180();
+        lkmTotalPrice = (int) (((circle * lkmPrices.getCircle()) + (strips * lkmPrices.getStrip())
+                + (lkm.getScotchBrite() * lkmPrices.getScotchBrite())
+                + (lkm.getPriming() * lkmPrices.getPriming())
+                + (lkm.getClear() * lkmPrices.getClear())
+                + (lkm.getBaseDilution() * lkmPrices.getBaseDilution())
+                + (lkm.getBasePaint() * lkmPrices.getSiliconRemover())
+                + (lkm.getStickyTape() * lkmPrices.getStickyTape())
+                + (lkm.getCoveringFilm() * lkmPrices.getCoveringFilm())
+                + (lkm.getPuttyFiber() * lkmPrices.getPuttyFiber())
+                + (lkm.getPuttyUniversal() * lkmPrices.getPuttyUniversal())
+                + (lkm.getNapkin() * lkmPrices.getNapkin())
+                + (lkm.getHermetic() * lkmPrices.getHermetic())) * 1.1);
+    } // Метод подсчета стоимости необходимого ЛКМ
 }

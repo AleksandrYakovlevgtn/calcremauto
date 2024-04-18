@@ -21,6 +21,6 @@ public class Total {
                 " Арматурщик: " + armatyrchik +
                 " Кузовщик: " + kuzovchik +
                 " Мастер: " + master +
-                " Итого: " + total;
+                " Работы: " + total;
     }
 }

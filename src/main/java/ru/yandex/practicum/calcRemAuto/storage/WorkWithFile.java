@@ -27,38 +27,42 @@ public class WorkWithFile {
     private Map<String, Map<String, List<String>>> lineBorderColorMap; // Таблица с нажатыми кнопками, инициируется из конструктора и load (загрузка).
     private Total total; // Класс итого, инициируется из конструктора и load (загрузка).
     private List<Element> elements; // Список добавленных элементов, инициируется из конструктора и load (загрузка).
+    private Lkm lkm;
     String GOS_NUMBER; // директория начальная/госНомер
     String DATE_DIRECTORY; // директория начальная/госНомер/дата_расчета
     String OFFICIAL_DIRECTORY; // директория начальная/госНомер/дата_расчета/служебная Для записи служебных данных.
 
-    public WorkWithFile(Client client, Total total, List<Element> elements, Map<String, Map<String, List<String>>> lineBorderColorMap) {
+    public WorkWithFile(Client client, Total total, List<Element> elements, Map<String, Map<String, List<String>>> lineBorderColorMap, Lkm lkm) {
         this.client = client;
         this.lineBorderColorMap = lineBorderColorMap;
         this.total = total;
         this.elements = elements;
+        this.lkm = lkm;
         GOS_NUMBER = directories.getNAME_START_DIRECTORY() + directories.getSlash() + client.getNumberAuto().toUpperCase();
     } // Конструктор
 
     @SneakyThrows
-    public void save(String text) {
+    public void save(String text,int lkmTotalPrice) {
         DATE_DIRECTORY = GOS_NUMBER + directories.getSlash() + directories.getDATE_DIRECTORY();
         OFFICIAL_DIRECTORY = DATE_DIRECTORY + directories.getSlash() + directories.getOFFICIAL_DIRECTORY();
 
         createDirectories();
         OpenFolder openFolder = new OpenFolder();
         openFolder.open(DATE_DIRECTORY);
-        exel.createOrderExelFile(client,elements,DATE_DIRECTORY);
+        exel.createOrderExelFile(client, elements,lkmTotalPrice, DATE_DIRECTORY);
 
         try (PrintWriter out = new PrintWriter(DATE_DIRECTORY + directories.getSlash() + directories.getSMETA() + directories.getTxt());
              PrintWriter dataClient = new PrintWriter(OFFICIAL_DIRECTORY + directories.getSlash() + directories.getCLIENT() + directories.getTxt());
-             PrintWriter dataTotal = new PrintWriter(OFFICIAL_DIRECTORY + directories.getSlash() + directories.getITOGO() + directories.getTxt())) {
+             PrintWriter dataTotal = new PrintWriter(OFFICIAL_DIRECTORY + directories.getSlash() + directories.getITOGO() + directories.getTxt());
+             PrintWriter dataLkm = new PrintWriter(OFFICIAL_DIRECTORY + directories.getSlash() + directories.getLKM() + directories.getTxt())) {
 
-            out.println(text);
-            dataClient.write(toStringClient(client));
-            dataTotal.write(toStringTotal(total));
-
-            saveListElements(DATE_DIRECTORY, OFFICIAL_DIRECTORY);
-            saveMap(OFFICIAL_DIRECTORY);
+            out.println(text); // Запись файла сметы
+            dataClient.write(toStringClient(client)); // Запись файла данных клиента
+            dataTotal.write(toStringTotal(total)); // Запись данных класса итого
+            dataLkm.write(toStringLkm(lkm)); // запись данных класса ЛКМ
+            writeLkmSmeta(lkm);             // Запись файла сметы ЛКМ необходимых для данного ремонта
+            saveListElements(DATE_DIRECTORY, OFFICIAL_DIRECTORY); // Запись Списка элементов в файл
+            saveMap(OFFICIAL_DIRECTORY);                         // Запись Таблицы работ(нажатых кнопок на элементах) в файл
         }
     } // Метод сохранения который через другие методы сохраняет все в файлы .txt
 
@@ -79,10 +83,11 @@ public class WorkWithFile {
         client = loadClient(String.valueOf(file));
         total = loadTotal(String.valueOf(file));
         lineBorderColorMap = loadMap(String.valueOf(file));
+        lkm = loadLkm(String.valueOf(file));
         elements = loadElementsList(String.valueOf(file));
         AddWorkPanel addWorkPanel = new AddWorkPanel();
-        addWorkPanel.load(elements, lineBorderColorMap, client, panel);
-    } // Загрузка из файла
+        addWorkPanel.load(elements, lineBorderColorMap, client, lkm, panel);
+    } // Загрузка из файлов
 
     private String toStringElement(Element element) {
         String[] words = {element.getName(), String.valueOf(element.getPaintSide()), String.valueOf(element.getArmatureSide()),
@@ -242,6 +247,97 @@ public class WorkWithFile {
             }
         }
     } // Метод загрузки из файла Client
+
+    @SneakyThrows
+    public void writeLkmSmeta(Lkm lkm) {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(DATE_DIRECTORY + directories.getSlash() + directories.getLKM_NEEDED() + directories.getTxt()))) {
+            writer.write("Круг p80 " + lkm.getP80() + "шт.");
+            writer.newLine();
+            writer.write("Круг p180 " + lkm.getP180() + "шт.");
+            writer.newLine();
+            writer.write("Круг p280 " + lkm.getP280() + "шт.");
+            writer.newLine();
+            writer.write("Круг p400 " + lkm.getP400() + "шт.");
+            writer.newLine();
+            writer.write("Круг p500 " + lkm.getP500() + "шт.");
+            writer.newLine();
+            writer.write("Полоска P80 " + lkm.getStripP80() + "шт.");
+            writer.newLine();
+            writer.write("Полоска P120 " + lkm.getStripP120() + "шт.");
+            writer.newLine();
+            writer.write("Полоска P180 " + lkm.getStripP180() + "шт.");
+            writer.newLine();
+            writer.write("scotchBrite " + String.format("%.2f", lkm.getScotchBrite()) + "м.");
+            writer.newLine();
+            writer.write("Грунт " + String.format("%.2f", lkm.getPriming()) + "кг.");
+            writer.newLine();
+            writer.write("Лак HS " + String.format("%.2f", lkm.getClear()) + "кг.");
+            writer.newLine();
+            writer.write("Разбавитель " + String.format("%.2f", lkm.getBaseDilution()) + "кг.");
+            writer.newLine();
+            writer.write("База " + String.format("%.2f", lkm.getBasePaint()) + "кг.");
+            writer.newLine();
+            writer.write("Обезжириватель " + String.format("%.2f", lkm.getSiliconRemover()) + "кг.");
+            writer.newLine();
+            writer.write("Скотч " + String.format("%.2f", lkm.getStickyTape()) + "шт.");
+            writer.newLine();
+            writer.write("Пленка " + String.format("%.2f", lkm.getCoveringFilm()) + "м.");
+            writer.newLine();
+            writer.write("Шпатлевка Волокнистая " + String.format("%.2f", lkm.getPuttyFiber()) + "кг.");
+            writer.newLine();
+            writer.write("Шпатлевка Универсальная " + String.format("%.2f", lkm.getPuttyUniversal()) + "кг.");
+            writer.newLine();
+            writer.write("Салфетки " + lkm.getNapkin() + "шт.");
+            writer.newLine();
+            writer.write("Герметик " + lkm.getHermetic() + "туб");
+        }
+    } // Метод записывает файл необходимых ЛКМ на данный расчет
+
+    private String toStringLkm(Lkm lkm) {
+        return String.format("%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s",
+                lkm.getP80(), lkm.getP180(), lkm.getP280(), lkm.getP400(), lkm.getP500(),
+                lkm.getStripP80(), lkm.getStripP120(), lkm.getStripP180(),
+                lkm.getScotchBrite(), lkm.getPriming(), lkm.getClear(),
+                lkm.getBaseDilution(), lkm.getBasePaint(), lkm.getSiliconRemover(),
+                lkm.getStickyTape(), lkm.getCoveringFilm(), lkm.getPuttyFiber(),
+                lkm.getPuttyUniversal(), lkm.getNapkin(), lkm.getHermetic());
+    } // Метод разбития ЛКМ в строки для сохранения в файл
+
+    @SneakyThrows
+    private Lkm loadLkm(String officialDirectory) {
+        try (BufferedReader bufferedReader = new BufferedReader(new FileReader(officialDirectory + "/служебная/Лкм.txt"))) {
+            String[] parts = bufferedReader.readLine().split(",");
+            if (parts.length == 20) {
+                Lkm lkm = new Lkm();
+                lkm.setP80(Integer.parseInt(parts[0]));
+                lkm.setP180(Integer.parseInt(parts[1]));
+                lkm.setP280(Integer.parseInt(parts[2]));
+                lkm.setP400(Integer.parseInt(parts[3]));
+                lkm.setP500(Integer.parseInt(parts[4]));
+                lkm.setStripP80(Integer.parseInt(parts[5]));
+                lkm.setStripP120(Integer.parseInt(parts[6]));
+                lkm.setStripP180(Integer.parseInt(parts[7]));
+                lkm.setScotchBrite(Double.parseDouble(parts[8]));
+                lkm.setPriming(Double.parseDouble(parts[9]));
+                lkm.setClear(Double.parseDouble(parts[10]));
+                lkm.setBaseDilution(Double.parseDouble(parts[11]));
+                lkm.setBasePaint(Double.parseDouble(parts[12]));
+                lkm.setSiliconRemover(Double.parseDouble(parts[13]));
+                lkm.setStickyTape(Double.parseDouble(parts[14]));
+                lkm.setCoveringFilm(Double.parseDouble(parts[15]));
+                lkm.setPuttyFiber(Double.parseDouble(parts[16]));
+                lkm.setPuttyUniversal(Double.parseDouble(parts[17]));
+                lkm.setNapkin(Integer.parseInt(parts[18]));
+                lkm.setHermetic(Integer.parseInt(parts[19]));
+                return lkm;
+            } else {
+                return new Lkm();
+            }
+        } catch (FileNotFoundException e) {
+            log.error(e.getMessage());
+            return new Lkm();
+        }
+    } // Метод загрузки из файла Lkm
 
     @SneakyThrows
     private void saveMap(String officialDirectory) {
