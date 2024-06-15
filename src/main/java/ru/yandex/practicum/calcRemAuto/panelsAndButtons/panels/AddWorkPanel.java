@@ -18,6 +18,7 @@ import java.util.List;
 import javax.swing.text.*;
 
 public class AddWorkPanel {
+
     List<Element> elementList = new ArrayList<>(); // Список добавленных элементов
     Map<String, Map<String, List<String>>> lineBorderColorMap = new HashMap<>(); // Таблица с нажатыми кнопками добавленных элементов
     Buttons but = new Buttons(); // Кнопки
