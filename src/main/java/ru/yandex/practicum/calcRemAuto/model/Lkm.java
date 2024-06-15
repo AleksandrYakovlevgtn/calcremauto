@@ -37,10 +37,22 @@ public class Lkm {
         p400++;
         p500++;
     }
+    public void minusOneCircles() {
+        p80--;
+        p180--;
+        p280--;
+        p400--;
+        p500--;
+    }
 
     public void plusStrip() {
         stripP80++;
         stripP120++;
         stripP180++;
+    }
+    public void minusStrip() {
+        stripP80--;
+        stripP120--;
+        stripP180--;
     }
 }

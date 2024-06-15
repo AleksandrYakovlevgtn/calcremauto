@@ -27,13 +27,19 @@ public class Element {
     double remont = 0;
     double total;
     String hoDoRemont = "null";
+    double dopWorksArmoturchik = 0;
+    double dopWorksPainter = 0;
+    double dopWorksKuzovchik = 0;
+    double lkmForElement = 0.0;
 
     {
         calculateTotal();
     }
 
     private void calculateTotal() {
-        total = ((paintSide + armatureSide + kuzDetReplaceSide + glass + zerkalo + molding + ruchka + expander + overlay + remont) * hourlyRate);
+        total = ((paintSide + armatureSide + kuzDetReplaceSide + glass + zerkalo
+                + molding + ruchka + expander + overlay + remont
+                + dopWorksArmoturchik + dopWorksPainter + dopWorksKuzovchik) * hourlyRate);
     }
 
     @Override
@@ -48,6 +54,9 @@ public class Element {
         if (expander > 0) result.append("Расширитель окраска.").append("\n");
         if (overlay > 0) result.append("Накладка окраска.").append("\n");
         if (remont > 0) result.append("Ремонт ").append(remont).append("н/ч").append("\n");
+        if (dopWorksArmoturchik > 0) result.append("Доп работа Арматурщик ").append(dopWorksArmoturchik).append("н/ч").append("\n");
+        if (dopWorksPainter > 0) result.append("Доп работа Маляр ").append(dopWorksPainter).append("н/ч").append("\n");
+        if (dopWorksKuzovchik > 0) result.append("Доп работа Кузовщик ").append(dopWorksKuzovchik).append("н/ч").append("\n");
         result.append("малярные работы = ").append(paintSide).append("\n")
                 .append("арматурные работы = ").append(armatureSide).append("\n")
                 .append("зам.куз.детали = ").append(kuzDetReplaceSide).append("\n")

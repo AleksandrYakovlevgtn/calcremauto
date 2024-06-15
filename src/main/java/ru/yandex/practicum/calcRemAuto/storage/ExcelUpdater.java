@@ -40,7 +40,7 @@ public class ExcelUpdater {
             calkNeededRows(sheet, elements); // высчитываем необходимое количество строк для работ и отправляем в заполнение этих строк работами.
             writeTotal(sheet, lkmTotalPrice);  // заполняем итоговую сумму ремонта
             Row row = sheet.getRow(targetRowNum); // берем строку для лкм
-            writeLkm(row,lkmTotalPrice); // Записываем стоимость Лакокрасочных материалов
+            writeLkm(row, lkmTotalPrice); // Записываем стоимость Лакокрасочных материалов
 
             // Сохранение в новый файл
             FileOutputStream newFileOutputStream = new FileOutputStream(newFilePath);
@@ -112,6 +112,15 @@ public class ExcelUpdater {
             if (element.getExpander() != 0) {
                 elementNeededRow++;
             }
+            if (element.getDopWorksArmoturchik() != 0) {
+                elementNeededRow++;
+            }
+            if (element.getDopWorksPainter() != 0) {
+                elementNeededRow++;
+            }
+            if (element.getDopWorksKuzovchik() != 0) {
+                elementNeededRow++;
+            }
             for (int i = 0; i < elementNeededRow; i++) {
                 copyRow(sheet, sourceRow, targetRowNum, numOfWork);
                 targetRowNum++;
@@ -120,75 +129,130 @@ public class ExcelUpdater {
             writeInCalculatedRowsElement(element, sheet, sourceRowNum);
             sourceRowNum += elementNeededRow;
         }
-    } // метод высчитывает необходимые строки для работ
+    } // метод высчитывает необходимое количество строк для работ
 
     private void writeInCalculatedRowsElement(Element element, Sheet sheet, int rowForePaste) {
-        int nameOfWork = 8;
-        int narmotive = 25;
-        int price = 29;
-        int totalPrice = 39;
+        int nameOfWork = 8; // Ячейка с названием работ
+        int narmotive = 25; // Ячейка с нормативом работ
+        int price = 29;     // Ячейка с ценой норма часа
+        int totalPrice = 39;// Ячейка с ценой работ
         Row row = sheet.getRow(rowForePaste);
         Cell cell = row.getCell(nameOfWork);
+        // Первое прописываем арматурные работы элемента в Ячейку с названием работ
         if (element.getName().contains("Замена")) {
-            cell.setCellValue(element.getName());
-        } else if (!element.getName().contains("Остекление")) {
+            // Если работы по замене кузовной детали, то к имени прибавляем р/с для замены куз. Детали
+            cell.setCellValue(element.getName().replace("Замена", "р/с для замены куз.детали"));
+        } else if (!element.getName().contains("Остекление") && element.getArmatureSide() != 0) {
+            // Если работы не замена, то добавляем к имени р/с
             cell.setCellValue((element.getName() + " р/с "));
-        } else {
+        } else if (element.getName().contains("Остекление")) {
+            // Если работы по остеклению, то добавляем к имени с/у
             cell.setCellValue((element.getName() + " c/у "));
         }
+        // Далее прописываем Ячейку норматива работ
+        // Если элемент это остекление то
         if (element.getName().contains("Остекление")) {
-            cell = row.getCell(narmotive);
-            cell.setCellValue(element.getGlass());
-            cell = row.getCell(price);
-            cell.setCellValue(prices.getHourlyRate());
-            cell = row.getCell(totalPrice);
-            total += (element.getGlass() * prices.getHourlyRate());
-            cell.setCellValue(element.getGlass() * prices.getHourlyRate());
-        } else {
-            cell = row.getCell(narmotive);
-            cell.setCellValue(element.getArmatureSide());
-            cell = row.getCell(price);
-            cell.setCellValue(prices.getHourlyRate());
-            cell = row.getCell(totalPrice);
-            total += (element.getArmatureSide() * prices.getHourlyRate());
-            cell.setCellValue(element.getArmatureSide() * prices.getHourlyRate());
+            cell = row.getCell(narmotive); // Берем ячейку норматив работ
+            cell.setCellValue(element.getGlass()); // Вставляем значение работ по остеклению
+            cell = row.getCell(price); // Берем ячейку стоимость норма часа
+            cell.setCellValue(prices.getHourlyRate()); // Вставляем значение стоимости норма часа
+            cell = row.getCell(totalPrice); // Берем ячейку стоимость работы
+            cell.setCellValue(element.getGlass() * prices.getHourlyRate()); // Вставляем значение стоимости данной работы (норматив * цену норма часа)
+            total += (element.getGlass() * prices.getHourlyRate()); // Добавляем к итоговой стоимости работ стоимость данной работы
+        } else { // Если элемент не стекло
+            cell = row.getCell(narmotive); // Берем ячейку норматив работ
+            cell.setCellValue(element.getArmatureSide()); // Вставляем значение арматурных работ
+            cell = row.getCell(price);// Берем ячейку стоимость норма часа
+            cell.setCellValue(prices.getHourlyRate());// Вставляем значение стоимости норма часа
+            cell = row.getCell(totalPrice);// Берем ячейку стоимость работы
+            cell.setCellValue(element.getArmatureSide() * prices.getHourlyRate()); // Вставляем значение стоимости данной работы (норматив * цену норма часа)
+            total += (element.getArmatureSide() * prices.getHourlyRate()); // Добавляем к итоговой стоимости работ стоимость данной работы
         }
-        if (element.getKuzDetReplaceSide() != 0) {
-            row = sheet.getRow(++rowForePaste);
-            cell = row.getCell(nameOfWork);
-            cell.setCellValue(element.getName().replace("Замена", "") + " Замена.куз.дет.");
-            cell = row.getCell(narmotive);
-            cell.setCellValue(element.getKuzDetReplaceSide());
-            cell = row.getCell(price);
-            cell.setCellValue(prices.getHourlyRate());
-            cell = row.getCell(totalPrice);
-            total += (element.getKuzDetReplaceSide() * prices.getHourlyRate());
-            cell.setCellValue(element.getKuzDetReplaceSide() * prices.getHourlyRate());
+        if (element.getKuzDetReplaceSide() != 0) { // Если работы по замене кузовной приварной детали, то прописываем работы кузовщика по замене
+            row = sheet.getRow(++rowForePaste); // Берем новую строку
+            cell = row.getCell(nameOfWork); // Берем ячейку имени работ
+            cell.setCellValue(element.getName().replace("Замена", "") + " Замена.куз.дет."); // Вставляем имя элемента и вид работ
+            cell = row.getCell(narmotive);  // Берем ячейку норматив работ
+            cell.setCellValue(element.getKuzDetReplaceSide()); // Вставляем значение кузовных работ
+            cell = row.getCell(price); // Берем ячейку стоимость норма часа
+            cell.setCellValue(prices.getHourlyRate()); // Вставляем значение стоимости норма часа
+            cell = row.getCell(totalPrice); // Берем ячейку стоимость работы
+            cell.setCellValue(element.getKuzDetReplaceSide() * prices.getHourlyRate()); // Вставляем значение стоимости данной работы (норматив * цену норма часа)
+            total += (element.getKuzDetReplaceSide() * prices.getHourlyRate()); // Добавляем к итоговой стоимости работ стоимость данной работы
         }
-        if (element.getRemont() != 0) {
-            row = sheet.getRow(++rowForePaste);
-            cell = row.getCell(nameOfWork);
-            cell.setCellValue(element.getName().replace("Замена", "") + " ремонт");
-            cell = row.getCell(narmotive);
-            cell.setCellValue(element.getRemont());
-            cell = row.getCell(price);
-            cell.setCellValue(prices.getHourlyRate());
-            cell = row.getCell(totalPrice);
-            total += (element.getRemont() * prices.getHourlyRate());
-            cell.setCellValue(element.getRemont() * prices.getHourlyRate());
+        if (element.getRemont() != 0) { // Если элемент имеет ремонт
+            row = sheet.getRow(++rowForePaste); // Берем новую строку
+            cell = row.getCell(nameOfWork);  // Берем ячейку имени работ
+            cell.setCellValue(element.getName().replace("Замена", "") + " ремонт"); // Вставляем имя элемента и вид работ
+            cell = row.getCell(narmotive);  // Берем ячейку норматив работ
+            cell.setCellValue(element.getRemont()); // Вставляем значение ремонтных работ
+            cell = row.getCell(price);  // Берем ячейку стоимость норма часа
+            cell.setCellValue(prices.getHourlyRate()); // Вставляем значение стоимости норма часа
+            cell = row.getCell(totalPrice); // Берем ячейку стоимость работы
+            cell.setCellValue(element.getRemont() * prices.getHourlyRate()); // Вставляем значение стоимости данной работы (норматив * цену норма часа)
+            total += (element.getRemont() * prices.getHourlyRate()); // Добавляем к итоговой стоимости работ стоимость данной работы
         }
-        if (element.getPaintSide() != 0) {
-            row = sheet.getRow(++rowForePaste);
-            cell = row.getCell(nameOfWork);
-            cell.setCellValue(element.getName().replace("Замена", "") + " окраска");
-            cell = row.getCell(narmotive);
-            cell.setCellValue(element.getPaintSide());
-            cell = row.getCell(price);
-            cell.setCellValue(prices.getHourlyRate());
-            cell = row.getCell(totalPrice);
-            total += (element.getPaintSide() * prices.getHourlyRate());
-            cell.setCellValue(element.getPaintSide() * prices.getHourlyRate());
+        if (element.getDopWorksArmoturchik() != 0) { // Если на элементе есть арматурные Доп.работы прописываем их
+            // Если в элементе отсутствуют работы для арматурщика, то не берем новую строку
+            if (element.getArmatureSide() != 0) {
+                // Если есть работы для арматурщика, то
+                row = sheet.getRow(++rowForePaste); // Берем новую строку
+            }
+            cell = row.getCell(nameOfWork);  // Берем ячейку имени работ
+            cell.setCellValue(element.getName().replace("Замена", "") + " арматурные Доп.работы"); // Вставляем имя элемента и вид работ
+            cell = row.getCell(narmotive);  // Берем ячейку норматив работ
+            cell.setCellValue(element.getDopWorksArmoturchik()); // Вставляем значение Доп.работ
+            cell = row.getCell(price);  // Берем ячейку стоимость норма часа
+            cell.setCellValue(prices.getHourlyRate()); // Вставляем значение стоимости норма часа
+            cell = row.getCell(totalPrice); // Берем ячейку стоимость работы
+            cell.setCellValue(element.getDopWorksArmoturchik() * prices.getHourlyRate()); // Вставляем значение стоимости данной работы (норматив * цену норма часа)
+            total += (element.getDopWorksArmoturchik() * prices.getHourlyRate()); // Добавляем к итоговой стоимости работ стоимость данной работы
         }
+        if (element.getDopWorksPainter() != 0) { // Если на элементе есть малярные Доп.работы прописываем их
+            // Если в элементе отсутствуют работы для арматурщика или отсутствуют доп.работы для арматурщика, то не берем новую строку
+            if (element.getArmatureSide() != 0 || element.getDopWorksArmoturchik() != 0) {
+                // Если есть то
+                row = sheet.getRow(++rowForePaste); // Берем новую строку
+            }
+            cell = row.getCell(nameOfWork);  // Берем ячейку имени работ
+            cell.setCellValue(element.getName().replace("Замена", "") + " покрасочные Доп.работы"); // Вставляем имя элемента и вид работ
+            cell = row.getCell(narmotive);  // Берем ячейку норматив работ
+            cell.setCellValue(element.getDopWorksPainter()); // Вставляем значение Доп.работ
+            cell = row.getCell(price);  // Берем ячейку стоимость норма часа
+            cell.setCellValue(prices.getHourlyRate()); // Вставляем значение стоимости норма часа
+            cell = row.getCell(totalPrice); // Берем ячейку стоимость работы
+            cell.setCellValue(element.getDopWorksPainter() * prices.getHourlyRate()); // Вставляем значение стоимости данной работы (норматив * цену норма часа)
+            total += (element.getDopWorksPainter() * prices.getHourlyRate()); // Добавляем к итоговой стоимости работ стоимость данной работы
+        }
+        if (element.getDopWorksKuzovchik() != 0) { // Если на элементе есть кузовные Доп.работы прописываем их
+            // Если в элементе отсутствуют работы для арматурщика или отсутствуют доп.работы для арматурщика или отсутствуют доп.работы маляра то не берем новую строку
+            if (element.getArmatureSide() != 0 || element.getDopWorksArmoturchik() != 0 || element.getDopWorksPainter() != 0) {
+                // Если есть то
+                row = sheet.getRow(++rowForePaste); // Берем новую строку
+            }
+            cell = row.getCell(nameOfWork);  // Берем ячейку имени работ
+            cell.setCellValue(element.getName().replace("Замена", "") + " кузовные Доп.работы"); // Вставляем имя элемента и вид работ
+            cell = row.getCell(narmotive);  // Берем ячейку норматив работ
+            cell.setCellValue(element.getDopWorksKuzovchik()); // Вставляем значение Доп.работ
+            cell = row.getCell(price);  // Берем ячейку стоимость норма часа
+            cell.setCellValue(prices.getHourlyRate()); // Вставляем значение стоимости норма часа
+            cell = row.getCell(totalPrice); // Берем ячейку стоимость работы
+            cell.setCellValue(element.getDopWorksKuzovchik() * prices.getHourlyRate()); // Вставляем значение стоимости данной работы (норматив * цену норма часа)
+            total += (element.getDopWorksKuzovchik() * prices.getHourlyRate()); // Добавляем к итоговой стоимости работ стоимость данной работы
+        }
+        if (element.getPaintSide() != 0) { // Далее прописываем работы по окраске
+            row = sheet.getRow(++rowForePaste); // Берем новую строку
+            cell = row.getCell(nameOfWork); // Берем ячейку имени работ
+            cell.setCellValue(element.getName().replace("Замена", "") + " окраска"); // Вставляем имя элемента и вид работ
+            cell = row.getCell(narmotive); // Берем ячейку норматив работ
+            cell.setCellValue(element.getPaintSide()); // Вставляем значение окраски
+            cell = row.getCell(price); // Берем ячейку стоимость норма часа
+            cell.setCellValue(prices.getHourlyRate()); // Вставляем значение стоимости норма часа
+            cell = row.getCell(totalPrice); // Берем ячейку стоимость работы
+            cell.setCellValue(element.getPaintSide() * prices.getHourlyRate()); // Вставляем значение стоимости данной работы (норматив * цену норма часа)
+            total += (element.getPaintSide() * prices.getHourlyRate()); // Добавляем к итоговой стоимости работ стоимость данной работы
+        }
+        // Далее прописываем Все работы по навесным деталям на элементе
         if (element.getRuchka() != 0) {
             row = sheet.getRow(++rowForePaste);
             cell = row.getCell(nameOfWork);
@@ -249,6 +313,7 @@ public class ExcelUpdater {
             total += (element.getExpander() * prices.getHourlyRate());
             cell.setCellValue(element.getExpander() * prices.getHourlyRate());
         }
+        // Здесь прописываем работы по стеклам если они добавлены к работам по элементу
         if (!element.getNameGlass().contains("null")) {
             row = sheet.getRow(++rowForePaste);
             cell = row.getCell(nameOfWork);
@@ -299,27 +364,33 @@ public class ExcelUpdater {
     } // заполняет параметры мастера
 
     private void copyRow(Sheet sheet, Row sourceRow, int targetRowNum, int numOfWork) {
+        // Задает высоту строки по умолчанию в пунктах
+        float defaultRowHeightInPoints = 20.0f;
+        // Устанавливает высоту исходной строки
+        sourceRow.setHeightInPoints(defaultRowHeightInPoints);
+        // Создает или получает строку назначения
         Row newRow = sheet.getRow(targetRowNum);
         if (newRow != null) {
+            // Если строка уже существует, сдвигает строки вниз, чтобы освободить место для новой строки
             sheet.shiftRows(targetRowNum, sheet.getLastRowNum(), 1);
             newRow = sheet.createRow(targetRowNum);
         } else {
+            // Если строки не существует, создает новую строку
             newRow = sheet.createRow(targetRowNum);
         }
-
+        // Копирует ячейки из исходной строки в строку назначения
         for (int i = 0; i < sourceRow.getLastCellNum(); i++) {
             Cell oldCell = sourceRow.getCell(i);
             Cell newCell = newRow.createCell(i);
-
+            // Если исходная ячейка пуста, пропускает её
             if (oldCell == null) {
                 newCell = null;
                 continue;
             }
-
-            // Копирование стиля и содержимого
+            // Копирует стиль и содержимое ячейки
             newCell.setCellStyle(oldCell.getCellStyle());
             newCell.setCellType(oldCell.getCellType());
-
+            // Копирует значение ячейки в зависимости от типа данных
             switch (oldCell.getCellType()) {
                 case STRING:
                     newCell.setCellValue(oldCell.getStringCellValue());
@@ -341,10 +412,11 @@ public class ExcelUpdater {
                     break;
             }
         }
-        // Копирование объединенных ячеек
+        // Копирует объединенные ячейки
         for (int i = 0; i < sheet.getNumMergedRegions(); i++) {
             CellRangeAddress cellRangeAddress = sheet.getMergedRegion(i);
             if (cellRangeAddress.getFirstRow() == sourceRow.getRowNum()) {
+                // Создает новую область объединения ячеек для строки назначения
                 CellRangeAddress newCellRangeAddress = new CellRangeAddress(newRow.getRowNum(),
                         (newRow.getRowNum() +
                                 (cellRangeAddress.getLastRow() - cellRangeAddress.getFirstRow())),
@@ -353,9 +425,12 @@ public class ExcelUpdater {
                 sheet.addMergedRegion(newCellRangeAddress);
             }
         }
+        // Если передано значение numOfWork, устанавливает его в соответствующей ячейке
         if (numOfWork != 0) {
             Cell numWorkCell = newRow.getCell(1);
             numWorkCell.setCellValue(numOfWork);
         }
+        // Устанавливает высоту строки назначения
+        newRow.setHeightInPoints(defaultRowHeightInPoints);
     } // метод копирования строк со всеми параметрами
 }

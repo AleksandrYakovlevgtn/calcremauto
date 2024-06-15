@@ -42,14 +42,14 @@ public class WorkWithFile {
     } // Конструктор
 
     @SneakyThrows
-    public void save(String text,int lkmTotalPrice) {
+    public void save(String text, int lkmTotalPrice) {
         DATE_DIRECTORY = GOS_NUMBER + directories.getSlash() + directories.getDATE_DIRECTORY();
         OFFICIAL_DIRECTORY = DATE_DIRECTORY + directories.getSlash() + directories.getOFFICIAL_DIRECTORY();
 
         createDirectories();
         OpenFolder openFolder = new OpenFolder();
         openFolder.open(DATE_DIRECTORY);
-        exel.createOrderExelFile(client, elements,lkmTotalPrice, DATE_DIRECTORY);
+        exel.createOrderExelFile(client, elements, lkmTotalPrice, DATE_DIRECTORY);
 
         try (PrintWriter out = new PrintWriter(DATE_DIRECTORY + directories.getSlash() + directories.getSMETA() + directories.getTxt());
              PrintWriter dataClient = new PrintWriter(OFFICIAL_DIRECTORY + directories.getSlash() + directories.getCLIENT() + directories.getTxt());
@@ -90,12 +90,24 @@ public class WorkWithFile {
     } // Загрузка из файлов
 
     private String toStringElement(Element element) {
-        String[] words = {element.getName(), String.valueOf(element.getPaintSide()), String.valueOf(element.getArmatureSide()),
-                String.valueOf(element.getKuzDetReplaceSide()), String.valueOf(element.getGlass()), element.getNameGlass(),
-                String.valueOf(element.getZerkalo()), String.valueOf(element.getMolding()), String.valueOf(element.getRuchka()),
-                String.valueOf(element.getOverlay()), String.valueOf(element.getExpander()), String.valueOf(element.getRemont()),
+        String[] words = {element.getName(),
+                String.valueOf(element.getPaintSide()),
+                String.valueOf(element.getArmatureSide()),
+                String.valueOf(element.getKuzDetReplaceSide()),
+                String.valueOf(element.getGlass()),
+                element.getNameGlass(),
+                String.valueOf(element.getZerkalo()),
+                String.valueOf(element.getMolding()),
+                String.valueOf(element.getRuchka()),
+                String.valueOf(element.getOverlay()),
+                String.valueOf(element.getExpander()),
+                String.valueOf(element.getRemont()),
                 String.valueOf(element.getTotal()),
-                element.getHoDoRemont()};
+                element.getHoDoRemont(),
+                String.valueOf(element.getDopWorksArmoturchik()),
+                String.valueOf(element.getDopWorksPainter()),
+                String.valueOf(element.getDopWorksKuzovchik()),
+                String.valueOf(element.getLkmForElement())};
         return String.join(",", words);
     } // Метод разбития Элемента в строки для сохранения в файл
 
@@ -111,21 +123,40 @@ public class WorkWithFile {
                 armoterchik.write(element.getName() + " " + element.getArmatureSide() + "н/ч");
 
                 dataElementList.write(toStringElement(element) + "\n");
+                if (element.getKuzDetReplaceSide() > 0 || element.getHoDoRemont().toLowerCase().equals("кузовщик") || element.getDopWorksKuzovchik() > 0) {
+                    double kuz = 0;
+                    String Kuzline = element.getName();
+                    if (element.getHoDoRemont().toLowerCase().equals("кузовщик")) {
+                        Kuzline = Kuzline + (" ремонт: " + element.getRemont() + "н/ч ");
+                        if (element.getName().contains("Моторный отсек") || element.getName().contains("Задняя панель")) {
+                            kuz += element.getRemont();
+                        } else {
+                            kuz += (element.getRemont() * 0.7);
+                        }
 
-                if (element.getKuzDetReplaceSide() > 0 || element.getHoDoRemont().equals("кузовщик")) {
-                    String line = element.getName();
-                    if (element.getHoDoRemont().equals("кузовщик")) {
-                        line = line + (" ремонт: " + element.getRemont() + "н/ч " + element.getRemont() * prices.getMechanicHourlyRate()) + "руб.\n";
                     } else if (element.getKuzDetReplaceSide() > 0) {
-                        line = line + (" замена: " + element.getKuzDetReplaceSide() + "н/ч " + element.getKuzDetReplaceSide() * prices.getMechanicHourlyRate()) + "руб.\n";
+                        Kuzline = Kuzline + (" замена: " + element.getKuzDetReplaceSide() + "н/ч ");
+                        kuz += element.getKuzDetReplaceSide();
+                    } else if (element.getDopWorksKuzovchik() > 0) {
+                        Kuzline = Kuzline + (" доп.работы " + element.getDopWorksKuzovchik() + " н/ч.");
+                        kuz += element.getDopWorksKuzovchik();
                     }
-                    kuzovchik.write(line);
+                    Kuzline = Kuzline + (" Итого: " + (kuz * prices.getMechanicHourlyRate() + " руб\n"));
+                    kuzovchik.write(Kuzline);
                 }
+
                 if (element.getRemont() > 0) {
-                    if (element.getHoDoRemont().equals("маляр")) {
-                        malyr.write(" ремонт: " + element.getRemont() + "н/ч");
+                    if (element.getHoDoRemont().toLowerCase().equals("маляр")
+                            || (element.getHoDoRemont().toLowerCase().equals("кузовщик")
+                            && !(element.getName().contains("Моторный отсек") || element.getName().contains("Задняя панель")))) {
+
+                        if (element.getHoDoRemont().toLowerCase().equals("маляр")) {
+                            malyr.write(" ремонт: " + element.getRemont() + "н/ч");
+                        } else {
+                            malyr.write(" ремонт 30%: " + (element.getRemont() * 0.3) + "н/ч");
+                        }
                     }
-                    if (element.getHoDoRemont().equals("арматурщик")) {
+                    if (element.getHoDoRemont().toLowerCase().equals("арматурщик")) {
                         armoterchik.write(" ремонт: " + element.getRemont() + "н/ч");
                     }
                 }
@@ -153,11 +184,21 @@ public class WorkWithFile {
                     malyr.write(" окраска");
                     armoterchik.write(" c/у под окрас");
                 }
+                if (element.getDopWorksPainter() > 0) {
+                    malyr.write(" доп.работы " + element.getDopWorksPainter() + " н/ч.");
+                }
+                if (element.getDopWorksArmoturchik() > 0) {
+                    armoterchik.write(" доп.работы " + element.getDopWorksArmoturchik() + " н/ч.");
+                }
                 int line = (int) ((element.getPaintSide() + element.getRuchka() +
-                        element.getZerkalo() + element.getMolding() + element.getOverlay() + element.getExpander()) *
-                        prices.getMechanicHourlyRate());
-                if (element.getHoDoRemont().equals("маляр")) {
-                    line = line + (int) (element.getRemont() * prices.getMechanicHourlyRate());
+                        element.getZerkalo() + element.getMolding() + element.getOverlay() +
+                        element.getExpander() + element.getDopWorksPainter()) * prices.getMechanicHourlyRate());
+                if (element.getHoDoRemont().toLowerCase().equals("маляр") || element.getHoDoRemont().toLowerCase().equals("кузовщик")) {
+                    if (element.getHoDoRemont().toLowerCase().equals("маляр")) {
+                        line = line + (int) (element.getRemont() * prices.getMechanicHourlyRate());
+                    } else if (element.getHoDoRemont().toLowerCase().equals("кузовщик") && !(element.getName().contains("Моторный отсек") || element.getName().contains("Задняя панель"))) {
+                        line = line + (int) ((element.getRemont() * 0.3) * prices.getMechanicHourlyRate());
+                    }
                 }
                 malyr.write(" итого: " + line + "руб.\n");
                 if (element.getGlass() > 0) {
@@ -168,9 +209,9 @@ public class WorkWithFile {
                     }
                 }
                 line = 0;
-                line = (int) ((element.getArmatureSide() + element.getGlass()) *
+                line = (int) ((element.getArmatureSide() + element.getGlass() + element.getDopWorksArmoturchik()) *
                         prices.getMechanicHourlyRate());
-                if (element.getHoDoRemont().equals("арматурщик")) {
+                if (element.getHoDoRemont().toLowerCase().equals("арматурщик")) {
                     line = line + (int) (element.getRemont() * prices.getMechanicHourlyRate());
                 }
                 armoterchik.write(" итого: " + line + "руб.\n");
@@ -179,7 +220,7 @@ public class WorkWithFile {
             armoterchik.write("Итог: " + total.getArmatyrchik());
             kuzovchik.write("Итог: " + total.getKuzovchik());
         }
-    } // Метод сохранения List<Element> elements
+    } // Метод сохранения List<Element> elements и так же смет по механикам
 
     @SneakyThrows
     private List<Element> loadElementsList(String nameStartDirectory) {
@@ -206,7 +247,13 @@ public class WorkWithFile {
             element.setRemont(Double.parseDouble(parts[11]));
             element.setHoDoRemont(parts[13]);
             element.setTotal(0);
-
+            // Проверка для совместимости со старыми расчетами!!!
+            if (parts.length > 14) {
+                element.setDopWorksArmoturchik(Double.parseDouble(parts[14]));
+                element.setDopWorksPainter(Double.parseDouble(parts[15]));
+                element.setDopWorksKuzovchik(Double.parseDouble(parts[16]));
+                element.setLkmForElement(Double.parseDouble(parts[17]));
+            }
             elements.add(element);
         }
         return elements;

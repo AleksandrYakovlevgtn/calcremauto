@@ -15,6 +15,7 @@ import java.awt.*;
 import java.awt.event.ActionListener;
 import java.util.*;
 import java.util.List;
+import javax.swing.text.*;
 
 public class AddWorkPanel {
     List<Element> elementList = new ArrayList<>(); // Список добавленных элементов
@@ -23,11 +24,14 @@ public class AddWorkPanel {
     JPanel elementLeftRightSidePanel = new JPanel(); // Панель с элементами которые расположены по бокам авто
     JPanel elementCenterSide = new JPanel();   // Панель с элементами расположенными по центру авто
     JPanel panelGlass = new JPanel(); // Панель с остеклением авто
-    private JComboBox<String> remontComboBox;
+    private JComboBox<String> remontComboBox = new JComboBox<>(new String[]{"Маляр", "Кузовщик", "Арматурщик"});
     JTextField remont = but.getRemontJText(); // Графа ввода н\ч ремонта элемента
+    JTextField dopWorksArmaturchik = new JTextField();  // Графа ввода доп работ Арматурщик
+    JTextField dopWorksPainter = new JTextField();  // Графа ввода доп работ Маляр
+    JTextField dopWorksKuzovchik = new JTextField();  // Графа ввода доп работ Кузовщик
     JTextArea elementListTextViewing = new JTextArea(30, 19); // Окно отображения добавленных в List<Element> elementList элементов
     Double elementPaintSide = 0.0;  // Норматив окраски с одной или двух сторон
-    double elementPaintAllForLkm = 0.0; //
+    double elementPaintAllForLkm = 0.0; //  Общее количество норматива для подсчета ЛКМ
     double elementArmatureSide = 0.0; // Норматив на арматурные работы
     Double elementKuzDetReplaceSide = 0.0; // Норматив на кузовные работы (сварка, замена приварных деталей)
     String elementRemont; // Норматив на ремонтные работы (шпаклевка)
@@ -44,6 +48,9 @@ public class AddWorkPanel {
     JButton glassButtonPushed; // Стекло
     JButton expanderButtonPushed; // Расширитель
     JButton overlayButtonPushed;  // Накладка
+    JButton dopWorksArmaturchikButtonPushed; // Арматурщик
+    JButton dopWorksPainterButtonPushed;    // Маляр
+    JButton dopWorksKuzovchikButtonPushed;  // Кузовщик
     Lkm lkm = new Lkm();
     LkmPrices lkmPrices = new LkmPrices();
     int lkmTotalPrice = 0;
@@ -129,7 +136,7 @@ public class AddWorkPanel {
             if (elementList.isEmpty()) {
                 JOptionPane.showMessageDialog(null, "Не добавлен ни один элемент\nСохранить нечего!", "Ошибка", JOptionPane.INFORMATION_MESSAGE);
             } else {
-                SaveDialog saveDialog = new SaveDialog(startFrame, client, elementList, lineBorderColorMap,lkm,lkmTotalPrice);
+                SaveDialog saveDialog = new SaveDialog(startFrame, client, elementList, lineBorderColorMap, lkm, lkmTotalPrice);
                 saveDialog.setVisible(true);
                 if (saveDialog.getAnswer()) {
                     FirstPanel firstPanel = new FirstPanel();
@@ -347,52 +354,7 @@ public class AddWorkPanel {
 
     public void WorksPanel(JPanel elementLeftRightSidePanel, JPanel panelAdd) {
         clearPushedButtonAfterElementAdd();
-        remont.getDocument().addDocumentListener(new DocumentListener() {
-            @Override
-            public void insertUpdate(DocumentEvent e) throws RuntimeException {
-                // Проверяем что введено число, если да то цвет поля зеленый нет розовый.
-                try {
-                    if (!remont.getText().isBlank()) {
-                        Integer.parseInt(remont.getText());
-                        remont.setBackground(Color.green);
-                    } else {
-                        remont.setBackground(null);
-                    }
-                } catch (NumberFormatException o) {
-                    remont.setBackground(Color.pink);
-                }
-            }
 
-            @Override
-            public void removeUpdate(DocumentEvent e) {
-                // Проверяем что введено число, если да то цвет поля зеленый нет розовый.
-                try {
-                    if (!remont.getText().isBlank()) {
-                        Integer.parseInt(remont.getText());
-                        remont.setBackground(Color.green);
-                    } else {
-                        remont.setBackground(null);
-                    }
-                } catch (NumberFormatException o) {
-                    remont.setBackground(Color.pink);
-                }
-            }
-
-            @Override
-            public void changedUpdate(DocumentEvent e) {
-                // Проверяем что введено число, если да то цвет поля зеленый нет розовый.
-                try {
-                    if (!remont.getText().isBlank()) {
-                        Integer.parseInt(remont.getText());
-                        remont.setBackground(Color.green);
-                    } else {
-                        remont.setBackground(null);
-                    }
-                } catch (NumberFormatException o) {
-                    remont.setBackground(Color.pink);
-                }
-            }
-        });
         // Удаляем лишние строчки из работ так как не везде есть молдинги, зеркала, ручки и стекла.
         if (elementLeftRightSidePanel.getComponents().length > 9) {
             for (int i = elementLeftRightSidePanel.getComponents().length - 1; i >= 9; i--) {
@@ -437,7 +399,7 @@ public class AddWorkPanel {
                 GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
                 new Insets(2, 2, 2, 2), 0, 0));
 
-        elementLeftRightSidePanel.add(remont, new GridBagConstraints(2, 3, 1, 1, 1, 1,
+        elementLeftRightSidePanel.add(addDocumentListener(remont), new GridBagConstraints(2, 3, 1, 1, 1, 1,
                 GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
                 new Insets(2, 2, 2, 2), 0, 0));
         if (elementButtonPushed.getText().contains("Пер.Дверь") || elementButtonPushed.getText().contains("Зад.Дверь") || elementButtonPushed.getText().contains("Крышка баг.")) {
@@ -488,6 +450,31 @@ public class AddWorkPanel {
                         new Insets(2, 2, 2, 0), 0, 0));
             }
         }
+        //************************* добавляем доп работы
+        int gridY = getMaxGridY(elementLeftRightSidePanel, 1);
+        elementLeftRightSidePanel.add(new JLabel("Доп работы"), new GridBagConstraints(1, gridY + 1, 1, 1, 1, 1,
+                GridBagConstraints.CENTER, GridBagConstraints.NONE,
+                new Insets(2, 5, 2, 0), 0, 0));
+        elementLeftRightSidePanel.add(takeColorOfButtons(removeActionListener(but.getDopWorksArmaturchikButton()), 3), new GridBagConstraints(1, gridY + 2, 1, 1, 1, 1,
+                GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
+                new Insets(2, 5, 2, 0), 0, 0));
+        elementLeftRightSidePanel.add(takeColorOfButtons(removeActionListener(but.getDopWorksPainterButton()), 3), new GridBagConstraints(1, gridY + 3, 1, 1, 1, 1,
+                GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
+                new Insets(2, 5, 2, 0), 0, 0));
+        elementLeftRightSidePanel.add(takeColorOfButtons(removeActionListener(but.getDopWorksKuzovchikButton()), 3), new GridBagConstraints(1, gridY + 4, 1, 1, 1, 1,
+                GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
+                new Insets(2, 5, 2, 0), 0, 0));
+        elementLeftRightSidePanel.add(addDocumentListener(dopWorksArmaturchik), new GridBagConstraints(2, gridY + 2, 1, 1, 1, 1,
+                GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
+                new Insets(2, 2, 2, 2), 0, 0));
+        elementLeftRightSidePanel.add(addDocumentListener(dopWorksPainter), new GridBagConstraints(2, gridY + 3, 1, 1, 1, 1,
+                GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
+                new Insets(2, 2, 2, 2), 0, 0));
+        elementLeftRightSidePanel.add(addDocumentListener(dopWorksKuzovchik), new GridBagConstraints(2, gridY + 4, 1, 1, 1, 1,
+                GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
+                new Insets(2, 2, 2, 2), 0, 0));
+
+
         remont.setText(elementRemont);
 
         but.getReplaceButton().addActionListener(e -> { // замена
@@ -915,15 +902,174 @@ public class AddWorkPanel {
                 }
             }
         });   // Накладка
+        but.getDopWorksArmaturchikButton().addActionListener(e -> {
+            if (dopWorksArmaturchikButtonPushed == null) {
+                if (dopWorksArmaturchik.getBackground() != Color.pink && dopWorksArmaturchik.getText().length() > 0) {
+                    dopWorksArmaturchikButtonPushed = but.getDopWorksArmaturchikButton();
+                    dopWorksArmaturchikButtonPushed.setBorder(BorderFactory.createLineBorder(Color.red, 1));
+                    addAndRemovePanel(clearCenter(panelAdd));
+                    panelAdd.updateUI();
+                }
+            } else {
+                // Если доп. работы уже добавлены, а мы хотим их убрать необходимо повторно нажать на кнопку
+                LineBorder color = (LineBorder) dopWorksArmaturchikButtonPushed.getBorder();
+                // Если кнопка уже была нажата и элемент был добавлен (то есть имеет цвет рамки зеленый) мы убираем нормативы
+                if (color.getLineColor() == (Color.green)) {
+                    // Устанавливаем цвет кнопки на серый тем самым убрав ее из элемента
+                    but.getDopWorksArmaturchikButton().setBorder(BorderFactory.createLineBorder(Color.lightGray, 1));
+                    dopWorksArmaturchikButtonPushed = null;
+                    addAndRemovePanel(clearCenter(panelAdd));
+                    panelAdd.updateUI();
+                } else {
+                    // Если кнопка была нажата, но элемент не был добавлен (то есть имеет цвет рамки красный) мы убираем нормативы
+                    dopWorksArmaturchik.setText("");
+                    // Устанавливаем цвет кнопки на серый тем самым убрав ее из элемента
+                    but.getDopWorksArmaturchikButton().setBorder(BorderFactory.createLineBorder(Color.lightGray, 1));
+                    dopWorksArmaturchikButtonPushed = null;
+                    addAndRemovePanel(clearCenter(panelAdd));
+                    panelAdd.updateUI();
+                }
+            }
+        }); // Доп работы арматурщик
+        but.getDopWorksPainterButton().addActionListener(e -> {
+            if (dopWorksPainterButtonPushed == null) {
+                if (dopWorksPainter.getBackground() != Color.pink && dopWorksPainter.getText().length() > 0) {
+                    dopWorksPainterButtonPushed = but.getDopWorksPainterButton();
+                    dopWorksPainterButtonPushed.setBorder(BorderFactory.createLineBorder(Color.red, 1));
+                    addAndRemovePanel(clearCenter(panelAdd));
+                    panelAdd.updateUI();
+                }
+            } else {
+                // Если доп. работы уже добавлены, а мы хотим их убрать необходимо повторно нажать на кнопку
+                LineBorder color = (LineBorder) dopWorksPainterButtonPushed.getBorder();
+                // Если кнопка уже была нажата и элемент был добавлен (то есть имеет цвет рамки зеленый) мы убираем нормативы
+                if (color.getLineColor() == (Color.green)) {
+                    // Устанавливаем цвет кнопки на серый тем самым убрав ее из элемента
+                    but.getDopWorksPainterButton().setBorder(BorderFactory.createLineBorder(Color.lightGray, 1));
+                    dopWorksPainterButtonPushed = null;
+                    addAndRemovePanel(clearCenter(panelAdd));
+                    panelAdd.updateUI();
+                } else {
+                    // Если кнопка была нажата, но элемент не был добавлен (то есть имеет цвет рамки красный) мы убираем нормативы
+                    dopWorksPainter.setText("");
+                    // Устанавливаем цвет кнопки на серый тем самым убрав ее из элемента
+                    but.getDopWorksPainterButton().setBorder(BorderFactory.createLineBorder(Color.lightGray, 1));
+                    dopWorksPainterButtonPushed = null;
+                    addAndRemovePanel(clearCenter(panelAdd));
+                    panelAdd.updateUI();
+                }
+            }
+        });    // Доп работы маляр
+        but.getDopWorksKuzovchikButton().addActionListener(e -> {
+            if (dopWorksKuzovchikButtonPushed == null) {
+                if (dopWorksKuzovchik.getBackground() != Color.pink && dopWorksKuzovchik.getText().length() > 0) {
+                    dopWorksKuzovchikButtonPushed = but.getDopWorksKuzovchikButton();
+                    dopWorksKuzovchikButtonPushed.setBorder(BorderFactory.createLineBorder(Color.red, 1));
+                    addAndRemovePanel(clearCenter(panelAdd));
+                    panelAdd.updateUI();
+                }
+            } else {
+                // Если доп. работы уже добавлены, а мы хотим их убрать необходимо повторно нажать на кнопку
+                LineBorder color = (LineBorder) dopWorksKuzovchikButtonPushed.getBorder();
+                // Если кнопка уже была нажата и элемент был добавлен (то есть имеет цвет рамки зеленый) мы убираем нормативы
+                if (color.getLineColor() == (Color.green)) {
+                    // Устанавливаем цвет кнопки на серый тем самым убрав ее из элемента
+                    but.getDopWorksKuzovchikButton().setBorder(BorderFactory.createLineBorder(Color.lightGray, 1));
+                    dopWorksKuzovchikButtonPushed = null;
+                    addAndRemovePanel(clearCenter(panelAdd));
+                    panelAdd.updateUI();
+                } else {
+                    // Если кнопка была нажата, но элемент не был добавлен (то есть имеет цвет рамки красный) мы убираем нормативы
+                    dopWorksKuzovchik.setText("");
+                    // Устанавливаем цвет кнопки на серый тем самым убрав ее из элемента
+                    but.getDopWorksKuzovchikButton().setBorder(BorderFactory.createLineBorder(Color.lightGray, 1));
+                    dopWorksKuzovchikButtonPushed = null;
+                    addAndRemovePanel(clearCenter(panelAdd));
+                    panelAdd.updateUI();
+                }
+            }
+        }); // Доп работы кузовщик
 
         checkEarlyPushedButtonsWorksPanel();
         panelAdd.updateUI();
     } // Панель с работами
 
+    public static int getMaxGridY(JPanel panel, int targetGridX) {
+        int maxGridY = -1;
+
+        // Перебор всех компонентов в JPanel
+        for (Component comp : panel.getComponents()) {
+            GridBagConstraints gbc = ((GridBagLayout) panel.getLayout()).getConstraints(comp);
+            if (gbc.gridx == targetGridX && gbc.gridy > maxGridY) {
+                maxGridY = gbc.gridy;
+            }
+        }
+
+        return maxGridY;
+    }
+
+    public static JTextField addDocumentListener(JTextField textField) {
+        Document document = textField.getDocument();
+        AbstractDocument abstractDocument = (AbstractDocument) document;
+
+        // Add DocumentFilter для избежания ввода чего угодна кроме цифр
+        abstractDocument.setDocumentFilter(new DocumentFilter() {
+            @Override
+            public void insertString(FilterBypass fb, int offset, String string, AttributeSet attr) throws BadLocationException {
+                if (string != null && string.matches("\\d*")) {
+                    super.insertString(fb, offset, string, attr);
+                }
+            }
+
+            @Override
+            public void replace(FilterBypass fb, int offset, int length, String string, AttributeSet attr) throws BadLocationException {
+                if (string != null && string.matches("\\d*")) {
+                    super.replace(fb, offset, length, string, attr);
+                }
+            }
+
+            @Override
+            public void remove(FilterBypass fb, int offset, int length) throws BadLocationException {
+                super.remove(fb, offset, length);
+            }
+        });
+
+        // Add DocumentListener для изменения цвета поля ввода
+        document.addDocumentListener(new DocumentListener() {
+            @Override
+            public void insertUpdate(DocumentEvent e) {
+                updateBackgroundColor();
+            }
+
+            @Override
+            public void removeUpdate(DocumentEvent e) {
+                updateBackgroundColor();
+            }
+
+            @Override
+            public void changedUpdate(DocumentEvent e) {
+                updateBackgroundColor();
+            }
+
+            private void updateBackgroundColor() {
+                try {
+                    if (!textField.getText().isBlank()) {
+                        Integer.parseInt(textField.getText());
+                        textField.setBackground(Color.green);
+                    } else {
+                        textField.setBackground(Color.white);
+                    }
+                } catch (NumberFormatException ex) {
+                    textField.setBackground(Color.pink);
+                }
+            }
+        });
+        return textField;
+    } // Добавление слушателя для JTextField-ов
+
+
     private void addAndRemovePanel(JPanel panel) {
         Dimension buttonSize = new Dimension(58, 20);
-        remontComboBox = new JComboBox<>(new String[]{"маляр", "кузовщик", "арматурщик"});
-        remontComboBox.setSelectedIndex(0);
         remontComboBox.setBackground(Color.WHITE);
         remontComboBox.setPreferredSize(buttonSize);
 
@@ -987,6 +1133,10 @@ public class AddWorkPanel {
                 elementButtonPushed.setBorder(BorderFactory.createLineBorder(Color.green, 1));
                 elementButtonPushed = null;
             }
+            // Затем обнуляем ЛКМ
+            clearLkm();
+            // Пересчитываем ЛКМ оставшихся элементов
+            reCalcLkmPrice();
             // Отправляем новый список на отображение в окошке.
             sendToStringInElementListTextViewing();
             // Убираем панель addAndRemovePanel
@@ -995,6 +1145,10 @@ public class AddWorkPanel {
         but.getRemoveButton().addActionListener(e -> {
             // Сначала удаляем элемент из List
             removeElementFromList(createName());
+            // Затем обнуляем ЛКМ
+            clearLkm();
+            // Пересчитываем ЛКМ оставшихся элементов
+            reCalcLkmPrice();
             // Отправляем новый список на отображение в окошке.
             sendToStringInElementListTextViewing();
             // Удаляем из Map элемент
@@ -1038,13 +1192,42 @@ public class AddWorkPanel {
                                 if (check.equals(button.getText())) {
                                     button.setBorder(BorderFactory.createLineBorder(Color.green));
                                 }
-                                //Если есть кнопка ремонт, то делим ее на значение "ремонт" и "число"
+                                //Если есть кнопка ремонт, то делим ее на значение "ремонт", "число" и "механик"
                                 if (check.contains("Ремонт") && button.getText().equals("Ремонт")) {
                                     button.setBorder(BorderFactory.createLineBorder(Color.green));
                                     String[] split = check.split(" ");
                                     // Возвращаем значение "elementRemont" для того чтобы отобразить сколько у данного элемента это значение
                                     if (split.length > 1) {
                                         elementRemont = split[1];
+                                    }
+                                    if (split.length > 2) {
+                                        switch (split[2]) {
+                                            case "Маляр":
+                                                remontComboBox.setSelectedIndex(0);
+                                                break;
+                                            case "Кузовщик":
+                                                remontComboBox.setSelectedIndex(1);
+                                                break;
+                                            case "Арматурщик":
+                                                remontComboBox.setSelectedIndex(2);
+                                                break;
+                                        }
+                                    }
+                                } else if (check.contains(button.getText())  && (check.contains("Маляр") || check.contains("Кузовщик") || check.contains("Арматурщик"))) {
+                                    String[] split = check.split(" ");
+                                    switch (split[0]) {
+                                        case "Арматурщик":
+                                            dopWorksArmaturchik.setText(split[1]);
+                                            button.setBorder(BorderFactory.createLineBorder(Color.green));
+                                            break;
+                                        case "Маляр":
+                                            dopWorksPainter.setText(split[1]);
+                                            button.setBorder(BorderFactory.createLineBorder(Color.green));
+                                            break;
+                                        case "Кузовщик":
+                                            dopWorksKuzovchik.setText(split[1]);
+                                            button.setBorder(BorderFactory.createLineBorder(Color.green));
+                                            break;
                                     }
                                 }
                             }
@@ -1081,7 +1264,7 @@ public class AddWorkPanel {
             paint1xOr2xButtonPushed.setBorder(BorderFactory.createLineBorder(Color.green, 1));
         }
         if (remontButtonPushed != null) {
-            color.add(remontButtonPushed.getText() + " " + elementRemont);
+            color.add(remontButtonPushed.getText() + " " + elementRemont + " " + remontComboBox.getSelectedItem());
             remontButtonPushed.setBorder(BorderFactory.createLineBorder(Color.green, 1));
         }
         if (zercaloButtonPushed != null) {
@@ -1114,6 +1297,18 @@ public class AddWorkPanel {
         if (overlayButtonPushed != null) {
             color.add(overlayButtonPushed.getText());
             overlayButtonPushed.setBorder(BorderFactory.createLineBorder(Color.green, 1));
+        }
+        if (dopWorksArmaturchikButtonPushed != null) {
+            color.add(dopWorksArmaturchikButtonPushed.getText() + " " + dopWorksArmaturchik.getText());
+            dopWorksArmaturchikButtonPushed.setBorder(BorderFactory.createLineBorder(Color.green, 1));
+        }
+        if (dopWorksPainterButtonPushed != null) {
+            color.add(dopWorksPainterButtonPushed.getText() + " " + dopWorksPainter.getText());
+            dopWorksPainterButtonPushed.setBorder(BorderFactory.createLineBorder(Color.green, 1));
+        }
+        if (dopWorksKuzovchikButtonPushed != null) {
+            color.add(dopWorksKuzovchikButtonPushed.getText() + " " + dopWorksKuzovchik.getText());
+            dopWorksKuzovchikButtonPushed.setBorder(BorderFactory.createLineBorder(Color.green, 1));
         }
         return color;
     } // Добавление зеленой рамки кнопке и занесение нажатий в Map при добавлении в список
@@ -1150,6 +1345,13 @@ public class AddWorkPanel {
         overlayButtonPushed = null;
         glassButtonPushed = null;
         elementRemont = null;
+        dopWorksArmaturchikButtonPushed = null;
+        dopWorksPainterButtonPushed = null;
+        dopWorksKuzovchikButtonPushed = null;
+        dopWorksArmaturchik.setText("");
+        dopWorksPainter.setText("");
+        dopWorksKuzovchik.setText("");
+        remont.setText("");
         elementKuzDetReplaceSide = 0.0;
         elementArmatureSide = 0.0;
         elementPaintSide = 0.0;
@@ -1169,9 +1371,10 @@ public class AddWorkPanel {
             element.setPaintSide(elementPaintSide);
             element.setArmatureSide(elementArmatureSide);
             element.setKuzDetReplaceSide(elementKuzDetReplaceSide);
+            elementPaintAllForLkm += elementPaintSide;  // Добавляем в ЛКМ норматив объем окраски общего для всех Элементов
+            element.setLkmForElement(element.getPaintSide()); // Добавляем в ЛКМ норматив объем окраски для конкретного Элемента
             // Если нажата кнопка ремонта, то добавляем, добавив "." перед последним символом
             // переведя в двоичное число
-            elementPaintAllForLkm += elementPaintSide;
             if (remontButtonPushed != null) {
                 String rem;
                 rem = new StringBuilder(elementRemont).insert(elementRemont.length() - 1, ".").toString();
@@ -1181,25 +1384,30 @@ public class AddWorkPanel {
             // Если имя элемента входит в перечень, то добавляем ручки, молдинги и зеркала.
             if (zercaloButtonPushed != null) {
                 element.setZerkalo(1);
-                elementPaintAllForLkm += 1;
+                element.setLkmForElement(element.getLkmForElement() + 1);
+                elementPaintAllForLkm += 1; // Добавляем в ЛКМ общее, норматив объем окраски согласно элементу
             }
             if (ruchkaButtonPushed != null) {
                 element.setRuchka(1);
-                elementPaintAllForLkm += 1;
+                element.setLkmForElement(element.getLkmForElement() + 1);
+                elementPaintAllForLkm += 1; // Добавляем в ЛКМ общее, норматив объем окраски согласно элементу
             }
             if (moldingButtonPushed != null) {
                 element.setMolding(1);
-                elementPaintAllForLkm += 1;
+                element.setLkmForElement(element.getLkmForElement() + 1);
+                elementPaintAllForLkm += 1; // Добавляем в ЛКМ общее, норматив объем окраски согласно элементу
             }
             // Если имя элемента входит в перечень добавляем расширитель крыльев
             if (expanderButtonPushed != null) {
                 element.setExpander(2);
-                elementPaintAllForLkm += 2;
+                element.setLkmForElement(element.getLkmForElement() + 2);
+                elementPaintAllForLkm += 2; // Добавляем в ЛКМ общее, норматив объем окраски согласно элементу
             }
             // Если имя элемента входит в перечень, то добавляем накладку
             if (overlayButtonPushed != null) {
                 element.setOverlay(2);
-                elementPaintAllForLkm += 2;
+                element.setLkmForElement(element.getLkmForElement() + 2);
+                elementPaintAllForLkm += 2; // Добавляем в ЛКМ общее, норматив объем окраски согласно элементу
             }
             // Если у элемента есть стекло, то проверяем надо ли снимать.
             if (haveGlass > 0) {
@@ -1210,6 +1418,21 @@ public class AddWorkPanel {
                 } else {
                     element.setNameGlass(glassButtonPushed.getText() + " стекло c/у");
                 }
+            }
+            if (dopWorksArmaturchikButtonPushed != null) {
+                String dopWorks;
+                dopWorks = new StringBuilder(dopWorksArmaturchik.getText()).insert(dopWorksArmaturchik.getText().length() - 1, ".").toString();
+                element.setDopWorksArmoturchik(Double.parseDouble(dopWorks));
+            }
+            if (dopWorksPainterButtonPushed != null) {
+                String dopWorks;
+                dopWorks = new StringBuilder(dopWorksPainter.getText()).insert(dopWorksPainter.getText().length() - 1, ".").toString();
+                element.setDopWorksPainter(Double.parseDouble(dopWorks));
+            }
+            if (dopWorksKuzovchikButtonPushed != null) {
+                String dopWorks;
+                dopWorks = new StringBuilder(dopWorksKuzovchik.getText()).insert(dopWorksKuzovchik.getText().length() - 1, ".").toString();
+                element.setDopWorksKuzovchik(Double.parseDouble(dopWorks));
             }
         }
         calcLkm(element);
@@ -1271,6 +1494,9 @@ public class AddWorkPanel {
         LineBorder colorPaint1xButton = (LineBorder) but.getPaint1xButton().getBorder();
         LineBorder colorPaint2xButton = (LineBorder) but.getPaint2xButton().getBorder();
         LineBorder colorRepair = (LineBorder) but.getRepairButton().getBorder();
+        LineBorder colorDopWorksArmaturchik = (LineBorder) but.getDopWorksArmaturchikButton().getBorder();
+        LineBorder colorDopWorksPainter = (LineBorder) but.getDopWorksPainterButton().getBorder();
+        LineBorder colorDopWorksKuzovchik = (LineBorder) but.getDopWorksKuzovchikButton().getBorder();
 
         if (colorReplaceButton.getLineColor().equals(Color.GREEN)) {
             but.getReplaceButton().doClick();
@@ -1284,7 +1510,6 @@ public class AddWorkPanel {
         if (colorPaint2xButton.getLineColor().equals(Color.GREEN)) {
             but.getPaint2xButton().doClick();
         }
-
         if (colorRepair.getLineColor().equals(Color.GREEN)) {
             but.getRepairButton().doClick();
         }
@@ -1329,6 +1554,15 @@ public class AddWorkPanel {
                 but.getOverlayButton().doClick();
             }
         }
+        if (colorDopWorksArmaturchik.getLineColor().equals(Color.GREEN)) {
+            but.getDopWorksArmaturchikButton().doClick();
+        }
+        if (colorDopWorksPainter.getLineColor().equals(Color.GREEN)) {
+            but.getDopWorksPainterButton().doClick();
+        }
+        if (colorDopWorksKuzovchik.getLineColor().equals(Color.GREEN)) {
+            but.getDopWorksKuzovchikButton().doClick();
+        }
     } // Проверка и нажатие кнопок добавленного элемента
 
     private void removeElementFromList(String elementName) {
@@ -1345,11 +1579,11 @@ public class AddWorkPanel {
         }
     } // Удаление из Списка элементов "element"
 
-    public void load(List<Element> elementList, Map<String, Map<String, List<String>>> lineBorderColorMap, Client client,Lkm lkm, JPanel panel) {
+    public void load(List<Element> elementList, Map<String, Map<String, List<String>>> lineBorderColorMap, Client client, Lkm lkm, JPanel panel) {
         this.elementList = elementList;
         this.lineBorderColorMap = lineBorderColorMap;
+        reCalcLkmPrice();
         this.lkm = lkm;
-        calcLkmPrice();
         JFrame parentFrame = (JFrame) SwingUtilities.getWindowAncestor(panel);
         startPanel(panel, client, parentFrame);
         sendToStringInElementListTextViewing();
@@ -1416,4 +1650,40 @@ public class AddWorkPanel {
                 + (lkm.getNapkin() * lkmPrices.getNapkin())
                 + (lkm.getHermetic() * lkmPrices.getHermetic())) * 1.1);
     } // Метод подсчета стоимости необходимого ЛКМ
+
+    private void reCalcLkmPrice() {
+        lkmTotalPrice = 0;
+        elementPaintAllForLkm = 0;
+        if (!elementList.isEmpty()) {
+            for (Element element : elementList) {
+                elementPaintAllForLkm = elementPaintAllForLkm + element.getLkmForElement();
+                calcLkm(element);
+            }
+        } else {
+            calcLkmPrice();
+        }
+    } // Пересчитать ЛКМ заново
+    private void clearLkm(){
+        lkm.setP80(0);
+        lkm.setP180(0);
+        lkm.setP280(0);
+        lkm.setP280(0);
+        lkm.setP400(0);
+        lkm.setP500(0);
+        lkm.setStripP80(0);
+        lkm.setStripP120(0);
+        lkm.setStripP180(0);
+        lkm.setScotchBrite(0);
+        lkm.setPriming(0);
+        lkm.setClear(0);
+        lkm.setBaseDilution(0);
+        lkm.setBasePaint(0);
+        lkm.setSiliconRemover(0);
+        lkm.setStickyTape(0);
+        lkm.setCoveringFilm(0);
+        lkm.setPuttyFiber(0);
+        lkm.setPuttyUniversal(0);
+        lkm.setNapkin(0);
+        lkm.setHermetic(0);
+    } // Обнуляем ЛКМ
 }

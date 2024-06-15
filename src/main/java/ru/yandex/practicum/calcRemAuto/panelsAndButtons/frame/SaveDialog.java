@@ -70,8 +70,8 @@ public class SaveDialog extends JDialog {
 
         but.getYesButton().addActionListener(e -> {
             answer = true;
-            WorkWithFile workWithFaile = new WorkWithFile(client, total, elements, lineBorderColorMap,lkm);
-            workWithFaile.save(line,lkmTotalPrice);
+            WorkWithFile workWithFaile = new WorkWithFile(client, total, elements, lineBorderColorMap, lkm);
+            workWithFaile.save(line, lkmTotalPrice);
             if (checkBoxSendToTelegram.isSelected()) { // Если галку не сняли, то отправляем смету в telegram
                 sendSmeta(workWithFaile.getDATE_DIRECTORY());
             }
@@ -110,30 +110,49 @@ public class SaveDialog extends JDialog {
         // Установка текста в previewTextArea на основе клиента, total и строк
         previewTextArea.setText(buildPreviewText(client, line, lkmTotalPrice));
         return previewTextArea.getText();
-    }
+    } // Метод отображения строк элемента и подсчета total
 
     private double calculateMalyr(Element element) {
+        // Сначала высчитываем работы маляра
         double total = (element.getPaintSide() + element.getMolding()
                 + element.getRuchka() + element.getZerkalo() + element.getExpander()
-                + element.getOverlay()) * prices.getMechanicHourlyRate();
-        if (element.getHoDoRemont().equals("маляр")) {
-            total = total + (element.getRemont() * prices.getMechanicHourlyRate());
+                + element.getOverlay() + element.getDopWorksPainter()) * prices.getMechanicHourlyRate();
+        // Далее рассчитываем ремонт. Нужно учесть кто делал ремонт
+        if (element.getHoDoRemont().equals("Маляр") || (element.getHoDoRemont().toLowerCase().equals("кузовщик")
+                && !(element.getName().contains("Моторный отсек") || element.getName().contains("Задняя панель")))) {
+            // Если ремонт делал маляр то весь норматив его
+            if (element.getHoDoRemont().equals("Маляр")) {
+                total = total + (element.getRemont() * prices.getMechanicHourlyRate());
+            } else {
+                // Если ремонт выполнял кузовщик и это не моторный отсек и задняя панель, то начисляем малеру 30% от норматива на шпатлевку.
+                total = total + ((element.getRemont() * 0.3) * prices.getMechanicHourlyRate());
+            }
         }
         return total;
     }// Метод для расчета значения Маляр на основе текущего элемента
 
     private double calculateArmatyrchik(Element element) {
-        double total = (element.getArmatureSide() + element.getGlass()) * prices.getMechanicHourlyRate();
-        if (element.getHoDoRemont().equals("арматурщик")) {
+        // Сначала высчитываем работы арматурщика
+        double total = (element.getArmatureSide() + element.getGlass() + element.getDopWorksArmoturchik()) * prices.getMechanicHourlyRate();
+        // Если арматурщик выполнял ремонт, то добавляем норматив на ремонт
+        if (element.getHoDoRemont().equals("Арматурщик")) {
             total = total + (element.getRemont() * prices.getMechanicHourlyRate());
         }
         return total;
     } // Метод для расчета значения Арматурщик на основе текущего элемента
 
     private double calculateKuzovchik(Element element) {
-        double total = element.getKuzDetReplaceSide() * prices.getMechanicHourlyRate();
-        if (element.getHoDoRemont().equals("кузовщик")) {
-            total = total + (element.getRemont() * prices.getMechanicHourlyRate());
+        // Сначала высчитываем нормативы кузовных работ
+        double total = (element.getKuzDetReplaceSide() + element.getDopWorksKuzovchik()) * prices.getMechanicHourlyRate();
+        // Далее необходимо просчитать ремонт
+        if (element.getHoDoRemont().equals("Кузовщик")) {
+            if (element.getName().contains("Моторный отсек") || element.getName().contains("Задняя панель")) {
+                // Если ремонт производился на элементы из списка, то засчитываем 100%
+                total = total + (element.getRemont() * prices.getMechanicHourlyRate());
+            } else {
+                // Если ремонт не из списка, то делим на 70% кузовщик и 30% маляру на шпатлевку
+                total = total + ((element.getRemont() * 0.7) * prices.getMechanicHourlyRate());
+            }
         }
         return total;
     }// Метод для расчета значения Кузовщик на основе текущего элемента
@@ -142,7 +161,8 @@ public class SaveDialog extends JDialog {
         return (element.getRemont() + element.getMolding() + element.getRuchka()
                 + element.getZerkalo() + element.getExpander() + element.getOverlay()
                 + element.getPaintSide() + element.getGlass() + element.getKuzDetReplaceSide()
-                + element.getArmatureSide()) * prices.getMasterHourlyRate();
+                + element.getArmatureSide() + element.getDopWorksPainter() + element.getDopWorksArmoturchik()
+                + element.getDopWorksKuzovchik()) * prices.getMasterHourlyRate();
     }// Метод для расчета значения Мастер на основе текущего элемента
 
     private void updateTotalValues(Element element) {
@@ -150,11 +170,11 @@ public class SaveDialog extends JDialog {
         total.setArmatyrchik(total.getArmatyrchik() + calculateArmatyrchik(element));
         total.setKuzovchik(total.getKuzovchik() + calculateKuzovchik(element));
         total.setMaster(total.getMaster() + calculateMaster(element));
-    } // Метод для обновления значений total на основе текущего элемента
+    } // Метод для обновления значений total механиков на основе текущего элемента
 
     private void updateTotal() {
         total.setTotal(total.getTotal() + total.getArmatyrchik() + total.getMalyr() + total.getKuzovchik() + total.getMaster());
-    }// Метод для обновления общего значения total
+    }// Метод для обновления общего значения total(всего по смете)
 
     private String buildPreviewText(Client client, StringBuilder line, int lkmTotalPrice) {
         return client.toString()
@@ -170,8 +190,7 @@ public class SaveDialog extends JDialog {
             line.append(" окраска: ").append(element.getPaintSide()).append(" н/ч.")
                     .append(" ремонт: ").append(element.getRemont()).append(" н/ч.")
                     .append(" замена кузовной детали: ").append(element.getKuzDetReplaceSide()).append(" н/ч.")
-                    .append(" р/с: ").append(element.getArmatureSide()).append(" н/ч. ")
-                    .append(" Итого: ").append(element.getTotal()).append(" руб.");
+                    .append(" р/с: ").append(element.getArmatureSide()).append(" н/ч. ");
             if (element.getGlass() > 0) line.append(element.getNameGlass());
             if (element.getZerkalo() > 0) line.append(" зеркало ");
             if (element.getMolding() > 0) line.append(" молдинг ");
@@ -182,7 +201,17 @@ public class SaveDialog extends JDialog {
                 line.append(" расширитель окраска: ").append(element.getExpander()).append(" н/ч.");
             if (element.getOverlay() > 0)
                 line.append(" накладка окраска: ").append(element.getOverlay()).append(" н/ч.");
+            if (element.getDopWorksPainter() > 0)
+                line.append(" Доп.работы по покраске: ").append(element.getDopWorksPainter()).append(" н/ч.");
+            if (element.getDopWorksArmoturchik() > 0)
+                line.append(" Доп.работы арматурные: ").append(element.getDopWorksArmoturchik()).append(" н/ч.");
+            if (element.getDopWorksKuzovchik() > 0)
+                line.append(" Доп.работы кузовные: ").append(element.getDopWorksKuzovchik()).append(" н/ч.");
+
+            line.append(" Итого: ").append(element.getTotal()).append(" руб.");
+        } else {
+            line.append(" Итого: ").append(element.getTotal()).append(" руб.");
         }
         return line.append("\n").toString();
-    } // Создание текста отображения сметы
+    } // Создание текста отображения сметы. Строка элемента, работ по нему и сколько он стоит.
 }

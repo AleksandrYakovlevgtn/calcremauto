@@ -50,5 +50,8 @@ public class Buttons {
     JButton overlayButton = new JButton("Накладка");
     JButton paint1xButton = new JButton("Окраска с 1х");
     JButton paint2xButton = new JButton("2х");
+    JButton dopWorksArmaturchikButton = new JButton("Арматурщик");
+    JButton dopWorksPainterButton = new JButton("Маляр");
+    JButton dopWorksKuzovchikButton = new JButton("Кузовщик");
     JTextField remontJText = new JTextField();
 }
