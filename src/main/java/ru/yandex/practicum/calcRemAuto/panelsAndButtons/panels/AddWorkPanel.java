@@ -18,13 +18,14 @@ import java.util.List;
 import javax.swing.text.*;
 
 public class AddWorkPanel {
-
     List<Element> elementList = new ArrayList<>(); // Список добавленных элементов
     Map<String, Map<String, List<String>>> lineBorderColorMap = new HashMap<>(); // Таблица с нажатыми кнопками добавленных элементов
     Buttons but = new Buttons(); // Кнопки
     JPanel elementLeftRightSidePanel = new JPanel(); // Панель с элементами которые расположены по бокам авто
     JPanel elementCenterSide = new JPanel();   // Панель с элементами расположенными по центру авто
     JPanel panelGlass = new JPanel(); // Панель с остеклением авто
+    private String imagePath = "Системные/полировка_фон.png"; // Путь до фона. Картинка разложенного авто
+    JPanel polirovkaPanel;// = new JPanel(new GridBagLayout()); // Панель для полировки использует фон на котором cheakBox,сы для элементов
     private JComboBox<String> remontComboBox = new JComboBox<>(new String[]{"Маляр", "Кузовщик", "Арматурщик"});
     JTextField remont = but.getRemontJText(); // Графа ввода н\ч ремонта элемента
     JTextField dopWorksArmaturchik = new JTextField();  // Графа ввода доп работ Арматурщик
@@ -87,6 +88,9 @@ public class AddWorkPanel {
         panelStartAdd.add(takeColorOfButtons(removeActionListener(but.getButtonGlass()), 1), new GridBagConstraints(0, 4, 1, 1, 1, 1,
                 GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
                 new Insets(2, 2, 2, 2), 0, 0));
+        panelStartAdd.add(takeColorOfButtons(removeActionListener(but.getPolirovkaButton()), 1), new GridBagConstraints(0, 5, 1, 1, 1, 1,
+                GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
+                new Insets(2, 2, 2, 2), 0, 0));
         // Добавляем кнопки снизу с права "назад" и "сохранить"
         panelSaveAndBack.add(but.getButtonBack(), new GridBagConstraints(0, 0, 1, 1, 1, 1,
                 GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
@@ -107,7 +111,7 @@ public class AddWorkPanel {
         // Добавляем панель нижнего правого угла с 2 кнопками
         panelXYZSaveAndBack.add(panelSaveAndBack, BorderLayout.EAST);
         panel.add(panelXYZSaveAndBack, BorderLayout.SOUTH);
-        // Добавляем в основную панель запененную начальную панель
+        // Добавляем в основную панель заполненную начальную панель
         panel.add(panelAdd, BorderLayout.CENTER);
         panelStartAdd.updateUI();
         // Назначаем действия кнопкам
@@ -126,6 +130,10 @@ public class AddWorkPanel {
         but.getButtonCenter().addActionListener(e -> {
             sideButtonPushed = changeColorPushedButton(sideButtonPushed, but.getButtonCenter(), 1);
             centerSidePanel(clearAll(panelAdd));
+        });
+        but.getPolirovkaButton().addActionListener(e -> {
+            sideButtonPushed = changeColorPushedButton(sideButtonPushed, but.getPolirovkaButton(), 1);
+            polirovkaPanel(clearAll(panelAdd));
         });
 
         but.getButtonBack().addActionListener(e -> {
@@ -352,6 +360,234 @@ public class AddWorkPanel {
             }
         }); // Заднее стекло
     } // Панель с остеклением
+
+    private void polirovkaPanel(JPanel panelAdd) {
+        polirovkaPanel = setPanelBackground(polirovkaPanel, imagePath);
+        JPanel test = new JPanel(new GridBagLayout());
+        test.setPreferredSize(new Dimension(300, 200));
+        JPanel xyzPanel = new JPanel(new GridBagLayout());
+        xyzPanel.setOpaque(false);
+        xyzPanel.setPreferredSize(new Dimension(300, 200));
+        polirovkaPanel.add(xyzPanel);
+
+        test.add(polirovkaPanel, new GridBagConstraints(0, 0, 1, 1, 1, 1,
+                GridBagConstraints.NORTH, GridBagConstraints.NONE,
+                new Insets(2, 2, 1, 2), 300, 200));
+        panelAdd.add(test, BorderLayout.WEST);
+
+        JCheckBox perBamperCheckBox = new JCheckBox();
+        perBamperCheckBox.setToolTipText("Пер.Бампер");
+        perBamperCheckBox.setOpaque(false);  // Устанавливаем прозрачность
+        perBamperCheckBox.setBackground(null);  // Убираем фон
+
+        JCheckBox perWingLeftCheckBox = new JCheckBox();
+        perWingLeftCheckBox.setToolTipText("Пер.Лев.Крыло");
+        perWingLeftCheckBox.setOpaque(false);  // Устанавливаем прозрачность
+        perWingLeftCheckBox.setBackground(null);  // Убираем фон
+
+        JCheckBox perWingRightCheckBox = new JCheckBox();
+        perWingRightCheckBox.setToolTipText("Пер.Пр.крыло");
+        perWingRightCheckBox.setOpaque(false);  // Устанавливаем прозрачность
+        perWingRightCheckBox.setBackground(null);  // Убираем фон
+
+        JCheckBox bonnetCheckBox = new JCheckBox();
+        bonnetCheckBox.setToolTipText("Капот");
+        bonnetCheckBox.setOpaque(false);  // Устанавливаем прозрачность
+        bonnetCheckBox.setBackground(null);  // Убираем фон
+
+        JCheckBox perDoorLeftCheckBox = new JCheckBox();
+        perDoorLeftCheckBox.setToolTipText("Пер.Лев.Дверь");
+        perDoorLeftCheckBox.setOpaque(false);  // Устанавливаем прозрачность
+        perDoorLeftCheckBox.setBackground(null);  // Убираем фон
+
+        JCheckBox perDoorRightCheckBox = new JCheckBox();
+        perDoorRightCheckBox.setToolTipText("Пер.Пр.Дверь");
+        perDoorRightCheckBox.setOpaque(false);  // Устанавливаем прозрачность
+        perDoorRightCheckBox.setBackground(null);  // Убираем фон
+
+        JCheckBox backDoorLeftCheckBox = new JCheckBox();
+        backDoorLeftCheckBox.setToolTipText("Зад.Лев.Дверь");
+        backDoorLeftCheckBox.setOpaque(false);  // Устанавливаем прозрачность
+        backDoorLeftCheckBox.setBackground(null);  // Убираем фон
+
+        JCheckBox backDoorRightCheckBox = new JCheckBox();
+        backDoorRightCheckBox.setToolTipText("Зад.Пр.Дверь");
+        backDoorRightCheckBox.setOpaque(false);  // Устанавливаем прозрачность
+        backDoorRightCheckBox.setBackground(null);  // Убираем фон
+
+        JCheckBox balkLeftCheckBox = new JCheckBox();
+        balkLeftCheckBox.setToolTipText("Лев.Брус");
+        balkLeftCheckBox.setOpaque(false);  // Устанавливаем прозрачность
+        balkLeftCheckBox.setBackground(null);  // Убираем фон
+
+        JCheckBox balkRightCheckBox = new JCheckBox();
+        balkRightCheckBox.setToolTipText("Пр.Брус");
+        balkRightCheckBox.setOpaque(false);  // Устанавливаем прозрачность
+        balkRightCheckBox.setBackground(null);  // Убираем фон
+
+        JCheckBox roofCheckBox = new JCheckBox();
+        roofCheckBox.setToolTipText("Крыша");
+        roofCheckBox.setOpaque(false);  // Устанавливаем прозрачность
+        roofCheckBox.setBackground(null);  // Убираем фон
+
+        JCheckBox backWingLeftCheckBox = new JCheckBox();
+        backWingLeftCheckBox.setToolTipText("Зад.Лев.Крыло");
+        backWingLeftCheckBox.setOpaque(false);  // Устанавливаем прозрачность
+        backWingLeftCheckBox.setBackground(null);  // Убираем фон
+
+        JCheckBox backWingRightCheckBox = new JCheckBox();
+        backWingRightCheckBox.setToolTipText("Зад.Пр.Крыло");
+        backWingRightCheckBox.setOpaque(false);  // Устанавливаем прозрачность
+        backWingRightCheckBox.setBackground(null);  // Убираем фон
+
+        JCheckBox trunkLidCheckBox = new JCheckBox();
+        trunkLidCheckBox.setToolTipText("Крышка баг.");
+        trunkLidCheckBox.setOpaque(false);  // Устанавливаем прозрачность
+        trunkLidCheckBox.setBackground(null);  // Убираем фон
+
+        JCheckBox rearBumperCheckBox = new JCheckBox();
+        rearBumperCheckBox.setToolTipText("Зад.Бампер");
+        rearBumperCheckBox.setOpaque(false);  // Устанавливаем прозрачность
+        rearBumperCheckBox.setBackground(null);  // Убираем фон
+
+        JCheckBox lampLeftCheckBox = new JCheckBox();
+        lampLeftCheckBox.setToolTipText("Фонарь левый");
+        lampLeftCheckBox.setOpaque(false);  // Устанавливаем прозрачность
+        lampLeftCheckBox.setBackground(null);  // Убираем фон
+
+        JCheckBox lampRightCheckBox = new JCheckBox();
+        lampRightCheckBox.setToolTipText("Фонарь правый");
+        lampRightCheckBox.setOpaque(false);  // Устанавливаем прозрачность
+        lampRightCheckBox.setBackground(null);  // Убираем фон
+
+        JCheckBox headlightLeftCheckBox = new JCheckBox();
+        headlightLeftCheckBox.setToolTipText("Фара левая");
+        headlightLeftCheckBox.setOpaque(false);  // Устанавливаем прозрачность
+        headlightLeftCheckBox.setBackground(null);  // Убираем фон
+
+        JCheckBox headlightRightCheckBox = new JCheckBox();
+        headlightRightCheckBox.setToolTipText("Фара правая");
+        headlightRightCheckBox.setOpaque(false);  // Устанавливаем прозрачность
+        headlightRightCheckBox.setBackground(null);  // Убираем фон
+
+        JCheckBox mirrorLeftCheckBox = new JCheckBox();
+        mirrorLeftCheckBox.setToolTipText("Зеркало левое");
+        mirrorLeftCheckBox.setOpaque(false);  // Устанавливаем прозрачность
+        mirrorLeftCheckBox.setBackground(null);  // Убираем фон
+
+        JCheckBox mirrorRightCheckBox = new JCheckBox();
+        mirrorRightCheckBox.setToolTipText("Зеркало правое");
+        mirrorRightCheckBox.setOpaque(false);  // Устанавливаем прозрачность
+        mirrorRightCheckBox.setBackground(null);  // Убираем фон
+
+
+        // Пер лев крыло
+        xyzPanel.add(perWingLeftCheckBox, new GridBagConstraints(1, 2, 1, 1, 1, 1,
+                GridBagConstraints.EAST, GridBagConstraints.NONE,
+                new Insets(0, 35, 0, 2), 0, 0));
+        // Пер лев дверь
+        xyzPanel.add(perDoorLeftCheckBox, new GridBagConstraints(1, 3, 1, 1, 1, 1,
+                GridBagConstraints.CENTER, GridBagConstraints.NONE,
+                new Insets(0, 35, 2, 2), 0, 0));
+        // Зад лев дверь
+        xyzPanel.add(backDoorLeftCheckBox, new GridBagConstraints(1, 5, 1, 1, 1, 1,
+                GridBagConstraints.NORTH, GridBagConstraints.NONE,
+                new Insets(0, 35, 50, 2), 0, 0));
+        // Заднее левое крыло
+        xyzPanel.add(backWingLeftCheckBox, new GridBagConstraints(1, 6, 1, 1, 1, 1,
+                GridBagConstraints.NORTH, GridBagConstraints.NONE,
+                new Insets(2, 50, 30, 2), 0, 0));
+        // Фара левая
+        xyzPanel.add(headlightLeftCheckBox, new GridBagConstraints(2, 1, 1, 1, 1, 1,
+                GridBagConstraints.NORTHEAST, GridBagConstraints.NONE,
+                new Insets(2, 2, 2, 2), 0, 0));
+        // Зеркало левое
+        xyzPanel.add(mirrorLeftCheckBox, new GridBagConstraints(2, 3, 1, 1, 1, 1,
+                GridBagConstraints.NORTH, GridBagConstraints.NONE,
+                new Insets(0, 2, 50, 2), 0, 0));
+        // Фонарь левый
+        xyzPanel.add(lampLeftCheckBox, new GridBagConstraints(2, 7, 1, 1, 1, 1,
+                GridBagConstraints.NORTHEAST, GridBagConstraints.NONE,
+                new Insets(2, 2, 2, 2), 0, 0));
+        // Левый брус крыши
+        xyzPanel.add(balkLeftCheckBox, new GridBagConstraints(3, 4, 1, 1, 1, 1,
+                GridBagConstraints.NORTHWEST, GridBagConstraints.NONE,
+                new Insets(2, 2, 2, 20), 0, 0));
+        // Пер бампер
+        xyzPanel.add(perBamperCheckBox, new GridBagConstraints(4, 0, 1, 1, 1, 1,
+                GridBagConstraints.CENTER, GridBagConstraints.NONE,
+                new Insets(2, 2, 2, 2), 0, 0));
+        // Капот
+        xyzPanel.add(bonnetCheckBox, new GridBagConstraints(4, 2, 1, 1, 1, 1,
+                GridBagConstraints.NORTH, GridBagConstraints.NORTH,
+                new Insets(2, 2, 50, 2), 0, 0));
+        // Крыша
+        xyzPanel.add(roofCheckBox, new GridBagConstraints(4, 4, 1, 1, 1, 1,
+                GridBagConstraints.CENTER, GridBagConstraints.NONE,
+                new Insets(2, 2, 2, 2), 0, 0));
+        // Крышка багажника
+        xyzPanel.add(trunkLidCheckBox, new GridBagConstraints(4, 6, 1, 1, 1, 1,
+                GridBagConstraints.SOUTH, GridBagConstraints.NONE,
+                new Insets(2, 2, 2, 2), 0, 0));
+        // Задний бампер
+        xyzPanel.add(rearBumperCheckBox, new GridBagConstraints(4, 8, 1, 1, 1, 1,
+                GridBagConstraints.CENTER, GridBagConstraints.NONE,
+                new Insets(2, 2, 2, 2), 0, 0));
+        // Правый брус крыши
+        xyzPanel.add(balkRightCheckBox, new GridBagConstraints(5, 4, 1, 1, 1, 1,
+                GridBagConstraints.NORTHEAST, GridBagConstraints.NONE,
+                new Insets(2, 20, 2, 2), 0, 0));
+        // Фара правая
+        xyzPanel.add(headlightRightCheckBox, new GridBagConstraints(6, 1, 1, 1, 1, 1,
+                GridBagConstraints.NORTHWEST, GridBagConstraints.NONE,
+                new Insets(2, 2, 2, 2), 0, 0));
+        // Зеркало правое
+        xyzPanel.add(mirrorRightCheckBox, new GridBagConstraints(6, 3, 1, 1, 1, 1,
+                GridBagConstraints.NORTH, GridBagConstraints.NONE,
+                new Insets(0, 2, 40, 2), 0, 0));
+        // Фонарь правый
+        xyzPanel.add(lampRightCheckBox, new GridBagConstraints(6, 7, 1, 1, 1, 1,
+                GridBagConstraints.NORTHWEST, GridBagConstraints.NONE,
+                new Insets(2, 2, 2, 2), 0, 0));
+        // Пер прав крыло
+        xyzPanel.add(perWingRightCheckBox, new GridBagConstraints(7, 2, 1, 1, 1, 1,
+                GridBagConstraints.WEST, GridBagConstraints.NONE,
+                new Insets(0, 2, 0, 35), 0, 0));
+        // Пер прав дверь
+        xyzPanel.add(perDoorRightCheckBox, new GridBagConstraints(7, 3, 1, 1, 1, 1,
+                GridBagConstraints.CENTER, GridBagConstraints.NONE,
+                new Insets(2, 2, 2, 35), 0, 0));
+        // Зад прав дверь
+        xyzPanel.add(backDoorRightCheckBox, new GridBagConstraints(7, 5, 1, 1, 1, 1,
+                GridBagConstraints.NORTH, GridBagConstraints.NONE,
+                new Insets(0, 2, 50, 35), 0, 0));
+        // Заднее правое крыло
+        xyzPanel.add(backWingRightCheckBox, new GridBagConstraints(7, 6, 1, 1, 1, 1,
+                GridBagConstraints.NORTH, GridBagConstraints.NONE,
+                new Insets(2, 2, 30, 50), 0, 0));
+
+
+        addAndRemovePanel(clearCenter(panelAdd));
+        panelAdd.updateUI();
+    }
+
+    private JPanel setPanelBackground(JPanel panel, String imagePath) {
+        // Создаем ImageIcon из указанного пути
+        ImageIcon imageIcon = new ImageIcon(imagePath);
+        Image image = imageIcon.getImage();
+
+        // Переопределяем paintComponent для рисования изображения
+        panel = new JPanel() {
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                g.drawImage(image, 0, 0, getWidth(), getHeight(), this);
+            }
+        };
+        panel.setLayout(new GridLayout(1, 1));
+        panel.setPreferredSize(new Dimension(300, 200));
+        return panel;
+    } // Добавления фона для панели полировки
 
     public void WorksPanel(JPanel elementLeftRightSidePanel, JPanel panelAdd) {
         clearPushedButtonAfterElementAdd();
@@ -1214,7 +1450,7 @@ public class AddWorkPanel {
                                                 break;
                                         }
                                     }
-                                } else if (check.contains(button.getText())  && (check.contains("Маляр") || check.contains("Кузовщик") || check.contains("Арматурщик"))) {
+                                } else if (check.contains(button.getText()) && (check.contains("Маляр") || check.contains("Кузовщик") || check.contains("Арматурщик"))) {
                                     String[] split = check.split(" ");
                                     switch (split[0]) {
                                         case "Арматурщик":
@@ -1664,7 +1900,8 @@ public class AddWorkPanel {
             calcLkmPrice();
         }
     } // Пересчитать ЛКМ заново
-    private void clearLkm(){
+
+    private void clearLkm() {
         lkm.setP80(0);
         lkm.setP180(0);
         lkm.setP280(0);

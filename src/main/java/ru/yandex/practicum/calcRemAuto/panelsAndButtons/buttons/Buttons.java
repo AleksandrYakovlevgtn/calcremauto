@@ -21,6 +21,7 @@ public class Buttons {
     JButton buttonRight = new JButton("Правая");
     JButton buttonCenter = new JButton("Центр");
     JButton buttonGlass = new JButton("Остекление");
+    JButton PolirovkaButton = new JButton("Полировка");
     JButton buttonFrontWing = new JButton("Пер.Крыло");
     JButton buttonFrontDoor = new JButton("Пер.Дверь");
     JButton buttonBackDoor = new JButton("Зад.Дверь");
