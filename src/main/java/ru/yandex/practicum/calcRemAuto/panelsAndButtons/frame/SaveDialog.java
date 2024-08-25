@@ -185,7 +185,9 @@ public class SaveDialog extends JDialog {
 
     private String takeLine(Element element) {
         StringBuilder line = new StringBuilder(element.getName());
-        line.append(probels.substring(element.getName().length()));
+        if (!element.getName().startsWith("Полировка")) {
+            line.append(probels.substring(element.getName().length()));
+        }
         if (!element.getName().contains("Остекление")) {
             line.append(" окраска: ").append(element.getPaintSide()).append(" н/ч.")
                     .append(" ремонт: ").append(element.getRemont()).append(" н/ч.")

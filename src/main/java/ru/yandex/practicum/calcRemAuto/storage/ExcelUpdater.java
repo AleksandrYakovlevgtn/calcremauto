@@ -142,12 +142,14 @@ public class ExcelUpdater {
         if (element.getName().contains("Замена")) {
             // Если работы по замене кузовной детали, то к имени прибавляем р/с для замены куз. Детали
             cell.setCellValue(element.getName().replace("Замена", "р/с для замены куз.детали"));
-        } else if (!element.getName().contains("Остекление") && element.getArmatureSide() != 0) {
+        } else if (!element.getName().contains("Остекление") && element.getArmatureSide() != 0 && !element.getName().contains("Полировка")) {
             // Если работы не замена, то добавляем к имени р/с
             cell.setCellValue((element.getName() + " р/с "));
-        } else if (element.getName().contains("Остекление")) {
+        } else if (element.getName().contains("Остекление") && !element.getName().contains("Полировка")) {
             // Если работы по остеклению, то добавляем к имени с/у
             cell.setCellValue((element.getName() + " c/у "));
+        } else if (element.getName().contains("Полировка")) {
+            cell.setCellValue((element.getName()));
         }
         // Далее прописываем Ячейку норматива работ
         // Если элемент это остекление то
@@ -161,12 +163,21 @@ public class ExcelUpdater {
             total += (element.getGlass() * prices.getHourlyRate()); // Добавляем к итоговой стоимости работ стоимость данной работы
         } else { // Если элемент не стекло
             cell = row.getCell(narmotive); // Берем ячейку норматив работ
-            cell.setCellValue(element.getArmatureSide()); // Вставляем значение арматурных работ
+            if (!element.getName().contains("Полировка")) {
+                cell.setCellValue(element.getArmatureSide()); // !!!!!!!!Вставляем значение арматурных работ если элемент не полировка!!!!!!!!!!!
+            } else {
+                cell.setCellValue(element.getPaintSide()); // !!!!!!!!Если элемент полировка сразу вставляем значение малярных работ!!!!!!!!!!
+            }
             cell = row.getCell(price);// Берем ячейку стоимость норма часа
             cell.setCellValue(prices.getHourlyRate());// Вставляем значение стоимости норма часа
             cell = row.getCell(totalPrice);// Берем ячейку стоимость работы
-            cell.setCellValue(element.getArmatureSide() * prices.getHourlyRate()); // Вставляем значение стоимости данной работы (норматив * цену норма часа)
-            total += (element.getArmatureSide() * prices.getHourlyRate()); // Добавляем к итоговой стоимости работ стоимость данной работы
+            if (!element.getName().contains("Полировка")) {
+                cell.setCellValue(element.getArmatureSide() * prices.getHourlyRate()); // Вставляем значение стоимости данной работы (норматив * цену норма часа)
+                total += (element.getArmatureSide() * prices.getHourlyRate()); // Добавляем к итоговой стоимости работ стоимость данной работы
+            } else {
+                cell.setCellValue(element.getPaintSide() * prices.getHourlyRate()); // Вставляем значение стоимости данной работы (норматив * цену норма часа)
+                total += (element.getPaintSide() * prices.getHourlyRate()); // Добавляем к итоговой стоимости работ стоимость данной работы
+            }
         }
         if (element.getKuzDetReplaceSide() != 0) { // Если работы по замене кузовной приварной детали, то прописываем работы кузовщика по замене
             row = sheet.getRow(++rowForePaste); // Берем новую строку
@@ -240,7 +251,7 @@ public class ExcelUpdater {
             cell.setCellValue(element.getDopWorksKuzovchik() * prices.getHourlyRate()); // Вставляем значение стоимости данной работы (норматив * цену норма часа)
             total += (element.getDopWorksKuzovchik() * prices.getHourlyRate()); // Добавляем к итоговой стоимости работ стоимость данной работы
         }
-        if (element.getPaintSide() != 0) { // Далее прописываем работы по окраске
+        if (element.getPaintSide() != 0 && !element.getName().contains("Полировка")) { // Далее прописываем работы по окраске
             row = sheet.getRow(++rowForePaste); // Берем новую строку
             cell = row.getCell(nameOfWork); // Берем ячейку имени работ
             cell.setCellValue(element.getName().replace("Замена", "") + " окраска"); // Вставляем имя элемента и вид работ

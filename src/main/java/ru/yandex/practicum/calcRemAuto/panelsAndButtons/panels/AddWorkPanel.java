@@ -53,6 +53,19 @@ public class AddWorkPanel {
     JButton dopWorksArmaturchikButtonPushed; // Арматурщик
     JButton dopWorksPainterButtonPushed;    // Маляр
     JButton dopWorksKuzovchikButtonPushed;  // Кузовщик
+    JCheckBox[] checkBoxes = {
+            createCheckBox("Пер.Бампер"), createCheckBox("Пер.Лев.Крыло"),
+            createCheckBox("Пер.Пр.крыло"), createCheckBox("Капот"),
+            createCheckBox("Пер.Лев.Дверь"), createCheckBox("Пер.Пр.Дверь"),
+            createCheckBox("Зад.Лев.Дверь"), createCheckBox("Зад.Пр.Дверь"),
+            createCheckBox("Лев.Брус"), createCheckBox("Пр.Брус"),
+            createCheckBox("Крыша"), createCheckBox("Зад.Лев.Крыло"),
+            createCheckBox("Зад.Пр.Крыло"), createCheckBox("Крышка баг."),
+            createCheckBox("Зад.Бампер"), createCheckBox("Фонарь левый"),
+            createCheckBox("Фонарь правый"), createCheckBox("Фара левая"),
+            createCheckBox("Фара правая"), createCheckBox("Зеркало левое"),
+            createCheckBox("Зеркало правое")
+    }; // Массив чекбоксов с их описаниями и позициями
     Lkm lkm = new Lkm();
     LkmPrices lkmPrices = new LkmPrices();
     int lkmTotalPrice = 0;
@@ -132,7 +145,7 @@ public class AddWorkPanel {
             centerSidePanel(clearAll(panelAdd));
         });
         but.getPolirovkaButton().addActionListener(e -> {
-            sideButtonPushed = changeColorPushedButton(sideButtonPushed, but.getPolirovkaButton(), 1);
+            sideButtonPushed = changeColorPushedButton(sideButtonPushed, but.getPolirovkaButton(), 4);
             polirovkaPanel(clearAll(panelAdd));
         });
 
@@ -375,201 +388,78 @@ public class AddWorkPanel {
                 new Insets(2, 2, 1, 2), 300, 200));
         panelAdd.add(test, BorderLayout.WEST);
 
-        JCheckBox perBamperCheckBox = new JCheckBox();
-        perBamperCheckBox.setToolTipText("Пер.Бампер");
-        perBamperCheckBox.setOpaque(false);  // Устанавливаем прозрачность
-        perBamperCheckBox.setBackground(null);  // Убираем фон
+        // Позиции чекбоксов
+        GridBagConstraints[] constraints = {
+                // Пер бампер
+                new GridBagConstraints(4, 0, 1, 1, 1, 1, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(2, 2, 2, 2), 0, 0),
+                // Пер лев крыло
+                new GridBagConstraints(1, 2, 1, 1, 1, 1, GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(0, 35, 0, 2), 0, 0),
+                // Пер прав крыло
+                new GridBagConstraints(7, 2, 1, 1, 1, 1, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(0, 2, 0, 35), 0, 0),
+                // Капот
+                new GridBagConstraints(4, 2, 1, 1, 1, 1, GridBagConstraints.NORTH, GridBagConstraints.NONE, new Insets(2, 2, 50, 2), 0, 0),
+                // Пер лев дверь
+                new GridBagConstraints(1, 3, 1, 1, 1, 1, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(0, 35, 2, 2), 0, 0),
+                // Пер прав дверь
+                new GridBagConstraints(7, 3, 1, 1, 1, 1, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(2, 2, 2, 35), 0, 0),
+                // Зад лев дверь
+                new GridBagConstraints(1, 5, 1, 1, 1, 1, GridBagConstraints.NORTH, GridBagConstraints.NONE, new Insets(0, 35, 50, 2), 0, 0),
+                // Зад прав дверь
+                new GridBagConstraints(7, 5, 1, 1, 1, 1, GridBagConstraints.NORTH, GridBagConstraints.NONE, new Insets(0, 2, 50, 35), 0, 0),
+                // Левый брус крыши
+                new GridBagConstraints(3, 4, 1, 1, 1, 1, GridBagConstraints.NORTHWEST, GridBagConstraints.NONE, new Insets(2, 2, 2, 20), 0, 0),
+                // Правый брус крыши
+                new GridBagConstraints(5, 4, 1, 1, 1, 1, GridBagConstraints.NORTHEAST, GridBagConstraints.NONE, new Insets(2, 20, 2, 2), 0, 0),
+                // Крыша
+                new GridBagConstraints(4, 4, 1, 1, 1, 1, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(2, 2, 2, 2), 0, 0),
+                // Заднее левое крыло
+                new GridBagConstraints(1, 6, 1, 1, 1, 1, GridBagConstraints.NORTH, GridBagConstraints.NONE, new Insets(2, 50, 30, 2), 0, 0),
+                // Заднее правое крыло
+                new GridBagConstraints(7, 6, 1, 1, 1, 1, GridBagConstraints.NORTH, GridBagConstraints.NONE, new Insets(2, 2, 30, 50), 0, 0),
+                // Крышка багажника
+                new GridBagConstraints(4, 6, 1, 1, 1, 1, GridBagConstraints.SOUTH, GridBagConstraints.NONE, new Insets(2, 2, 2, 2), 0, 0),
+                // Задний бампер
+                new GridBagConstraints(4, 8, 1, 1, 1, 1, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(2, 2, 2, 2), 0, 0),
+                // Фонарь левый
+                new GridBagConstraints(2, 7, 1, 1, 1, 1, GridBagConstraints.NORTHEAST, GridBagConstraints.NONE, new Insets(2, 2, 2, 2), 0, 0),
+                // Фонарь правый
+                new GridBagConstraints(6, 7, 1, 1, 1, 1, GridBagConstraints.NORTHWEST, GridBagConstraints.NONE, new Insets(2, 2, 2, 2), 0, 0),
+                // Фара левая
+                new GridBagConstraints(2, 1, 1, 1, 1, 1, GridBagConstraints.NORTHEAST, GridBagConstraints.NONE, new Insets(2, 2, 2, 2), 0, 0),
+                // Фара правая
+                new GridBagConstraints(6, 1, 1, 1, 1, 1, GridBagConstraints.NORTHWEST, GridBagConstraints.NONE, new Insets(2, 2, 2, 2), 0, 0),
+                // Зеркало левое
+                new GridBagConstraints(2, 3, 1, 1, 1, 1, GridBagConstraints.NORTH, GridBagConstraints.NONE, new Insets(0, 2, 50, 2), 0, 0),
+                // Зеркало правое
+                new GridBagConstraints(6, 3, 1, 1, 1, 1, GridBagConstraints.NORTH, GridBagConstraints.NONE, new Insets(0, 2, 40, 2), 0, 0)
+        };
 
-        JCheckBox perWingLeftCheckBox = new JCheckBox();
-        perWingLeftCheckBox.setToolTipText("Пер.Лев.Крыло");
-        perWingLeftCheckBox.setOpaque(false);  // Устанавливаем прозрачность
-        perWingLeftCheckBox.setBackground(null);  // Убираем фон
-
-        JCheckBox perWingRightCheckBox = new JCheckBox();
-        perWingRightCheckBox.setToolTipText("Пер.Пр.крыло");
-        perWingRightCheckBox.setOpaque(false);  // Устанавливаем прозрачность
-        perWingRightCheckBox.setBackground(null);  // Убираем фон
-
-        JCheckBox bonnetCheckBox = new JCheckBox();
-        bonnetCheckBox.setToolTipText("Капот");
-        bonnetCheckBox.setOpaque(false);  // Устанавливаем прозрачность
-        bonnetCheckBox.setBackground(null);  // Убираем фон
-
-        JCheckBox perDoorLeftCheckBox = new JCheckBox();
-        perDoorLeftCheckBox.setToolTipText("Пер.Лев.Дверь");
-        perDoorLeftCheckBox.setOpaque(false);  // Устанавливаем прозрачность
-        perDoorLeftCheckBox.setBackground(null);  // Убираем фон
-
-        JCheckBox perDoorRightCheckBox = new JCheckBox();
-        perDoorRightCheckBox.setToolTipText("Пер.Пр.Дверь");
-        perDoorRightCheckBox.setOpaque(false);  // Устанавливаем прозрачность
-        perDoorRightCheckBox.setBackground(null);  // Убираем фон
-
-        JCheckBox backDoorLeftCheckBox = new JCheckBox();
-        backDoorLeftCheckBox.setToolTipText("Зад.Лев.Дверь");
-        backDoorLeftCheckBox.setOpaque(false);  // Устанавливаем прозрачность
-        backDoorLeftCheckBox.setBackground(null);  // Убираем фон
-
-        JCheckBox backDoorRightCheckBox = new JCheckBox();
-        backDoorRightCheckBox.setToolTipText("Зад.Пр.Дверь");
-        backDoorRightCheckBox.setOpaque(false);  // Устанавливаем прозрачность
-        backDoorRightCheckBox.setBackground(null);  // Убираем фон
-
-        JCheckBox balkLeftCheckBox = new JCheckBox();
-        balkLeftCheckBox.setToolTipText("Лев.Брус");
-        balkLeftCheckBox.setOpaque(false);  // Устанавливаем прозрачность
-        balkLeftCheckBox.setBackground(null);  // Убираем фон
-
-        JCheckBox balkRightCheckBox = new JCheckBox();
-        balkRightCheckBox.setToolTipText("Пр.Брус");
-        balkRightCheckBox.setOpaque(false);  // Устанавливаем прозрачность
-        balkRightCheckBox.setBackground(null);  // Убираем фон
-
-        JCheckBox roofCheckBox = new JCheckBox();
-        roofCheckBox.setToolTipText("Крыша");
-        roofCheckBox.setOpaque(false);  // Устанавливаем прозрачность
-        roofCheckBox.setBackground(null);  // Убираем фон
-
-        JCheckBox backWingLeftCheckBox = new JCheckBox();
-        backWingLeftCheckBox.setToolTipText("Зад.Лев.Крыло");
-        backWingLeftCheckBox.setOpaque(false);  // Устанавливаем прозрачность
-        backWingLeftCheckBox.setBackground(null);  // Убираем фон
-
-        JCheckBox backWingRightCheckBox = new JCheckBox();
-        backWingRightCheckBox.setToolTipText("Зад.Пр.Крыло");
-        backWingRightCheckBox.setOpaque(false);  // Устанавливаем прозрачность
-        backWingRightCheckBox.setBackground(null);  // Убираем фон
-
-        JCheckBox trunkLidCheckBox = new JCheckBox();
-        trunkLidCheckBox.setToolTipText("Крышка баг.");
-        trunkLidCheckBox.setOpaque(false);  // Устанавливаем прозрачность
-        trunkLidCheckBox.setBackground(null);  // Убираем фон
-
-        JCheckBox rearBumperCheckBox = new JCheckBox();
-        rearBumperCheckBox.setToolTipText("Зад.Бампер");
-        rearBumperCheckBox.setOpaque(false);  // Устанавливаем прозрачность
-        rearBumperCheckBox.setBackground(null);  // Убираем фон
-
-        JCheckBox lampLeftCheckBox = new JCheckBox();
-        lampLeftCheckBox.setToolTipText("Фонарь левый");
-        lampLeftCheckBox.setOpaque(false);  // Устанавливаем прозрачность
-        lampLeftCheckBox.setBackground(null);  // Убираем фон
-
-        JCheckBox lampRightCheckBox = new JCheckBox();
-        lampRightCheckBox.setToolTipText("Фонарь правый");
-        lampRightCheckBox.setOpaque(false);  // Устанавливаем прозрачность
-        lampRightCheckBox.setBackground(null);  // Убираем фон
-
-        JCheckBox headlightLeftCheckBox = new JCheckBox();
-        headlightLeftCheckBox.setToolTipText("Фара левая");
-        headlightLeftCheckBox.setOpaque(false);  // Устанавливаем прозрачность
-        headlightLeftCheckBox.setBackground(null);  // Убираем фон
-
-        JCheckBox headlightRightCheckBox = new JCheckBox();
-        headlightRightCheckBox.setToolTipText("Фара правая");
-        headlightRightCheckBox.setOpaque(false);  // Устанавливаем прозрачность
-        headlightRightCheckBox.setBackground(null);  // Убираем фон
-
-        JCheckBox mirrorLeftCheckBox = new JCheckBox();
-        mirrorLeftCheckBox.setToolTipText("Зеркало левое");
-        mirrorLeftCheckBox.setOpaque(false);  // Устанавливаем прозрачность
-        mirrorLeftCheckBox.setBackground(null);  // Убираем фон
-
-        JCheckBox mirrorRightCheckBox = new JCheckBox();
-        mirrorRightCheckBox.setToolTipText("Зеркало правое");
-        mirrorRightCheckBox.setOpaque(false);  // Устанавливаем прозрачность
-        mirrorRightCheckBox.setBackground(null);  // Убираем фон
-
-
-        // Пер лев крыло
-        xyzPanel.add(perWingLeftCheckBox, new GridBagConstraints(1, 2, 1, 1, 1, 1,
-                GridBagConstraints.EAST, GridBagConstraints.NONE,
-                new Insets(0, 35, 0, 2), 0, 0));
-        // Пер лев дверь
-        xyzPanel.add(perDoorLeftCheckBox, new GridBagConstraints(1, 3, 1, 1, 1, 1,
-                GridBagConstraints.CENTER, GridBagConstraints.NONE,
-                new Insets(0, 35, 2, 2), 0, 0));
-        // Зад лев дверь
-        xyzPanel.add(backDoorLeftCheckBox, new GridBagConstraints(1, 5, 1, 1, 1, 1,
-                GridBagConstraints.NORTH, GridBagConstraints.NONE,
-                new Insets(0, 35, 50, 2), 0, 0));
-        // Заднее левое крыло
-        xyzPanel.add(backWingLeftCheckBox, new GridBagConstraints(1, 6, 1, 1, 1, 1,
-                GridBagConstraints.NORTH, GridBagConstraints.NONE,
-                new Insets(2, 50, 30, 2), 0, 0));
-        // Фара левая
-        xyzPanel.add(headlightLeftCheckBox, new GridBagConstraints(2, 1, 1, 1, 1, 1,
-                GridBagConstraints.NORTHEAST, GridBagConstraints.NONE,
-                new Insets(2, 2, 2, 2), 0, 0));
-        // Зеркало левое
-        xyzPanel.add(mirrorLeftCheckBox, new GridBagConstraints(2, 3, 1, 1, 1, 1,
-                GridBagConstraints.NORTH, GridBagConstraints.NONE,
-                new Insets(0, 2, 50, 2), 0, 0));
-        // Фонарь левый
-        xyzPanel.add(lampLeftCheckBox, new GridBagConstraints(2, 7, 1, 1, 1, 1,
-                GridBagConstraints.NORTHEAST, GridBagConstraints.NONE,
-                new Insets(2, 2, 2, 2), 0, 0));
-        // Левый брус крыши
-        xyzPanel.add(balkLeftCheckBox, new GridBagConstraints(3, 4, 1, 1, 1, 1,
-                GridBagConstraints.NORTHWEST, GridBagConstraints.NONE,
-                new Insets(2, 2, 2, 20), 0, 0));
-        // Пер бампер
-        xyzPanel.add(perBamperCheckBox, new GridBagConstraints(4, 0, 1, 1, 1, 1,
-                GridBagConstraints.CENTER, GridBagConstraints.NONE,
-                new Insets(2, 2, 2, 2), 0, 0));
-        // Капот
-        xyzPanel.add(bonnetCheckBox, new GridBagConstraints(4, 2, 1, 1, 1, 1,
-                GridBagConstraints.NORTH, GridBagConstraints.NORTH,
-                new Insets(2, 2, 50, 2), 0, 0));
-        // Крыша
-        xyzPanel.add(roofCheckBox, new GridBagConstraints(4, 4, 1, 1, 1, 1,
-                GridBagConstraints.CENTER, GridBagConstraints.NONE,
-                new Insets(2, 2, 2, 2), 0, 0));
-        // Крышка багажника
-        xyzPanel.add(trunkLidCheckBox, new GridBagConstraints(4, 6, 1, 1, 1, 1,
-                GridBagConstraints.SOUTH, GridBagConstraints.NONE,
-                new Insets(2, 2, 2, 2), 0, 0));
-        // Задний бампер
-        xyzPanel.add(rearBumperCheckBox, new GridBagConstraints(4, 8, 1, 1, 1, 1,
-                GridBagConstraints.CENTER, GridBagConstraints.NONE,
-                new Insets(2, 2, 2, 2), 0, 0));
-        // Правый брус крыши
-        xyzPanel.add(balkRightCheckBox, new GridBagConstraints(5, 4, 1, 1, 1, 1,
-                GridBagConstraints.NORTHEAST, GridBagConstraints.NONE,
-                new Insets(2, 20, 2, 2), 0, 0));
-        // Фара правая
-        xyzPanel.add(headlightRightCheckBox, new GridBagConstraints(6, 1, 1, 1, 1, 1,
-                GridBagConstraints.NORTHWEST, GridBagConstraints.NONE,
-                new Insets(2, 2, 2, 2), 0, 0));
-        // Зеркало правое
-        xyzPanel.add(mirrorRightCheckBox, new GridBagConstraints(6, 3, 1, 1, 1, 1,
-                GridBagConstraints.NORTH, GridBagConstraints.NONE,
-                new Insets(0, 2, 40, 2), 0, 0));
-        // Фонарь правый
-        xyzPanel.add(lampRightCheckBox, new GridBagConstraints(6, 7, 1, 1, 1, 1,
-                GridBagConstraints.NORTHWEST, GridBagConstraints.NONE,
-                new Insets(2, 2, 2, 2), 0, 0));
-        // Пер прав крыло
-        xyzPanel.add(perWingRightCheckBox, new GridBagConstraints(7, 2, 1, 1, 1, 1,
-                GridBagConstraints.WEST, GridBagConstraints.NONE,
-                new Insets(0, 2, 0, 35), 0, 0));
-        // Пер прав дверь
-        xyzPanel.add(perDoorRightCheckBox, new GridBagConstraints(7, 3, 1, 1, 1, 1,
-                GridBagConstraints.CENTER, GridBagConstraints.NONE,
-                new Insets(2, 2, 2, 35), 0, 0));
-        // Зад прав дверь
-        xyzPanel.add(backDoorRightCheckBox, new GridBagConstraints(7, 5, 1, 1, 1, 1,
-                GridBagConstraints.NORTH, GridBagConstraints.NONE,
-                new Insets(0, 2, 50, 35), 0, 0));
-        // Заднее правое крыло
-        xyzPanel.add(backWingRightCheckBox, new GridBagConstraints(7, 6, 1, 1, 1, 1,
-                GridBagConstraints.NORTH, GridBagConstraints.NONE,
-                new Insets(2, 2, 30, 50), 0, 0));
-
-
+        // Добавление чекбоксов в панель
+        for (int i = 0; i < checkBoxes.length; i++) {
+            xyzPanel.add(checkBoxes[i], constraints[i]);
+        }
         addAndRemovePanel(clearCenter(panelAdd));
         panelAdd.updateUI();
-    }
+    } // Панель полировки
+
+    private JCheckBox createCheckBox(String toolTip) {
+        JCheckBox checkBox = new JCheckBox();
+        checkBox.setToolTipText(toolTip);
+        checkBox.setOpaque(false);
+        checkBox.setBackground(null);
+        return checkBox;
+    } // Создание чекбоксов с их описаниями и позициями
+
+    public static boolean isAnyCheckBoxSelected(JCheckBox[] checkBoxi) {
+        // Проходим по массиву checkBoxes
+        for (JCheckBox checkBox : checkBoxi) {
+            if (checkBox.isSelected()) {
+                return true; // Если нашли выбранный чекбокс, возвращаем true
+            }
+        }
+        return false; // Если ни один чекбокс не выбран, возвращаем false
+    } // Метод для проверки, выбран ли хотя бы один JCheckBox в массиве
+
 
     private JPanel setPanelBackground(JPanel panel, String imagePath) {
         // Создаем ImageIcon из указанного пути
@@ -1341,6 +1231,7 @@ public class AddWorkPanel {
 
         but.getAddButton().addActionListener(o -> {
             Element element = createElement();
+            // Если список элементов чист, то
             if (elementList.isEmpty()) {
                 // Если Элемент меняется, то к имени добавляем "замена".
                 // Применяем здесь, а не в createElement() по причине метода elementList.get(i).getName().contains(element.getName())
@@ -1350,8 +1241,24 @@ public class AddWorkPanel {
                 if (lineBorderColorMap.get(sideButtonPushed.getText()) != null) {
                     lineBorderColorMap.get(sideButtonPushed.getText()).put(elementButtonPushed.getText(), addColorOfButtonsWorks());
                 } else {
-                    lineBorderColorMap.put(sideButtonPushed.getText(), new HashMap<>(Map.of(elementButtonPushed.getText(), addColorOfButtonsWorks())));
+                    // Если не нажата кнопка полировки то
+                    if (!sideButtonPushed.getText().equals("Полировка")) {
+                        // Вторым ключом будет имя выбранного элемента через нажатую кнопку
+                        lineBorderColorMap.put(sideButtonPushed.getText(), new HashMap<>(Map.of(elementButtonPushed.getText(), addColorOfButtonsWorks())));
+                    } else {
+                        // Если кнопка выбранной стороны является полировка, то проверяем есть ли галочка хоть на одном checkBox
+                        if (isAnyCheckBoxSelected(checkBoxes)) {
+                            // Если выбран, то вторым ключом будет так же кнопка выбранной стороны, то есть "Полировка"
+                            lineBorderColorMap.put(sideButtonPushed.getText(), new HashMap<>(Map.of(sideButtonPushed.getText(), addColorOfButtonsWorks())));
+                        } else {
+                            // Если же ни оди checkBox ни выбран следует удалить вовсе пункт о полировке
+                            lineBorderColorMap.remove(sideButtonPushed.getText());
+                            // Так же требуется удалить и из списка элементов упоминание о полировке
+                            removeElementFromList(element.getName());
+                        }
+                    }
                 }
+                // Если же в списке элементов уже что, то есть, то
             } else {
                 // Сначала удаляем элемент из List
                 removeElementFromList(element.getName());
@@ -1360,9 +1267,39 @@ public class AddWorkPanel {
                 // Если применить в createElement() то при contains "**** ****.**** замена" getName с "**** ****.****" без замена он его не засчитает и вернет false*/
                 elementList.add(addToNameZamenaIfZamenaButtonPushed(element));
                 if (lineBorderColorMap.get(sideButtonPushed.getText()) != null) {
-                    lineBorderColorMap.get(sideButtonPushed.getText()).put(elementButtonPushed.getText(), addColorOfButtonsWorks());
+                    // Если не нажата кнопка полировки то
+                    if (!sideButtonPushed.getText().equals("Полировка")) {
+                        // Вторым ключом будет имя выбранного элемента через нажатую кнопку
+                        lineBorderColorMap.get(sideButtonPushed.getText()).put(elementButtonPushed.getText(), addColorOfButtonsWorks());
+                    } else {
+                        // Если кнопка выбранной стороны является полировка, то проверяем есть ли галочка хоть на одном checkBox
+                        if (isAnyCheckBoxSelected(checkBoxes)) {
+                            // Если выбран, то вторым ключом будет так же кнопка выбранной стороны, то есть "Полировка"
+                            lineBorderColorMap.get(sideButtonPushed.getText()).put(sideButtonPushed.getText(), addColorOfButtonsWorks());
+                        } else {
+                            // Если же ни оди checkBox ни выбран следует удалить вовсе пункт о полировке
+                            lineBorderColorMap.remove(sideButtonPushed.getText());
+                            // Так же требуется удалить и из списка элементов упоминание о полировке
+                            removeElementFromList(element.getName());
+                        }
+                    }
                 } else {
-                    lineBorderColorMap.put(sideButtonPushed.getText(), new HashMap<>(Map.of(elementButtonPushed.getText(), addColorOfButtonsWorks())));
+                    // Проверяем не нажата кнопка полировки.
+                    if (!sideButtonPushed.getText().equals("Полировка")) {
+                        // Вторым ключом будет имя выбранного элемента через нажатую кнопку
+                        lineBorderColorMap.put(sideButtonPushed.getText(), new HashMap<>(Map.of(elementButtonPushed.getText(), addColorOfButtonsWorks())));
+                    } else {
+                        // Если кнопка выбранной стороны является полировка, то проверяем есть ли галочка хоть на одном checkBox
+                        if (isAnyCheckBoxSelected(checkBoxes)) {
+                            // Если выбран, то вторым ключом будет так же кнопка выбранной стороны, то есть "Полировка"
+                            lineBorderColorMap.put(sideButtonPushed.getText(), new HashMap<>(Map.of(sideButtonPushed.getText(), addColorOfButtonsWorks())));
+                        } else {
+                            // Если же ни оди checkBox ни выбран следует удалить вовсе пункт о полировке
+                            lineBorderColorMap.remove(sideButtonPushed.getText());
+                            // Так же требуется удалить и из списка элементов упоминание о полировке
+                            removeElementFromList(element.getName());
+                        }
+                    }
                 }
             }
             // Так как у остекления всего 2 панели то добавляем ей после добавления зеленую рамку тут!
@@ -1390,10 +1327,21 @@ public class AddWorkPanel {
             sendToStringInElementListTextViewing();
             // Удаляем из Map элемент
             if (lineBorderColorMap.get(sideButtonPushed.getText()) != null) {
-                lineBorderColorMap.get(sideButtonPushed.getText()).remove(elementButtonPushed.getText());
+                // Проверяем не нажата кнопка полировки.
+                if (!sideButtonPushed.getText().equals("Полировка")) {
+                    lineBorderColorMap.get(sideButtonPushed.getText()).remove(elementButtonPushed.getText());
+                    // Прожимаем кнопку выбранного элемента для обновления кнопок
+                    elementButtonPushed.doClick();
+                } else {
+                    lineBorderColorMap.remove(sideButtonPushed.getText());
+                }
             }
-            // Прожимаем кнопку выбранного элемента для обновления кнопок
-            elementButtonPushed.doClick();
+            if (sideButtonPushed.getText().equals("Полировка")) {
+                for (JCheckBox checkBox : checkBoxes) {
+                    checkBox.setSelected(false);
+                }
+            }
+
             // Убираем панель addAndRemovePanel
             clearCenter(panel).updateUI();
         });// Удалить
@@ -1472,13 +1420,40 @@ public class AddWorkPanel {
                     }
                 }
                 break;
+            case 4:
+                if (lineBorderColorMap.get(button.getText()) != null) {
+                    button.setBorder(BorderFactory.createLineBorder(Color.green));
+                    // находим первый ключ кнопку1 (сторона)
+                    Map<String, List<String>> panel4 = lineBorderColorMap.get(button.getText());
+                    if (panel4.get(button.getText()) != null) {
+                        // находим в значении ключа второй ключ (имя элемента) и берем его значение лист с работами
+                        List<String> listOfAddWorks = panel4.get(button.getText());
+                        if (!listOfAddWorks.isEmpty()) {
+                            // Проходим по каждому JCheckBox в массиве checkBoxes
+                            for (JCheckBox checkBox : checkBoxes) {
+                                // Получаем текст подсказки (имя) текущего чекбокса
+                                String checkBoxName = checkBox.getToolTipText();
+                                // Проверяем, содержит ли список selectedCheckBoxNames имя текущего чекбокса
+                                if (listOfAddWorks.contains(checkBoxName)) {
+                                    // Если да, то устанавливаем чекбокс как выбранный
+                                    checkBox.setSelected(true);
+                                } else {
+                                    // Если нет, то снимаем выбор с чекбокса
+                                    checkBox.setSelected(false);
+                                }
+                            }
+                        }
+                    }
+                }
+                break;
             default:
                 throw new IllegalStateException("Unexpected value: " + panelNumber);
         }
         return button;
     } // Пробег по Map для оформления рамок кнопок
 
-    private JButton changeColorPushedButton(JButton lastPushedButton, JButton pushedButton, int panelNumber) {
+    private JButton changeColorPushedButton(JButton lastPushedButton, JButton pushedButton,
+                                            int panelNumber) {
         //Сначала проверяем была ли старая кнопка нажата и ищем было ли у данной кнопки раньше "добавление" в элемент
         if (lastPushedButton != null) {
             // если было, у нее меняется рамка на зеленую если нет, то на серую.
@@ -1492,60 +1467,69 @@ public class AddWorkPanel {
 
     private List<String> addColorOfButtonsWorks() {
         List<String> color = new ArrayList<>();
-        if (zamenaOrRsButtonPushed != null) {
-            color.add(zamenaOrRsButtonPushed.getText());
-            zamenaOrRsButtonPushed.setBorder(BorderFactory.createLineBorder(Color.green, 1));
-        }
-        if (paint1xOr2xButtonPushed != null) {
-            color.add(paint1xOr2xButtonPushed.getText());
-            paint1xOr2xButtonPushed.setBorder(BorderFactory.createLineBorder(Color.green, 1));
-        }
-        if (remontButtonPushed != null) {
-            color.add(remontButtonPushed.getText() + " " + elementRemont + " " + remontComboBox.getSelectedItem());
-            remontButtonPushed.setBorder(BorderFactory.createLineBorder(Color.green, 1));
-        }
-        if (zercaloButtonPushed != null) {
-            color.add(zercaloButtonPushed.getText());
-            zercaloButtonPushed.setBorder(BorderFactory.createLineBorder(Color.green, 1));
-        }
-        if (moldingButtonPushed != null) {
-            color.add(moldingButtonPushed.getText());
-            moldingButtonPushed.setBorder(BorderFactory.createLineBorder(Color.green, 1));
-        }
-        if (ruchkaButtonPushed != null) {
-            color.add(ruchkaButtonPushed.getText());
-            ruchkaButtonPushed.setBorder(BorderFactory.createLineBorder(Color.green, 1));
-        }
-        if (haveGlass > 0) {
-            if (haveGlass == 1) {
-                color.add(glassButtonPushed.getText());
-                glassButtonPushed.setBorder(BorderFactory.createLineBorder(Color.green, 1));
-            } else {
-                color.add(but.getButtonRearWindow().getText());
-                but.getButtonRearWindow().setBorder(BorderFactory.createLineBorder(Color.green, 1));
-                color.add(but.getButtonWindshield().getText());
-                but.getButtonWindshield().setBorder(BorderFactory.createLineBorder(Color.green, 1));
+        if (!sideButtonPushed.getText().equals("Полировка")) {
+            if (zamenaOrRsButtonPushed != null) {
+                color.add(zamenaOrRsButtonPushed.getText());
+                zamenaOrRsButtonPushed.setBorder(BorderFactory.createLineBorder(Color.green, 1));
             }
-        }
-        if (expanderButtonPushed != null) {
-            color.add(expanderButtonPushed.getText());
-            expanderButtonPushed.setBorder(BorderFactory.createLineBorder(Color.green, 1));
-        }
-        if (overlayButtonPushed != null) {
-            color.add(overlayButtonPushed.getText());
-            overlayButtonPushed.setBorder(BorderFactory.createLineBorder(Color.green, 1));
-        }
-        if (dopWorksArmaturchikButtonPushed != null) {
-            color.add(dopWorksArmaturchikButtonPushed.getText() + " " + dopWorksArmaturchik.getText());
-            dopWorksArmaturchikButtonPushed.setBorder(BorderFactory.createLineBorder(Color.green, 1));
-        }
-        if (dopWorksPainterButtonPushed != null) {
-            color.add(dopWorksPainterButtonPushed.getText() + " " + dopWorksPainter.getText());
-            dopWorksPainterButtonPushed.setBorder(BorderFactory.createLineBorder(Color.green, 1));
-        }
-        if (dopWorksKuzovchikButtonPushed != null) {
-            color.add(dopWorksKuzovchikButtonPushed.getText() + " " + dopWorksKuzovchik.getText());
-            dopWorksKuzovchikButtonPushed.setBorder(BorderFactory.createLineBorder(Color.green, 1));
+            if (paint1xOr2xButtonPushed != null) {
+                color.add(paint1xOr2xButtonPushed.getText());
+                paint1xOr2xButtonPushed.setBorder(BorderFactory.createLineBorder(Color.green, 1));
+            }
+            if (remontButtonPushed != null) {
+                color.add(remontButtonPushed.getText() + " " + elementRemont + " " + remontComboBox.getSelectedItem());
+                remontButtonPushed.setBorder(BorderFactory.createLineBorder(Color.green, 1));
+            }
+            if (zercaloButtonPushed != null) {
+                color.add(zercaloButtonPushed.getText());
+                zercaloButtonPushed.setBorder(BorderFactory.createLineBorder(Color.green, 1));
+            }
+            if (moldingButtonPushed != null) {
+                color.add(moldingButtonPushed.getText());
+                moldingButtonPushed.setBorder(BorderFactory.createLineBorder(Color.green, 1));
+            }
+            if (ruchkaButtonPushed != null) {
+                color.add(ruchkaButtonPushed.getText());
+                ruchkaButtonPushed.setBorder(BorderFactory.createLineBorder(Color.green, 1));
+            }
+            if (haveGlass > 0) {
+                if (haveGlass == 1) {
+                    color.add(glassButtonPushed.getText());
+                    glassButtonPushed.setBorder(BorderFactory.createLineBorder(Color.green, 1));
+                } else {
+                    color.add(but.getButtonRearWindow().getText());
+                    but.getButtonRearWindow().setBorder(BorderFactory.createLineBorder(Color.green, 1));
+                    color.add(but.getButtonWindshield().getText());
+                    but.getButtonWindshield().setBorder(BorderFactory.createLineBorder(Color.green, 1));
+                }
+            }
+            if (expanderButtonPushed != null) {
+                color.add(expanderButtonPushed.getText());
+                expanderButtonPushed.setBorder(BorderFactory.createLineBorder(Color.green, 1));
+            }
+            if (overlayButtonPushed != null) {
+                color.add(overlayButtonPushed.getText());
+                overlayButtonPushed.setBorder(BorderFactory.createLineBorder(Color.green, 1));
+            }
+            if (dopWorksArmaturchikButtonPushed != null) {
+                color.add(dopWorksArmaturchikButtonPushed.getText() + " " + dopWorksArmaturchik.getText());
+                dopWorksArmaturchikButtonPushed.setBorder(BorderFactory.createLineBorder(Color.green, 1));
+            }
+            if (dopWorksPainterButtonPushed != null) {
+                color.add(dopWorksPainterButtonPushed.getText() + " " + dopWorksPainter.getText());
+                dopWorksPainterButtonPushed.setBorder(BorderFactory.createLineBorder(Color.green, 1));
+            }
+            if (dopWorksKuzovchikButtonPushed != null) {
+                color.add(dopWorksKuzovchikButtonPushed.getText() + " " + dopWorksKuzovchik.getText());
+                dopWorksKuzovchikButtonPushed.setBorder(BorderFactory.createLineBorder(Color.green, 1));
+            }
+        } else {
+            // Итерируем по каждому JCheckBox в массиве
+            for (JCheckBox checkBox : checkBoxes) {
+                if (checkBox.isSelected()) { // Если чекбокс выбран
+                    color.add(checkBox.getToolTipText());// Добавляем его текст в список
+                }
+            }
         }
         return color;
     } // Добавление зеленой рамки кнопке и занесение нажатий в Map при добавлении в список
@@ -1603,8 +1587,8 @@ public class AddWorkPanel {
         if (sideButtonPushed.getText().equals("Остекление")) {
             element.setGlass(2);
         }
-        // От сих пор начинаем проставлять нормативы. Если это не стекло.
-        if (!sideButtonPushed.getText().equals("Остекление")) {
+        // От сих пор начинаем проставлять нормативы. Если это не стекло и не полировка.
+        if (!sideButtonPushed.getText().equals("Остекление") && !sideButtonPushed.getText().equals("Полировка")) {
             element.setPaintSide(elementPaintSide);
             element.setArmatureSide(elementArmatureSide);
             element.setKuzDetReplaceSide(elementKuzDetReplaceSide);
@@ -1671,8 +1655,10 @@ public class AddWorkPanel {
                 dopWorks = new StringBuilder(dopWorksKuzovchik.getText()).insert(dopWorksKuzovchik.getText().length() - 1, ".").toString();
                 element.setDopWorksKuzovchik(Double.parseDouble(dopWorks));
             }
+            calcLkm(element);
+        } else if (sideButtonPushed.getText().equals("Полировка")) {
+            element.setPaintSide(elementPaintSide);
         }
-        calcLkm(element);
         return element;
     }  // Создание элемента
 
@@ -1703,21 +1689,40 @@ public class AddWorkPanel {
 
     private String createName() {
         String name;
-        // Первое оформляем имя (левая правая сторона)
-        if (sideButtonPushed.getText().equals("Левая") || sideButtonPushed.getText().equals("Правая")) {
-            if (elementButtonPushed.getText().equals("Пер.Крыло") || elementButtonPushed.getText().equals("Зад.Крыло")) {
-                name = sideButtonPushed.getText().substring(0, sideButtonPushed.getText().length() - 2) + "ое " + elementButtonPushed.getText();
-            } else if (elementButtonPushed.getText().equals("Пер.Дверь") || elementButtonPushed.getText().equals("Зад.Дверь")) {
-                name = sideButtonPushed.getText() + " " + elementButtonPushed.getText();
+        // Оформляем имя если это не полировка
+        if (!sideButtonPushed.getText().equals("Полировка")) {
+            // Первое оформляем имя (левая правая сторона)
+            if (sideButtonPushed.getText().equals("Левая") || sideButtonPushed.getText().equals("Правая")) {
+                if (elementButtonPushed.getText().equals("Пер.Крыло") || elementButtonPushed.getText().equals("Зад.Крыло")) {
+                    name = sideButtonPushed.getText().substring(0, sideButtonPushed.getText().length() - 2) + "ое " + elementButtonPushed.getText();
+                } else if (elementButtonPushed.getText().equals("Пер.Дверь") || elementButtonPushed.getText().equals("Зад.Дверь")) {
+                    name = sideButtonPushed.getText() + " " + elementButtonPushed.getText();
+                } else {
+                    name = sideButtonPushed.getText().substring(0, sideButtonPushed.getText().length() - 2) + "ый " + elementButtonPushed.getText();
+                }
+                // Второе оформление имени остекление
+            } else if (sideButtonPushed.getText().equals("Остекление")) {
+                name = elementButtonPushed.getText() + " " + sideButtonPushed.getText();
+                // Третье оформление имени центральная часть авто (сторону упускаем, оставляем только элемент)
             } else {
-                name = sideButtonPushed.getText().substring(0, sideButtonPushed.getText().length() - 2) + "ый " + elementButtonPushed.getText();
+                name = elementButtonPushed.getText();
             }
-            // Второе оформление имени остекление
-        } else if (sideButtonPushed.getText().equals("Остекление")) {
-            name = elementButtonPushed.getText() + " " + sideButtonPushed.getText();
-            // Третье оформление имени центральная часть авто (сторону упускаем, оставляем только элемент)
+            // Если полировка, то нужно проверить все чекбоксы
         } else {
-            name = elementButtonPushed.getText();
+            int painter = 0;
+            // Список для хранения имен выбранных чекбоксов
+            List<String> selectedCheckBoxNames = new ArrayList<>();
+            // Итерируем по каждому JCheckBox в массиве
+            for (JCheckBox checkBox : checkBoxes) {
+                if (checkBox.isSelected()) { // Если чекбокс выбран
+                    selectedCheckBoxNames.add(checkBox.getToolTipText()); // Добавляем его текст в список
+                    painter++;
+                }
+            }
+            // Преобразуем список в строку с именами выбранных чекбоксов
+            String selectedNames = String.join("' ", selectedCheckBoxNames);
+            name = sideButtonPushed.getText() + " " + selectedNames;
+            elementPaintSide = painter * 0.8;
         }
         return name;
     }  // Создание имени элемента
@@ -1805,8 +1810,13 @@ public class AddWorkPanel {
     private void removeElementFromList(String elementName) {
         Integer q = null;
         Element el = null;
+        /*
+        Удаление элементов из списка работает просто по имени за исключение полировки в которой нужно всегда удалять
+        предыдущую версию элемента с полировкой через дополнительную проверку. Если имя элемента начинается с "Полировка" и
+        значение String elementName начинается тоже с "Полировка", то этот элемент подлежит удалению.
+         */
         for (int i = 0; i <= elementList.size() - 1; i++) {
-            if (elementList.get(i).getName().contains(elementName)) {
+            if (elementList.get(i).getName().contains(elementName) || (elementList.get(i).getName().startsWith("Полировка") && elementName.startsWith("Полировка"))) {
                 q = i;
                 el = elementList.get(i);
             }
@@ -1816,7 +1826,9 @@ public class AddWorkPanel {
         }
     } // Удаление из Списка элементов "element"
 
-    public void load(List<Element> elementList, Map<String, Map<String, List<String>>> lineBorderColorMap, Client client, Lkm lkm, JPanel panel) {
+    public void load
+            (List<Element> elementList, Map<String, Map<String, List<String>>> lineBorderColorMap, Client
+                    client, Lkm lkm, JPanel panel) {
         this.elementList = elementList;
         this.lineBorderColorMap = lineBorderColorMap;
         reCalcLkmPrice();
