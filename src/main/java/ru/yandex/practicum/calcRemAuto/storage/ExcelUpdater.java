@@ -150,6 +150,7 @@ public class ExcelUpdater {
             cell.setCellValue((element.getName() + " c/у "));
         } else if (element.getName().contains("Полировка")) {
             cell.setCellValue((element.getName()));
+            adjustRowHeight(row, element);
         }
         // Далее прописываем Ячейку норматива работ
         // Если элемент это остекление то
@@ -355,9 +356,13 @@ public class ExcelUpdater {
     } // Заполняем строку ЛКМ
 
     private void writeTotal(Sheet sheet, int lkmTotalPrice) {
-        int totalPrice = 40;
+        int totalPrice = 40; // Номер ячейки под работами итого
+        int totalTotalPrice = 32; // Номер ячейки итого итоговое
         Row row = sheet.getRow(targetRowNum + 1);
         Cell cell = row.getCell(totalPrice);
+        cell.setCellValue(total + lkmTotalPrice);
+        row = sheet.getRow(targetRowNum + 4);
+        cell = row.getCell(totalTotalPrice);
         cell.setCellValue(total + lkmTotalPrice);
     } // заполняет итоговою сумму ремонта
 
@@ -441,7 +446,14 @@ public class ExcelUpdater {
             Cell numWorkCell = newRow.getCell(1);
             numWorkCell.setCellValue(numOfWork);
         }
+        //*******************************************
         // Устанавливает высоту строки назначения
         newRow.setHeightInPoints(defaultRowHeightInPoints);
     } // метод копирования строк со всеми параметрами
+
+    private void adjustRowHeight(Row row, Element element) {
+        String[] points = element.getName().split("'");
+        int i = points.length / 3;
+        row.setHeightInPoints(i * 15);
+    } // метод выставления высоты строки для длинных имен элемента полировки.
 }

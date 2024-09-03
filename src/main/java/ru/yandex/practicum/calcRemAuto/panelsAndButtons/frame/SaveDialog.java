@@ -36,7 +36,7 @@ public class SaveDialog extends JDialog {
         setSize(800, 600);
         setLocationRelativeTo(parentFrame);
 
-        checkBoxSendToTelegram.setSelected(true); // По умолчанию галка установленна.
+        checkBoxSendToTelegram.setSelected(false); // По умолчанию галка не установленна.
         previewTextArea.setLineWrap(true);
         previewTextArea.setEditable(false);
 
