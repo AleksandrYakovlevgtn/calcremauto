@@ -31,6 +31,10 @@ public class AddWorkPanel {
     JTextField dopWorksArmaturchik = new JTextField();  // Графа ввода доп работ Арматурщик
     JTextField dopWorksPainter = new JTextField();  // Графа ввода доп работ Маляр
     JTextField dopWorksKuzovchik = new JTextField();  // Графа ввода доп работ Кузовщик
+    JTextField dopWorksArmaturchikDescription = new JTextField();  // Графа ввода описания доп работ Арматурщик
+    JTextField dopWorksPainterDescription = new JTextField();  // Графа ввода описания доп работ Маляр
+    JTextField dopWorksKuzovchikDescription = new JTextField();  // Графа ввода описания доп работ Кузовщик
+
     JTextArea elementListTextViewing = new JTextArea(30, 19); // Окно отображения добавленных в List<Element> elementList элементов
     Double elementPaintSide = 0.0;  // Норматив окраски с одной или двух сторон
     double elementPaintAllForLkm = 0.0; //  Общее количество норматива для подсчета ЛКМ
@@ -52,6 +56,7 @@ public class AddWorkPanel {
     JButton overlayButtonPushed;  // Накладка
     JButton dopWorksArmaturchikButtonPushed; // Арматурщик
     JButton dopWorksPainterButtonPushed;    // Маляр
+    int gridYForDopWorksDescription;
     JButton dopWorksKuzovchikButtonPushed;  // Кузовщик
     JCheckBox[] checkBoxes = {
             createCheckBox("Пер.Бампер"), createCheckBox("Пер.Лев.Крыло"),
@@ -442,43 +447,6 @@ public class AddWorkPanel {
         panelAdd.updateUI();
     } // Панель полировки
 
-    private JCheckBox createCheckBox(String toolTip) {
-        JCheckBox checkBox = new JCheckBox();
-        checkBox.setToolTipText(toolTip);
-        checkBox.setOpaque(false);
-        checkBox.setBackground(null);
-        return checkBox;
-    } // Создание чекбоксов с их описаниями и позициями
-
-    public static boolean isAnyCheckBoxSelected(JCheckBox[] checkBoxi) {
-        // Проходим по массиву checkBoxes
-        for (JCheckBox checkBox : checkBoxi) {
-            if (checkBox.isSelected()) {
-                return true; // Если нашли выбранный чекбокс, возвращаем true
-            }
-        }
-        return false; // Если ни один чекбокс не выбран, возвращаем false
-    } // Метод для проверки, выбран ли хотя бы один JCheckBox в массиве
-
-
-    private JPanel setPanelBackground(JPanel panel, String imagePath) {
-        // Создаем ImageIcon из указанного пути
-        ImageIcon imageIcon = new ImageIcon(imagePath);
-        Image image = imageIcon.getImage();
-
-        // Переопределяем paintComponent для рисования изображения
-        panel = new JPanel() {
-            @Override
-            protected void paintComponent(Graphics g) {
-                super.paintComponent(g);
-                g.drawImage(image, 0, 0, getWidth(), getHeight(), this);
-            }
-        };
-        panel.setLayout(new GridLayout(1, 1));
-        panel.setPreferredSize(new Dimension(300, 200));
-        return panel;
-    } // Добавления фона для панели полировки
-
     public void WorksPanel(JPanel elementLeftRightSidePanel, JPanel panelAdd) {
         clearPushedButtonAfterElementAdd();
 
@@ -579,9 +547,11 @@ public class AddWorkPanel {
         }
         //************************* добавляем доп работы
         int gridY = getMaxGridY(elementLeftRightSidePanel, 1);
+        gridYForDopWorksDescription = gridY;
         elementLeftRightSidePanel.add(new JLabel("Доп работы"), new GridBagConstraints(1, gridY + 1, 1, 1, 1, 1,
                 GridBagConstraints.CENTER, GridBagConstraints.NONE,
                 new Insets(2, 5, 2, 0), 0, 0));
+
         elementLeftRightSidePanel.add(takeColorOfButtons(removeActionListener(but.getDopWorksArmaturchikButton()), 3), new GridBagConstraints(1, gridY + 2, 1, 1, 1, 1,
                 GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
                 new Insets(2, 5, 2, 0), 0, 0));
@@ -591,6 +561,7 @@ public class AddWorkPanel {
         elementLeftRightSidePanel.add(takeColorOfButtons(removeActionListener(but.getDopWorksKuzovchikButton()), 3), new GridBagConstraints(1, gridY + 4, 1, 1, 1, 1,
                 GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
                 new Insets(2, 5, 2, 0), 0, 0));
+
         elementLeftRightSidePanel.add(addDocumentListener(dopWorksArmaturchik), new GridBagConstraints(2, gridY + 2, 1, 1, 1, 1,
                 GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
                 new Insets(2, 2, 2, 2), 0, 0));
@@ -601,6 +572,20 @@ public class AddWorkPanel {
                 GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
                 new Insets(2, 2, 2, 2), 0, 0));
 
+        elementLeftRightSidePanel.add(dopWorksArmaturchikDescription, new GridBagConstraints(3, gridY + 2, 1, 1, 1, 1,
+                GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
+                new Insets(2, 2, 2, 2), 0, 0));
+        elementLeftRightSidePanel.add(dopWorksPainterDescription, new GridBagConstraints(3, gridY + 3, 1, 1, 1, 1,
+                GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
+                new Insets(2, 2, 2, 2), 0, 0));
+        elementLeftRightSidePanel.add(dopWorksKuzovchikDescription, new GridBagConstraints(3, gridY + 4, 1, 1, 1, 1,
+                GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
+                new Insets(2, 2, 2, 2), 0, 0));
+
+        Dimension fixedSize = new Dimension(70, 20);
+        dopWorksArmaturchikDescription.setPreferredSize(fixedSize);
+        dopWorksArmaturchikDescription.setMinimumSize(fixedSize);
+        dopWorksArmaturchikDescription.setMaximumSize(fixedSize);
 
         remont.setText(elementRemont);
 
@@ -1121,6 +1106,43 @@ public class AddWorkPanel {
         panelAdd.updateUI();
     } // Панель с работами
 
+    private JCheckBox createCheckBox(String toolTip) {
+        JCheckBox checkBox = new JCheckBox();
+        checkBox.setToolTipText(toolTip);
+        checkBox.setOpaque(false);
+        checkBox.setBackground(null);
+        return checkBox;
+    } // Создание чекбоксов с их описаниями и позициями
+
+    public static boolean isAnyCheckBoxSelected(JCheckBox[] checkBoxi) {
+        // Проходим по массиву checkBoxes
+        for (JCheckBox checkBox : checkBoxi) {
+            if (checkBox.isSelected()) {
+                return true; // Если нашли выбранный чекбокс, возвращаем true
+            }
+        }
+        return false; // Если ни один чекбокс не выбран, возвращаем false
+    } // Метод для проверки, выбран ли хотя бы один JCheckBox в массиве
+
+
+    private JPanel setPanelBackground(JPanel panel, String imagePath) {
+        // Создаем ImageIcon из указанного пути
+        ImageIcon imageIcon = new ImageIcon(imagePath);
+        Image image = imageIcon.getImage();
+
+        // Переопределяем paintComponent для рисования изображения
+        panel = new JPanel() {
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                g.drawImage(image, 0, 0, getWidth(), getHeight(), this);
+            }
+        };
+        panel.setLayout(new GridLayout(1, 1));
+        panel.setPreferredSize(new Dimension(300, 200));
+        return panel;
+    } // Добавления фона для панели полировки
+
     public static int getMaxGridY(JPanel panel, int targetGridX) {
         int maxGridY = -1;
 
@@ -1136,6 +1158,10 @@ public class AddWorkPanel {
     }
 
     public static JTextField addDocumentListener(JTextField textField) {
+        Dimension fixedSize = new Dimension(25, 20);
+        textField.setPreferredSize(fixedSize);
+        textField.setMinimumSize(fixedSize);
+        textField.setMaximumSize(fixedSize);
         Document document = textField.getDocument();
         AbstractDocument abstractDocument = (AbstractDocument) document;
 
@@ -1222,6 +1248,21 @@ public class AddWorkPanel {
                     GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
                     new Insets(2, 2, 2, 2), 30, 0));
         }
+
+        /*
+        int b = gridYForDopWorksDescription;
+        int d = gridYForDopWorksDescription;
+        for (int i = 0; i < b; i++) {
+            addAndRemovePanel.add(new JLabel(String.valueOf(i)), new GridBagConstraints(0, gridYForDopWorksDescription + i, 1, 1, 1, 1,
+                    GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
+                    new Insets(2, 2, 2, 2), 0, 0));
+            d++;
+        }
+        if (dopWorksPainterButtonPushed != null) {
+            addAndRemovePanel.add(dopWorksPainterDescription, new GridBagConstraints(0, d , 1, 1, 1, 1,
+                    GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
+                    new Insets(2, 2, 2, 2), 0, 0));
+        }*/
 
 
         panelXY.add(addAndRemovePanel, BorderLayout.NORTH);

@@ -11,9 +11,11 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Scanner;
 import java.util.stream.Stream;
+import java.util.List;
 
 import ru.yandex.practicum.calcRemAuto.model.NameDirectories;
 import ru.yandex.practicum.calcRemAuto.panelsAndButtons.buttons.Buttons;
@@ -137,40 +139,54 @@ public class SearchPanel {
     } // Создание слушателя поля ввода для отображения цвета рамки
 
     private void updateBorderColor() {
-        if (search.getText().length() < 8) {
+        if (search.getText().length() < 6) {
             search.setBorder(BorderFactory.createLineBorder(Color.red));
         } else {
             search.setBorder(BorderFactory.createLineBorder(Color.green));
         }
     } // Метод обновления цвета рамки
 
-    private void searchAndDeleteFolder(String folderName) {
-        File folder = new File(directories.getNAME_START_DIRECTORY() + directories.getSlash() + folderName);
+    private void searchAndDeleteFolder(String partialFolderName) {
+        File startDirectory = new File(directories.getNAME_START_DIRECTORY());
 
-        if (folder.exists() && folder.isDirectory()) {
-            File[] subFolders = folder.listFiles(File::isDirectory);
+        if (startDirectory.exists() && startDirectory.isDirectory()) {
+            // Получаем список всех папок в стартовой директории
+            File[] allFolders = startDirectory.listFiles(File::isDirectory);
+            File[] subFolders = new File[0];
 
-            if (subFolders != null && subFolders.length > 0) {
-                StringBuilder message = new StringBuilder("На автомобиль " + folderName + " есть ранние расчеты:\n");
+            if (allFolders != null && allFolders.length > 0) {
+                List<File> matchingFolders = new ArrayList<>();
+                String name = "null";
 
-                for (File subFolder : subFolders) {
-                    message.append(subFolder.getName()).append("\n");
+                for (File folder : allFolders) {
+                    if (folder.getName().contains(partialFolderName.toUpperCase())) {
+                        matchingFolders.add(folder);
+                        subFolders = folder.listFiles(File::isDirectory);
+                        name = folder.getName();
+                    }
                 }
 
-                String[] folderNames = Arrays.stream(subFolders)
-                        .map(folderi -> folderi.getName().substring(folderi.getName().lastIndexOf(File.separator) + 1))
-                        .toArray(String[]::new);
+                if (!matchingFolders.isEmpty()) {
+                    StringBuilder message = new StringBuilder("На автомобиль " + name + " есть ранние расчеты:\n");
 
-                Object chosenFolder = showInputDialog((message + "\nОт какой даты открыть расчет?"), folderNames, subFolders[0]);
+                    String[] folderNames = Arrays.stream(subFolders)
+                            .map(folderi -> folderi.getName().substring(folderi.getName().lastIndexOf(File.separator) + 1))
+                            .toArray(String[]::new);
 
-                selectAction(chosenFolder);
+                    Object chosenFolder = showInputDialog((message + "\nОт какой даты открыть расчет?"), folderNames, subFolders[0]);
+                    AUTOMOBILE_DIRECTORY = directories.getNAME_START_DIRECTORY() + directories.getSlash() + name.toUpperCase();
 
+                    selectAction(chosenFolder);
+                } else {
+                    showMessageDialog("Ранних расчетов автомобиля  " + partialFolderName.toUpperCase() + " не найдено.");
+                }
             } else {
-                showMessageDialog("Ранних расчетов автомобиля  " + folderName + " не найдено.");
+                showMessageDialog("Ранних расчетов автомобиля  " + partialFolderName.toUpperCase() + " не найдено.");
             }
         } else {
-            showMessageDialog("Ранних расчетов автомобиля  " + folderName + " не найдено.");
+            showMessageDialog("Ранних расчетов автомобиля  " + partialFolderName.toUpperCase() + " не найдено.");
         }
+
     } // Открытие диалогового поля выбора расчета из найденных по гос/номера
 
     private void selectAction(Object chosenFolder) {
