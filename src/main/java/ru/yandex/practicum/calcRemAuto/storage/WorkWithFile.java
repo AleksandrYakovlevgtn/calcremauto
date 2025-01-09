@@ -38,7 +38,7 @@ public class WorkWithFile {
         this.total = total;
         this.elements = elements;
         this.lkm = lkm;
-        GOS_NUMBER = directories.getNAME_START_DIRECTORY() + directories.getSlash() + client.getNumberAuto().toUpperCase();
+        GOS_NUMBER = directories.getNAME_START_DIRECTORY() + directories.getSlash() + client.getNumberAuto().toUpperCase() + "_" + client.getModelAuto().toUpperCase();
     } // Конструктор
 
     @SneakyThrows
@@ -107,7 +107,11 @@ public class WorkWithFile {
                 String.valueOf(element.getDopWorksArmoturchik()),
                 String.valueOf(element.getDopWorksPainter()),
                 String.valueOf(element.getDopWorksKuzovchik()),
-                String.valueOf(element.getLkmForElement())};
+                String.valueOf(element.getLkmForElement()),
+// Присвоить описание к параметру заменив "," на "\u2400" и " " на "\u2422" для дальнейшей правильной записи в файл. Так же дальше при извлечении из файла будет обратная замена
+                String.valueOf(element.getDescriptionDopWorksArmaturchic().replaceAll(",", "\u2400").replaceAll(" ", "\u2422").replaceAll("\n", "\u2028")),
+                String.valueOf(element.getDescriptionDopWorksPainter().replaceAll(",", "\u2400").replaceAll(" ", "\u2422").replaceAll("\n", "\u2028")),
+                String.valueOf(element.getDescriptionDopWorksKuzovchik().replaceAll(",", "\u2400").replaceAll(" ", "\u2422").replaceAll("\n", "\u2028"))};
         return String.join(",", words);
     } // Метод разбития Элемента в строки для сохранения в файл
 
@@ -119,9 +123,10 @@ public class WorkWithFile {
              PrintWriter kuzovchik = new PrintWriter(dateDirectory + directories.getSlash() + directories.getKUZOVCHIK() + directories.getTxt())) {
 
             for (Element element : elements) {
-                malyr.write(element.getName() + " " + element.getPaintSide() + "н/ч");
-                armoterchik.write(element.getName() + " " + element.getArmatureSide() + "н/ч");
-
+                malyr.write(element.getName() + " " + element.getPaintSide() + " н/ч");
+                if (!element.getName().contains("Полировка")) {
+                    armoterchik.write(element.getName() + " " + element.getArmatureSide() + " н/ч");
+                }
                 dataElementList.write(toStringElement(element) + "\n");
                 if (element.getKuzDetReplaceSide() > 0 || element.getHoDoRemont().toLowerCase().equals("кузовщик") || element.getDopWorksKuzovchik() > 0) {
                     double kuz = 0;
@@ -138,7 +143,11 @@ public class WorkWithFile {
                         Kuzline = Kuzline + (" замена: " + element.getKuzDetReplaceSide() + "н/ч ");
                         kuz += element.getKuzDetReplaceSide();
                     } else if (element.getDopWorksKuzovchik() > 0) {
-                        Kuzline = Kuzline + (" доп.работы " + element.getDopWorksKuzovchik() + " н/ч.");
+                        if (element.getDescriptionDopWorksKuzovchik().equals("null")) {
+                            Kuzline = Kuzline + (" доп.работы " + element.getDopWorksKuzovchik() + " н/ч.");
+                        } else {
+                            Kuzline = Kuzline + (" доп.работы " + element.getDescriptionDopWorksKuzovchik() + " " + element.getDopWorksKuzovchik() + " н/ч.");
+                        }
                         kuz += element.getDopWorksKuzovchik();
                     }
                     Kuzline = Kuzline + (" Итого: " + (kuz * prices.getMechanicHourlyRate() + " руб\n"));
@@ -185,10 +194,18 @@ public class WorkWithFile {
                     armoterchik.write(" c/у под окрас");
                 }
                 if (element.getDopWorksPainter() > 0) {
-                    malyr.write(" доп.работы " + element.getDopWorksPainter() + " н/ч.");
+                    if (element.getDescriptionDopWorksPainter().equals("null")) {
+                        malyr.write(" доп.работы " + element.getDopWorksPainter() + " н/ч.");
+                    } else {
+                        malyr.write(" " + element.getName() + " " + element.getDescriptionDopWorksPainter() + " " + element.getDopWorksPainter() + " н/ч.");
+                    }
                 }
                 if (element.getDopWorksArmoturchik() > 0) {
-                    armoterchik.write(" доп.работы " + element.getDopWorksArmoturchik() + " н/ч.");
+                    if (element.getDescriptionDopWorksArmaturchic().equals("null")) {
+                        armoterchik.write(" доп.работы " + element.getDopWorksArmoturchik() + " н/ч.");
+                    } else {
+                        armoterchik.write(" " + element.getName() + " " + element.getDescriptionDopWorksArmaturchic() + " " + element.getDopWorksArmoturchik() + " н/ч.");
+                    }
                 }
                 int line = (int) ((element.getPaintSide() + element.getRuchka() +
                         element.getZerkalo() + element.getMolding() + element.getOverlay() +
@@ -214,11 +231,13 @@ public class WorkWithFile {
                 if (element.getHoDoRemont().toLowerCase().equals("арматурщик")) {
                     line = line + (int) (element.getRemont() * prices.getMechanicHourlyRate());
                 }
-                armoterchik.write(" итого: " + line + "руб.\n");
+                if (line > 0) {
+                    armoterchik.write(" итого: " + line + "руб.\n");
+                }
             }
-            malyr.write("Итог: " + total.getMalyr());
-            armoterchik.write("Итог: " + total.getArmatyrchik());
-            kuzovchik.write("Итог: " + total.getKuzovchik());
+            malyr.write("Итог: " + (int) total.getMalyr() + " руб.");
+            armoterchik.write("Итог: " + (int) total.getArmatyrchik() + " руб.");
+            kuzovchik.write("Итог: " + (int) total.getKuzovchik() + " руб.");
         }
     } // Метод сохранения List<Element> elements и так же смет по механикам
 
@@ -253,6 +272,15 @@ public class WorkWithFile {
                 element.setDopWorksPainter(Double.parseDouble(parts[15]));
                 element.setDopWorksKuzovchik(Double.parseDouble(parts[16]));
                 element.setLkmForElement(Double.parseDouble(parts[17]));
+            }
+            if (parts.length >= 19) {
+                element.setDescriptionDopWorksArmaturchic(parts[18].replaceAll("\u2422", " ").replaceAll("\u2400", ",").replaceAll("\u2028", "\n"));
+            }
+            if (parts.length >= 20) {
+                element.setDescriptionDopWorksPainter(parts[19].replaceAll("\u2422", " ").replaceAll("\u2400", ",").replaceAll("\u2028", "\n"));
+            }
+            if (parts.length >= 21) {
+                element.setDescriptionDopWorksKuzovchik(parts[20].replaceAll("\u2422", " ").replaceAll("\u2400", ",").replaceAll("\u2028", "\n"));
             }
             elements.add(element);
         }

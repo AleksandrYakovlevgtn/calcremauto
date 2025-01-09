@@ -1,5 +1,6 @@
 package ru.yandex.practicum.calcRemAuto.panelsAndButtons.panels;
 
+import lombok.extern.slf4j.Slf4j;
 import ru.yandex.practicum.calcRemAuto.model.Client;
 import ru.yandex.practicum.calcRemAuto.model.Element;
 import ru.yandex.practicum.calcRemAuto.model.Lkm;
@@ -17,7 +18,9 @@ import java.util.*;
 import java.util.List;
 import javax.swing.text.*;
 
+@Slf4j
 public class AddWorkPanel {
+    JFrame frame;
     List<Element> elementList = new ArrayList<>(); // Список добавленных элементов
     Map<String, Map<String, List<String>>> lineBorderColorMap = new HashMap<>(); // Таблица с нажатыми кнопками добавленных элементов
     Buttons but = new Buttons(); // Кнопки
@@ -31,10 +34,9 @@ public class AddWorkPanel {
     JTextField dopWorksArmaturchik = new JTextField();  // Графа ввода доп работ Арматурщик
     JTextField dopWorksPainter = new JTextField();  // Графа ввода доп работ Маляр
     JTextField dopWorksKuzovchik = new JTextField();  // Графа ввода доп работ Кузовщик
-    JTextField dopWorksArmaturchikDescription = new JTextField();  // Графа ввода описания доп работ Арматурщик
-    JTextField dopWorksPainterDescription = new JTextField();  // Графа ввода описания доп работ Маляр
-    JTextField dopWorksKuzovchikDescription = new JTextField();  // Графа ввода описания доп работ Кузовщик
-
+    JTextArea dopWorksArmaturchikDescription = new JTextArea();  // Графа ввода описания доп работ Арматурщик
+    JTextArea dopWorksPainterDescription = new JTextArea();  // Графа ввода описания доп работ Маляр
+    JTextArea dopWorksKuzovchikDescription = new JTextArea();  // Графа ввода описания доп работ Кузовщик
     JTextArea elementListTextViewing = new JTextArea(30, 19); // Окно отображения добавленных в List<Element> elementList элементов
     Double elementPaintSide = 0.0;  // Норматив окраски с одной или двух сторон
     double elementPaintAllForLkm = 0.0; //  Общее количество норматива для подсчета ЛКМ
@@ -54,10 +56,16 @@ public class AddWorkPanel {
     JButton glassButtonPushed; // Стекло
     JButton expanderButtonPushed; // Расширитель
     JButton overlayButtonPushed;  // Накладка
-    JButton dopWorksArmaturchikButtonPushed; // Арматурщик
-    JButton dopWorksPainterButtonPushed;    // Маляр
+    JButton dopWorksArmaturchikButtonPushed; // доп.работы Арматурщик
+    JButton dopWorksPainterButtonPushed;    // доп.работы Маляр
+    JButton dopWorksKuzovchikButtonPushed;  // доп.работы Кузовщик
+    JButton dopWorksArmaturchikDescriptionPushed; // кнопка описания доп.работы Арматурщик
+    JButton dopWorksPainterDescriptionPushed; // кнопка описания доп.работы Маляр
+    JButton dopWorksKuzovchikDescriptionPushed; // кнопка описания доп.работы Кузовщик
+    String inputDopWorksArmaturchikDescription; // Описание доп.работ Арматурщик (тестовое вырожение)
+    String inputDopWorksPainterDescription; // Описание доп.работ Маляр (тестовое вырожение)
+    String inputDopWorksKuzovchikDescription; // Описание доп.работ Кузовщик (тестовое вырожение)
     int gridYForDopWorksDescription;
-    JButton dopWorksKuzovchikButtonPushed;  // Кузовщик
     JCheckBox[] checkBoxes = {
             createCheckBox("Пер.Бампер"), createCheckBox("Пер.Лев.Крыло"),
             createCheckBox("Пер.Пр.крыло"), createCheckBox("Капот"),
@@ -70,12 +78,13 @@ public class AddWorkPanel {
             createCheckBox("Фонарь правый"), createCheckBox("Фара левая"),
             createCheckBox("Фара правая"), createCheckBox("Зеркало левое"),
             createCheckBox("Зеркало правое")
-    }; // Массив чекбоксов с их описаниями и позициями
+    }; // Массив чекбоксов с их описаниями и позициями для работ полировки
     Lkm lkm = new Lkm();
     LkmPrices lkmPrices = new LkmPrices();
     int lkmTotalPrice = 0;
 
     public void startPanel(JPanel panel, Client client, JFrame startFrame) {
+        frame = startFrame;
         elementListTextViewing.setLineWrap(true);
         elementListTextViewing.setEditable(false);
 
@@ -150,6 +159,8 @@ public class AddWorkPanel {
             centerSidePanel(clearAll(panelAdd));
         });
         but.getPolirovkaButton().addActionListener(e -> {
+            // Только тут используем данный костыль так как в полировке нам необходима запустить проверку чекБоксов заранее
+            sideButtonPushed = but.getPolirovkaButton();
             sideButtonPushed = changeColorPushedButton(sideButtonPushed, but.getPolirovkaButton(), 4);
             polirovkaPanel(clearAll(panelAdd));
         });
@@ -551,17 +562,17 @@ public class AddWorkPanel {
         elementLeftRightSidePanel.add(new JLabel("Доп работы"), new GridBagConstraints(1, gridY + 1, 1, 1, 1, 1,
                 GridBagConstraints.CENTER, GridBagConstraints.NONE,
                 new Insets(2, 5, 2, 0), 0, 0));
-
-        elementLeftRightSidePanel.add(takeColorOfButtons(removeActionListener(but.getDopWorksArmaturchikButton()), 3), new GridBagConstraints(1, gridY + 2, 1, 1, 1, 1,
-                GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
+        // Кнопки доп.работ
+        elementLeftRightSidePanel.add(takeColorOfButtons(removeActionListener(but.getDopWorksArmaturchikButton()), 3), new GridBagConstraints(1, gridY + 2, 1, 1, 0.7, 1,
+                GridBagConstraints.WEST, GridBagConstraints.NONE,
+                new Insets(2, 5, 2, 2), 0, 0));
+        elementLeftRightSidePanel.add(takeColorOfButtons(removeActionListener(but.getDopWorksPainterButton()), 3), new GridBagConstraints(1, gridY + 3, 1, 1, 0.7, 1,
+                GridBagConstraints.WEST, GridBagConstraints.NONE,
                 new Insets(2, 5, 2, 0), 0, 0));
-        elementLeftRightSidePanel.add(takeColorOfButtons(removeActionListener(but.getDopWorksPainterButton()), 3), new GridBagConstraints(1, gridY + 3, 1, 1, 1, 1,
-                GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
+        elementLeftRightSidePanel.add(takeColorOfButtons(removeActionListener(but.getDopWorksKuzovchikButton()), 3), new GridBagConstraints(1, gridY + 4, 1, 1, 0.7, 1,
+                GridBagConstraints.WEST, GridBagConstraints.NONE,
                 new Insets(2, 5, 2, 0), 0, 0));
-        elementLeftRightSidePanel.add(takeColorOfButtons(removeActionListener(but.getDopWorksKuzovchikButton()), 3), new GridBagConstraints(1, gridY + 4, 1, 1, 1, 1,
-                GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
-                new Insets(2, 5, 2, 0), 0, 0));
-
+        // Текстовое поля доп. работ Правее их кнопок
         elementLeftRightSidePanel.add(addDocumentListener(dopWorksArmaturchik), new GridBagConstraints(2, gridY + 2, 1, 1, 1, 1,
                 GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
                 new Insets(2, 2, 2, 2), 0, 0));
@@ -572,20 +583,20 @@ public class AddWorkPanel {
                 GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
                 new Insets(2, 2, 2, 2), 0, 0));
 
-        elementLeftRightSidePanel.add(dopWorksArmaturchikDescription, new GridBagConstraints(3, gridY + 2, 1, 1, 1, 1,
-                GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
-                new Insets(2, 2, 2, 2), 0, 0));
-        elementLeftRightSidePanel.add(dopWorksPainterDescription, new GridBagConstraints(3, gridY + 3, 1, 1, 1, 1,
-                GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
-                new Insets(2, 2, 2, 2), 0, 0));
-        elementLeftRightSidePanel.add(dopWorksKuzovchikDescription, new GridBagConstraints(3, gridY + 4, 1, 1, 1, 1,
-                GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
-                new Insets(2, 2, 2, 2), 0, 0));
+        but.getDopWorksArmaturchikButton().setPreferredSize(new Dimension(75, 18));
+        but.getDopWorksPainterButton().setPreferredSize(new Dimension(75, 18));
+        but.getDopWorksKuzovchikButton().setPreferredSize(new Dimension(75, 18));
 
-        Dimension fixedSize = new Dimension(70, 20);
-        dopWorksArmaturchikDescription.setPreferredSize(fixedSize);
-        dopWorksArmaturchikDescription.setMinimumSize(fixedSize);
-        dopWorksArmaturchikDescription.setMaximumSize(fixedSize);
+        //  Граффы ввода текста, описания доп работы по механикам !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        elementLeftRightSidePanel.add(takeColorOfButtons(removeActionListener(addGearIconToButton(but.getDopWorksArmaturchikDescriptionButton())), 3), new GridBagConstraints(1, gridY + 2, 1, 1, 0.3, 1,
+                GridBagConstraints.EAST, GridBagConstraints.NONE,
+                new Insets(2, 2, 2, 0), 0, 0));
+        elementLeftRightSidePanel.add(takeColorOfButtons(removeActionListener(addGearIconToButton(but.getDopWorksPainterDescriptionButton())), 3), new GridBagConstraints(1, gridY + 3, 1, 1, 0.3, 1,
+                GridBagConstraints.EAST, GridBagConstraints.NONE,
+                new Insets(2, 2, 2, 0), 0, 0));
+        elementLeftRightSidePanel.add(takeColorOfButtons(removeActionListener(addGearIconToButton(but.getDopWorksKuzovchikDescriptionButton())), 3), new GridBagConstraints(1, gridY + 4, 1, 1, 0.3, 1,
+                GridBagConstraints.EAST, GridBagConstraints.NONE,
+                new Insets(2, 2, 2, 0), 0, 0));
 
         remont.setText(elementRemont);
 
@@ -1021,6 +1032,7 @@ public class AddWorkPanel {
                     dopWorksArmaturchikButtonPushed.setBorder(BorderFactory.createLineBorder(Color.red, 1));
                     addAndRemovePanel(clearCenter(panelAdd));
                     panelAdd.updateUI();
+                    log.info("Нажата кнопка доп работы Арматурщик.\nДо этого не была прожата!");
                 }
             } else {
                 // Если доп. работы уже добавлены, а мы хотим их убрать необходимо повторно нажать на кнопку
@@ -1031,15 +1043,25 @@ public class AddWorkPanel {
                     but.getDopWorksArmaturchikButton().setBorder(BorderFactory.createLineBorder(Color.lightGray, 1));
                     dopWorksArmaturchikButtonPushed = null;
                     addAndRemovePanel(clearCenter(panelAdd));
+                    dopWorksArmaturchikDescription.setText("");
+                    inputDopWorksArmaturchikDescription = "";
+                    but.getDopWorksArmaturchikDescriptionButton().setBorder(BorderFactory.createLineBorder(Color.lightGray, 1));
+                    dopWorksArmaturchikDescriptionPushed = null;
                     panelAdd.updateUI();
+                    log.info("Нажата кнопка доп работы Арматурщик.\nДо этого была прожата и элемент был добавлен!\nНормативы, описание стерты и прожатие стерто!");
                 } else {
                     // Если кнопка была нажата, но элемент не был добавлен (то есть имеет цвет рамки красный) мы убираем нормативы
                     dopWorksArmaturchik.setText("");
                     // Устанавливаем цвет кнопки на серый тем самым убрав ее из элемента
                     but.getDopWorksArmaturchikButton().setBorder(BorderFactory.createLineBorder(Color.lightGray, 1));
                     dopWorksArmaturchikButtonPushed = null;
+                    dopWorksArmaturchikDescription.setText("");
+                    inputDopWorksArmaturchikDescription = "";
+                    but.getDopWorksArmaturchikDescriptionButton().setBorder(BorderFactory.createLineBorder(Color.lightGray, 1));
+                    dopWorksArmaturchikDescriptionPushed = null;
                     addAndRemovePanel(clearCenter(panelAdd));
                     panelAdd.updateUI();
+                    log.info("Нажата кнопка доп работы Арматурщик.\nДо этого была прожата но элемент не был добавлен!\nНормативы, описание стерты и прожатие стерто!");
                 }
             }
         }); // Доп работы арматурщик
@@ -1050,6 +1072,7 @@ public class AddWorkPanel {
                     dopWorksPainterButtonPushed.setBorder(BorderFactory.createLineBorder(Color.red, 1));
                     addAndRemovePanel(clearCenter(panelAdd));
                     panelAdd.updateUI();
+                    log.info("Нажата кнопка доп работы Маляр.\nДо этого не была прожата!");
                 }
             } else {
                 // Если доп. работы уже добавлены, а мы хотим их убрать необходимо повторно нажать на кнопку
@@ -1060,15 +1083,25 @@ public class AddWorkPanel {
                     but.getDopWorksPainterButton().setBorder(BorderFactory.createLineBorder(Color.lightGray, 1));
                     dopWorksPainterButtonPushed = null;
                     addAndRemovePanel(clearCenter(panelAdd));
+                    dopWorksPainterDescription.setText("");
+                    inputDopWorksPainterDescription = "";
+                    but.getDopWorksPainterDescriptionButton().setBorder(BorderFactory.createLineBorder(Color.lightGray, 1));
+                    dopWorksPainterDescriptionPushed = null;
                     panelAdd.updateUI();
+                    log.info("Нажата кнопка доп работы Маляр.\nДо этого была прожата и элемент был добавлен!\nНормативы, описание стерты и прожатие стерто!");
                 } else {
                     // Если кнопка была нажата, но элемент не был добавлен (то есть имеет цвет рамки красный) мы убираем нормативы
                     dopWorksPainter.setText("");
                     // Устанавливаем цвет кнопки на серый тем самым убрав ее из элемента
                     but.getDopWorksPainterButton().setBorder(BorderFactory.createLineBorder(Color.lightGray, 1));
                     dopWorksPainterButtonPushed = null;
+                    dopWorksPainterDescription.setText("");
+                    inputDopWorksPainterDescription = "";
+                    but.getDopWorksPainterDescriptionButton().setBorder(BorderFactory.createLineBorder(Color.lightGray, 1));
+                    dopWorksPainterDescriptionPushed = null;
                     addAndRemovePanel(clearCenter(panelAdd));
                     panelAdd.updateUI();
+                    log.info("Нажата кнопка доп работы Маляр.\nДо этого была прожата но элемент не был добавлен!\nНормативы, описание стерты и прожатие стерто!");
                 }
             }
         });    // Доп работы маляр
@@ -1079,6 +1112,7 @@ public class AddWorkPanel {
                     dopWorksKuzovchikButtonPushed.setBorder(BorderFactory.createLineBorder(Color.red, 1));
                     addAndRemovePanel(clearCenter(panelAdd));
                     panelAdd.updateUI();
+                    log.info("Нажата кнопка доп работы Кузовщик.\nДо этого не была прожата!");
                 }
             } else {
                 // Если доп. работы уже добавлены, а мы хотим их убрать необходимо повторно нажать на кнопку
@@ -1089,22 +1123,272 @@ public class AddWorkPanel {
                     but.getDopWorksKuzovchikButton().setBorder(BorderFactory.createLineBorder(Color.lightGray, 1));
                     dopWorksKuzovchikButtonPushed = null;
                     addAndRemovePanel(clearCenter(panelAdd));
+                    dopWorksKuzovchikDescription.setText("");
+                    inputDopWorksKuzovchikDescription = "";
+                    but.getDopWorksKuzovchikDescriptionButton().setBorder(BorderFactory.createLineBorder(Color.lightGray, 1));
+                    dopWorksKuzovchikDescriptionPushed = null;
                     panelAdd.updateUI();
+                    log.info("Нажата кнопка доп работы Кузовщик.\nДо этого была прожата и элемент был добавлен!\nНормативы, описание стерты и прожатие стерто!");
                 } else {
                     // Если кнопка была нажата, но элемент не был добавлен (то есть имеет цвет рамки красный) мы убираем нормативы
                     dopWorksKuzovchik.setText("");
                     // Устанавливаем цвет кнопки на серый тем самым убрав ее из элемента
                     but.getDopWorksKuzovchikButton().setBorder(BorderFactory.createLineBorder(Color.lightGray, 1));
                     dopWorksKuzovchikButtonPushed = null;
+                    dopWorksKuzovchikDescription.setText("");
+                    inputDopWorksKuzovchikDescription = "";
+                    but.getDopWorksKuzovchikDescriptionButton().setBorder(BorderFactory.createLineBorder(Color.lightGray, 1));
+                    dopWorksKuzovchikDescriptionPushed = null;
                     addAndRemovePanel(clearCenter(panelAdd));
                     panelAdd.updateUI();
+                    log.info("Нажата кнопка доп работы Кузовщик.\nДо этого была прожата но элемент не был добавлен!\nНормативы, описание стерты и прожатие стерто!");
                 }
             }
         }); // Доп работы кузовщик
 
+        but.getDopWorksArmaturchikDescriptionButton().addActionListener(e -> {
+            if (dopWorksArmaturchikButtonPushed != null) {
+                log.info("Нажата кнопка описания доп.работ Арматурщик");
+                // Создаем модальное окно
+                JDialog dialog = new JDialog(frame, "Описание доп.работ", true); // true - модальное окно
+                dialog.setSize(300, 300);
+                dialog.setLayout(new BorderLayout());
+                log.info("Создана и открыто окно ввода текста описания доп.работ Арматурщик");
+                JPanel textPanel = new JPanel();
+                textPanel.setLayout(new BorderLayout());
+
+                dopWorksArmaturchikDescription.setWrapStyleWord(true); // Включить перенос по словам
+                dopWorksArmaturchikDescription.setLineWrap(true); // Перенос строк
+                PlainDocument doc = (PlainDocument) dopWorksArmaturchikDescription.getDocument(); // Для ограничения вводимого текста.
+                // Если описание есть в памяти, то его и прописываем
+                if (inputDopWorksArmaturchikDescription != null) {
+                    dopWorksArmaturchikDescription.setText(inputDopWorksArmaturchikDescription);
+                    log.info("Произведена проверка текста описания доп.работ Арматурщик из памяти: он уже вводился и был сохранен в Map работ.");
+                } else {
+                    // Если же не было отправляем пустой текст
+                    dopWorksArmaturchikDescription.setText("");
+                    log.info("Произведена проверка текста описания доп.работ Арматурщик из памяти: в памяти нет ранее введенного текст, отправлен пустой символ.");
+                }
+                doc.setDocumentFilter(new DocumentFilter() {
+                    @Override
+                    public void insertString(FilterBypass fb, int offset, String string, AttributeSet attr) throws BadLocationException {
+                        if (fb.getDocument().getLength() + string.length() <= 100) {
+                            super.insertString(fb, offset, string, attr);
+                        }
+                    }
+
+                    @Override
+                    public void replace(FilterBypass fb, int offset, int length, String text, AttributeSet attrs) throws BadLocationException {
+                        if (fb.getDocument().getLength() + text.length() - length <= 100) {
+                            super.replace(fb, offset, length, text, attrs);
+                        }
+                    }
+                }); // Для ограничения вводимого текста.
+
+                textPanel.add(dopWorksArmaturchikDescription, BorderLayout.CENTER);
+
+                textPanel.setPreferredSize(new Dimension(200, 220));
+                dialog.add(textPanel, BorderLayout.NORTH);
+
+
+                // Панель для кнопок
+                JPanel buttonPanel = new JPanel();
+                buttonPanel.setLayout(new FlowLayout());
+
+                JButton okButton = new JButton("OK");
+                okButton.addActionListener(e1 -> {
+                    dopWorksArmaturchikDescriptionPushed = but.getDopWorksArmaturchikDescriptionButton();
+                    but.getDopWorksArmaturchikDescriptionButton().setBorder(BorderFactory.createLineBorder(Color.red, 1));
+                    inputDopWorksArmaturchikDescription = dopWorksArmaturchikDescription.getText();
+                    log.info("Описание доп.работ Арматурщик выбрана кнопка ОК. Текст: " + dopWorksArmaturchikDescription.getText());
+                    dialog.dispose(); // Закрыть диалоговое окно
+                }); // Кнопка "OK"
+
+                JButton cancelButton = new JButton("Отмена");
+                cancelButton.addActionListener(e1 -> {
+                    dopWorksArmaturchikDescription.setText("");
+                    inputDopWorksArmaturchikDescription = "";
+                    but.getDopWorksArmaturchikDescriptionButton().setBorder(BorderFactory.createLineBorder(Color.lightGray, 1));
+                    dopWorksArmaturchikDescriptionPushed = null;
+                    log.info("Описание доп.работ Арматурщик выбрана кнопка Отменена");
+                    dialog.dispose(); // Закрыть диалоговое окно
+                }); // Кнопка "Отмена"
+
+                buttonPanel.add(okButton);
+                buttonPanel.add(cancelButton);
+
+                dialog.add(buttonPanel, BorderLayout.SOUTH);
+                dialog.setLocationRelativeTo(frame); // Расположить относительно основного окна
+                dialog.setVisible(true); // Показываем диалог
+            }
+        }); // Кнопка ввода описания доп.работ Арматурщик
+        but.getDopWorksPainterDescriptionButton().addActionListener(e -> {
+            if (dopWorksPainterButtonPushed != null) {
+                log.info("Нажата кнопка описания доп.работ Маляр");
+                // Создаем модальное окно
+                JDialog dialog = new JDialog(frame, "Описание доп.работ", true); // true - модальное окно
+                dialog.setSize(300, 300);
+                dialog.setLayout(new BorderLayout());
+
+                JPanel textPanel = new JPanel();
+                textPanel.setLayout(new BorderLayout());
+                log.info("Создана и открыто окно ввода текста описания доп.работ Маляр");
+
+                dopWorksPainterDescription.setWrapStyleWord(true); // Включить перенос по словам
+                dopWorksPainterDescription.setLineWrap(true); // Перенос строк
+                PlainDocument doc = (PlainDocument) dopWorksPainterDescription.getDocument(); // Для ограничения вводимого текста.
+                // Если описание есть в памяти, то его и прописываем
+                if (inputDopWorksPainterDescription != null) {
+                    dopWorksPainterDescription.setText(inputDopWorksPainterDescription);
+                    log.info("Произведена проверка текста описания доп.работ Маляр из памяти: он уже вводился и был сохранен в Map работ.");
+                } else {
+                    // Если же не было отправляем пустой текст
+                    dopWorksPainterDescription.setText("");
+                    log.info("Произведена проверка текста описания доп.работ Маляр из памяти: в памяти нет ранее введенного текст, отправлен пустой символ.");
+                }
+                doc.setDocumentFilter(new DocumentFilter() {
+                    @Override
+                    public void insertString(FilterBypass fb, int offset, String string, AttributeSet attr) throws BadLocationException {
+                        if (fb.getDocument().getLength() + string.length() <= 100) {
+                            super.insertString(fb, offset, string, attr);
+                        }
+                    }
+
+                    @Override
+                    public void replace(FilterBypass fb, int offset, int length, String text, AttributeSet attrs) throws BadLocationException {
+                        if (fb.getDocument().getLength() + text.length() - length <= 100) {
+                            super.replace(fb, offset, length, text, attrs);
+                        }
+                    }
+                }); // Для ограничения вводимого текста.
+
+                textPanel.add(dopWorksPainterDescription, BorderLayout.CENTER);
+
+                textPanel.setPreferredSize(new Dimension(200, 220));
+                dialog.add(textPanel, BorderLayout.NORTH);
+
+
+                // Панель для кнопок
+                JPanel buttonPanel = new JPanel();
+                buttonPanel.setLayout(new FlowLayout());
+
+                JButton okButton = new JButton("OK");
+                okButton.addActionListener(e1 -> {
+                    dopWorksPainterDescriptionPushed = but.getDopWorksPainterDescriptionButton();
+                    but.getDopWorksPainterDescriptionButton().setBorder(BorderFactory.createLineBorder(Color.red, 1));
+                    inputDopWorksPainterDescription = dopWorksPainterDescription.getText();
+                    log.info("Описание доп.работ Маляр выбрана кнопка ОК. Текст: " + dopWorksPainterDescription.getText());
+                    dialog.dispose(); // Закрыть диалоговое окно
+                }); // Кнопка "OK"
+
+                JButton cancelButton = new JButton("Отмена");
+                cancelButton.addActionListener(e1 -> {
+                    dopWorksPainterDescription.setText("");
+                    inputDopWorksPainterDescription = "";
+                    but.getDopWorksPainterDescriptionButton().setBorder(BorderFactory.createLineBorder(Color.lightGray, 1));
+                    dopWorksPainterDescriptionPushed = null;
+                    log.info("Описание доп.работ Маляр выбрана кнопка Отменена");
+                    dialog.dispose(); // Закрыть диалоговое окно
+                }); // Кнопка "Отмена"
+
+                buttonPanel.add(okButton);
+                buttonPanel.add(cancelButton);
+
+                dialog.add(buttonPanel, BorderLayout.SOUTH);
+                dialog.setLocationRelativeTo(frame); // Расположить относительно основного окна
+                dialog.setVisible(true); // Показываем диалог
+            }
+        }); // Кнопка ввода описания доп.работ Маляр
+        but.getDopWorksKuzovchikDescriptionButton().addActionListener(e -> {
+            if (dopWorksKuzovchikButtonPushed != null) {
+                log.info("Нажата кнопка описания доп.работ Кузовщик");
+                // Создаем модальное окно
+                JDialog dialog = new JDialog(frame, "Описание доп.работ", true); // true - модальное окно
+                dialog.setSize(300, 300);
+                dialog.setLayout(new BorderLayout());
+
+                JPanel textPanel = new JPanel();
+                textPanel.setLayout(new BorderLayout());
+                log.info("Создана и открыто окно ввода текста описания доп.работ Кузовщик");
+
+                dopWorksKuzovchikDescription.setWrapStyleWord(true); // Включить перенос по словам
+                dopWorksKuzovchikDescription.setLineWrap(true); // Перенос строк
+                PlainDocument doc = (PlainDocument) dopWorksKuzovchikDescription.getDocument(); // Для ограничения вводимого текста.
+                // Если описание есть в памяти, то его и прописываем
+                if (inputDopWorksKuzovchikDescription != null) {
+                    dopWorksKuzovchikDescription.setText(inputDopWorksKuzovchikDescription);
+                    log.info("Произведена проверка текста описания доп.работ Кузовщик из памяти: он уже вводился и был сохранен в Map работ.");
+                } else {
+                    // Если же не было отправляем пустой текст
+                    dopWorksKuzovchikDescription.setText("");
+                    log.info("Произведена проверка текста описания доп.работ Кузовщик из памяти: в памяти нет ранее введенного текст, отправлен пустой символ.");
+                }
+                doc.setDocumentFilter(new DocumentFilter() {
+                    @Override
+                    public void insertString(FilterBypass fb, int offset, String string, AttributeSet attr) throws BadLocationException {
+                        if (fb.getDocument().getLength() + string.length() <= 100) {
+                            super.insertString(fb, offset, string, attr);
+                        }
+                    }
+
+                    @Override
+                    public void replace(FilterBypass fb, int offset, int length, String text, AttributeSet attrs) throws BadLocationException {
+                        if (fb.getDocument().getLength() + text.length() - length <= 100) {
+                            super.replace(fb, offset, length, text, attrs);
+                        }
+                    }
+                }); // Для ограничения вводимого текста.
+
+                textPanel.add(dopWorksKuzovchikDescription, BorderLayout.CENTER);
+
+                textPanel.setPreferredSize(new Dimension(200, 220));
+                dialog.add(textPanel, BorderLayout.NORTH);
+
+
+                // Панель для кнопок
+                JPanel buttonPanel = new JPanel();
+                buttonPanel.setLayout(new FlowLayout());
+
+                JButton okButton = new JButton("OK");
+                okButton.addActionListener(e1 -> {
+                    dopWorksKuzovchikDescriptionPushed = but.getDopWorksKuzovchikDescriptionButton();
+                    but.getDopWorksKuzovchikDescriptionButton().setBorder(BorderFactory.createLineBorder(Color.red, 1));
+                    inputDopWorksKuzovchikDescription = dopWorksKuzovchikDescription.getText();
+                    log.info("Описание доп.работ Кузовщик выбрана кнопка ОК. Текст: " + dopWorksKuzovchikDescription.getText());
+                    dialog.dispose(); // Закрыть диалоговое окно
+                }); // Кнопка "OK"
+
+                JButton cancelButton = new JButton("Отмена");
+                cancelButton.addActionListener(e1 -> {
+                    dopWorksKuzovchikDescription.setText("");
+                    inputDopWorksKuzovchikDescription = "";
+                    but.getDopWorksKuzovchikDescriptionButton().setBorder(BorderFactory.createLineBorder(Color.lightGray, 1));
+                    dopWorksKuzovchikDescriptionPushed = null;
+                    log.info("Описание доп.работ Кузовщик выбрана кнопка Отменена");
+                    dialog.dispose(); // Закрыть диалоговое окно
+                }); // Кнопка "Отмена"
+
+                buttonPanel.add(okButton);
+                buttonPanel.add(cancelButton);
+
+                dialog.add(buttonPanel, BorderLayout.SOUTH);
+                dialog.setLocationRelativeTo(frame); // Расположить относительно основного окна
+                dialog.setVisible(true); // Показываем диалог
+            }
+        }); // Кнопка ввода описания доп.работ Кузовщик
+
+
         checkEarlyPushedButtonsWorksPanel();
         panelAdd.updateUI();
     } // Панель с работами
+
+    private JButton addGearIconToButton(JButton button) {
+        button.removeAll(); // Убираем все с кнопки
+        button.setPreferredSize(new Dimension(20, 18)); // Выставляем размер кнопки
+        button.setIcon(new ImageIcon(new ImageIcon("Системные/gear.png").getImage().getScaledInstance(16, 16, Image.SCALE_SMOOTH))); // Наносим изображение
+        button.setIconTextGap(-8); // Смещение иконки вправо
+        return button; // Возвращаем готовую кнопку
+    } // Метод нанесения изображения шестеренки и изменения размера кнопки
 
     private JCheckBox createCheckBox(String toolTip) {
         JCheckBox checkBox = new JCheckBox();
@@ -1218,7 +1502,7 @@ public class AddWorkPanel {
             }
         });
         return textField;
-    } // Добавление слушателя для JTextField-ов
+    } // Добавление слушателя для JTextField-ов, ввода чисел
 
 
     private void addAndRemovePanel(JPanel panel) {
@@ -1248,22 +1532,6 @@ public class AddWorkPanel {
                     GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
                     new Insets(2, 2, 2, 2), 30, 0));
         }
-
-        /*
-        int b = gridYForDopWorksDescription;
-        int d = gridYForDopWorksDescription;
-        for (int i = 0; i < b; i++) {
-            addAndRemovePanel.add(new JLabel(String.valueOf(i)), new GridBagConstraints(0, gridYForDopWorksDescription + i, 1, 1, 1, 1,
-                    GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
-                    new Insets(2, 2, 2, 2), 0, 0));
-            d++;
-        }
-        if (dopWorksPainterButtonPushed != null) {
-            addAndRemovePanel.add(dopWorksPainterDescription, new GridBagConstraints(0, d , 1, 1, 1, 1,
-                    GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
-                    new Insets(2, 2, 2, 2), 0, 0));
-        }*/
-
 
         panelXY.add(addAndRemovePanel, BorderLayout.NORTH);
         panelXY2.add(panelXY, BorderLayout.WEST);
@@ -1386,7 +1654,7 @@ public class AddWorkPanel {
             // Убираем панель addAndRemovePanel
             clearCenter(panel).updateUI();
         });// Удалить
-    } // Панель добавить\удалить
+    } // Панель добавить\удалить элемент
 
     private JButton takeColorOfButtons(JButton button, int panelNumber) {
         button.setBorder(BorderFactory.createLineBorder(Color.lightGray, 1));
@@ -1455,12 +1723,36 @@ public class AddWorkPanel {
                                             button.setBorder(BorderFactory.createLineBorder(Color.green));
                                             break;
                                     }
+                                } else if ((button.getText().contains("Описание") && !check.contains("Ремонт")) && (check.contains("Маляр") || check.contains("Кузовщик") || check.contains("Арматурщик"))) {
+                                    String[] split = check.split(" ");
+                                    if (split.length > 2) {
+                                        String description = split[2].replaceAll("\u2400", ",").replaceAll("\u2422", " ");
+                                        String[] buttonDescriptionName = button.getText().split(" ");
+                                        String hoWasDescription = buttonDescriptionName[buttonDescriptionName.length - 1];
+                                        if (hoWasDescription.equals(split[0])) {
+                                            switch (hoWasDescription) {
+                                                case "Арматурщик":
+                                                    inputDopWorksArmaturchikDescription = description;
+                                                    button.setBorder(BorderFactory.createLineBorder(Color.green));
+                                                    break;
+                                                case "Маляр":
+                                                    inputDopWorksPainterDescription = description;
+                                                    button.setBorder(BorderFactory.createLineBorder(Color.green));
+                                                    break;
+                                                case "Кузовщик":
+                                                    inputDopWorksKuzovchikDescription = description;
+                                                    button.setBorder(BorderFactory.createLineBorder(Color.green));
+                                                    break;
+                                            }
+                                        }
+                                    }
                                 }
                             }
                         }
                     }
                 }
                 break;
+            // case 4 это полировка сложный вариант.
             case 4:
                 if (lineBorderColorMap.get(button.getText()) != null) {
                     button.setBorder(BorderFactory.createLineBorder(Color.green));
@@ -1488,7 +1780,7 @@ public class AddWorkPanel {
                 }
                 break;
             default:
-                throw new IllegalStateException("Unexpected value: " + panelNumber);
+                throw new IllegalStateException("Не верное значение панели номер: " + panelNumber);
         }
         return button;
     } // Пробег по Map для оформления рамок кнопок
@@ -1553,16 +1845,43 @@ public class AddWorkPanel {
                 overlayButtonPushed.setBorder(BorderFactory.createLineBorder(Color.green, 1));
             }
             if (dopWorksArmaturchikButtonPushed != null) {
-                color.add(dopWorksArmaturchikButtonPushed.getText() + " " + dopWorksArmaturchik.getText());
+                // Меняем цвет рамки кнопки "доп.Работы.Арматурщик" на зеленый так она теперь добавлена в работы.
                 dopWorksArmaturchikButtonPushed.setBorder(BorderFactory.createLineBorder(Color.green, 1));
+                // Если кнопка описания доп работ арматурщика нажата и описания доп работ добавлено то
+                if (dopWorksArmaturchikDescriptionPushed != null && inputDopWorksArmaturchikDescription != null) {
+                    // добавляем в список и описание доп работ
+                    color.add(dopWorksArmaturchikButtonPushed.getText() + " " + dopWorksArmaturchik.getText() + " " + inputDopWorksArmaturchikDescription.replaceAll(",", "\u2400").replaceAll(" ", "\u2422"));
+                    dopWorksArmaturchikDescriptionPushed.setBorder(BorderFactory.createLineBorder(Color.green, 1));
+                } else {
+                    // Если же описания нет, то добавляем только кнопку "доп.работы" и количество норма времени.
+                    color.add(dopWorksArmaturchikButtonPushed.getText() + " " + dopWorksArmaturchik.getText());
+                }
             }
             if (dopWorksPainterButtonPushed != null) {
-                color.add(dopWorksPainterButtonPushed.getText() + " " + dopWorksPainter.getText());
+                // Меняем цвет рамки кнопки "доп.Работы.Маляр" на зеленый так она теперь добавлена в работы.
                 dopWorksPainterButtonPushed.setBorder(BorderFactory.createLineBorder(Color.green, 1));
+                // Если кнопка описания доп работ Маляр нажата и описания доп работ добавлено то
+                if (dopWorksPainterDescriptionPushed != null && inputDopWorksPainterDescription != null) {
+                    // добавляем в список и описание доп работ
+                    color.add(dopWorksPainterButtonPushed.getText() + " " + dopWorksPainter.getText() + " " + inputDopWorksPainterDescription.replaceAll(",", "\u2400").replaceAll(" ", "\u2422"));
+                    dopWorksPainterDescriptionPushed.setBorder(BorderFactory.createLineBorder(Color.green, 1));
+                } else {
+                    // Если же описания нет, то добавляем только кнопку "доп.работы" и количество норма времени.
+                    color.add(dopWorksPainterButtonPushed.getText() + " " + dopWorksPainter.getText());
+                }
             }
             if (dopWorksKuzovchikButtonPushed != null) {
-                color.add(dopWorksKuzovchikButtonPushed.getText() + " " + dopWorksKuzovchik.getText());
+                // Меняем цвет рамки кнопки "доп.Работы.Кузовщик" на зеленый так она теперь добавлена в работы.
                 dopWorksKuzovchikButtonPushed.setBorder(BorderFactory.createLineBorder(Color.green, 1));
+                // Если кнопка описания доп работ Кузовщик нажата и описания доп работ добавлено то
+                if (dopWorksKuzovchikDescriptionPushed != null && inputDopWorksKuzovchikDescription != null) {
+                    // добавляем в список и описание доп работ
+                    color.add(dopWorksKuzovchikButtonPushed.getText() + " " + dopWorksKuzovchik.getText() + " " + inputDopWorksKuzovchikDescription.replaceAll(",", "\u2400").replaceAll(" ", "\u2422"));
+                    dopWorksKuzovchikDescriptionPushed.setBorder(BorderFactory.createLineBorder(Color.green, 1));
+                } else {
+                    // Если же описания нет, то добавляем только кнопку "доп.работы" и количество норма времени.
+                    color.add(dopWorksKuzovchikButtonPushed.getText() + " " + dopWorksKuzovchik.getText());
+                }
             }
         } else {
             // Итерируем по каждому JCheckBox в массиве
@@ -1597,27 +1916,33 @@ public class AddWorkPanel {
     } // Удаление панели добавить\удалить
 
     private void clearPushedButtonAfterElementAdd() {
-        zamenaOrRsButtonPushed = null;
-        paint1xOr2xButtonPushed = null;
-        remontButtonPushed = null;
-        ruchkaButtonPushed = null;
-        moldingButtonPushed = null;
-        zercaloButtonPushed = null;
-        expanderButtonPushed = null;
-        overlayButtonPushed = null;
-        glassButtonPushed = null;
-        elementRemont = null;
-        dopWorksArmaturchikButtonPushed = null;
-        dopWorksPainterButtonPushed = null;
-        dopWorksKuzovchikButtonPushed = null;
-        dopWorksArmaturchik.setText("");
-        dopWorksPainter.setText("");
-        dopWorksKuzovchik.setText("");
-        remont.setText("");
-        elementKuzDetReplaceSide = 0.0;
-        elementArmatureSide = 0.0;
-        elementPaintSide = 0.0;
-        haveGlass = 0;
+        zamenaOrRsButtonPushed = null;  // Кнопка замена
+        paint1xOr2xButtonPushed = null; // Кнопка окраска с1 или 2х сторон
+        remontButtonPushed = null;      // Кнопка ремонта
+        ruchkaButtonPushed = null;      // Кнопка ручка
+        moldingButtonPushed = null;     // Кнопка молдинг
+        zercaloButtonPushed = null;     // Кнопка зеркало
+        expanderButtonPushed = null;    // Кнопка расширитель
+        overlayButtonPushed = null;     // Кнопка накладка
+        glassButtonPushed = null;       // Кнопка остекление лобовое или заднее
+        elementRemont = null;           // Значение введенного числа норматива на ремонт
+        dopWorksArmaturchikButtonPushed = null; // Кнопка доп.работы Арматурщик
+        dopWorksPainterButtonPushed = null;     // Кнопка доп.работы Маляр
+        dopWorksKuzovchikButtonPushed = null;   // Кнопка доп.работы Кузовщик
+        dopWorksArmaturchikDescriptionPushed = null; // Кнопка описания доп.работы Арматурщик
+        dopWorksPainterDescriptionPushed = null;     // Кнопка описания доп.работы Маляр
+        dopWorksKuzovchikDescriptionPushed = null;   // Кнопка описания доп.работы Кузовщик
+        dopWorksArmaturchik.setText("");  // Графа ввода описания доп.работы Арматурщик
+        dopWorksPainter.setText("");      // Графа ввода описания доп.работы Маляр
+        dopWorksKuzovchik.setText("");    // Графа ввода описания доп.работы Кузовщик
+        remont.setText("");               // Графа ввода значения норматива ремонт
+        elementKuzDetReplaceSide = 0.0;   // Норматив замены кузовной детали
+        elementArmatureSide = 0.0;        // Норматив арматурных работ на детали
+        elementPaintSide = 0.0;           // Норматив на окраску детали
+        haveGlass = 0;                    // Значение норматив есть ли на детали остекление
+        inputDopWorksArmaturchikDescription = null;  // Введенный текст описания доп.работы Арматурщик
+        inputDopWorksPainterDescription = null;      // Введенный текст описания доп.работы Маляр
+        inputDopWorksKuzovchikDescription = null;    // Введенный текст описания доп.работы Кузовщик
     } // Стирание (приведя их к null) нажатых в процессе кнопок
 
     private Element createElement() {
@@ -1682,19 +2007,40 @@ public class AddWorkPanel {
                 }
             }
             if (dopWorksArmaturchikButtonPushed != null) {
+                // С начало необходимо перевести норматив в вид текста
                 String dopWorks;
+                // добавив точку перед последним символом таким образом переведя его двоичное число в виде текста
                 dopWorks = new StringBuilder(dopWorksArmaturchik.getText()).insert(dopWorksArmaturchik.getText().length() - 1, ".").toString();
+                // Далее присвоить элементу в параметр доп.Работы арматурщик двоичное число переведя его из String в double
                 element.setDopWorksArmoturchik(Double.parseDouble(dopWorks));
+                // Дальше если есть описание доп.работ арматурщик
+                if (dopWorksArmaturchikDescriptionPushed != null && inputDopWorksArmaturchikDescription != null) {
+                    element.setDescriptionDopWorksArmaturchic(inputDopWorksArmaturchikDescription);
+                }
             }
             if (dopWorksPainterButtonPushed != null) {
+                // С начало необходимо перевести норматив в вид текста
                 String dopWorks;
+                // добавив точку перед последним символом таким образом переведя его двоичное число в виде текста
                 dopWorks = new StringBuilder(dopWorksPainter.getText()).insert(dopWorksPainter.getText().length() - 1, ".").toString();
+                // Далее присвоить элементу в параметр доп.Работы Маляр двоичное число переведя его из String в double
                 element.setDopWorksPainter(Double.parseDouble(dopWorks));
+                // Дальше если есть описание доп.работ Маляр
+                if (dopWorksPainterDescriptionPushed != null && inputDopWorksPainterDescription != null) {
+                    element.setDescriptionDopWorksPainter(inputDopWorksPainterDescription);
+                }
             }
             if (dopWorksKuzovchikButtonPushed != null) {
+                // С начало необходимо перевести норматив в вид текста
                 String dopWorks;
+                // добавив точку перед последним символом таким образом переведя его двоичное число в виде текста
                 dopWorks = new StringBuilder(dopWorksKuzovchik.getText()).insert(dopWorksKuzovchik.getText().length() - 1, ".").toString();
+                // Далее присвоить элементу в параметр доп.Работы Кузовщик двоичное число переведя его из String в double
                 element.setDopWorksKuzovchik(Double.parseDouble(dopWorks));
+                // Дальше если есть описание доп.работ Кузовщик
+                if (dopWorksKuzovchikDescriptionPushed != null && inputDopWorksKuzovchikDescription != null) {
+                    element.setDescriptionDopWorksKuzovchik(inputDopWorksKuzovchikDescription);
+                }
             }
             calcLkm(element);
         } else if (sideButtonPushed.getText().equals("Полировка")) {
@@ -1778,8 +2124,11 @@ public class AddWorkPanel {
         LineBorder colorPaint2xButton = (LineBorder) but.getPaint2xButton().getBorder();
         LineBorder colorRepair = (LineBorder) but.getRepairButton().getBorder();
         LineBorder colorDopWorksArmaturchik = (LineBorder) but.getDopWorksArmaturchikButton().getBorder();
+        LineBorder colorDopWorksArmaturchikDescription = (LineBorder) but.getDopWorksArmaturchikDescriptionButton().getBorder();
         LineBorder colorDopWorksPainter = (LineBorder) but.getDopWorksPainterButton().getBorder();
+        LineBorder colorDopWorksPainterDescription = (LineBorder) but.getDopWorksPainterDescriptionButton().getBorder();
         LineBorder colorDopWorksKuzovchik = (LineBorder) but.getDopWorksKuzovchikButton().getBorder();
+        LineBorder colorDopWorksKuzovchikDescription = (LineBorder) but.getDopWorksKuzovchikDescriptionButton().getBorder();
 
         if (colorReplaceButton.getLineColor().equals(Color.GREEN)) {
             but.getReplaceButton().doClick();
@@ -1839,12 +2188,24 @@ public class AddWorkPanel {
         }
         if (colorDopWorksArmaturchik.getLineColor().equals(Color.GREEN)) {
             but.getDopWorksArmaturchikButton().doClick();
+            if (colorDopWorksArmaturchikDescription.getLineColor().equals(Color.GREEN)) {
+                dopWorksArmaturchikDescriptionPushed = but.getDopWorksArmaturchikDescriptionButton();
+                but.getDopWorksArmaturchikDescriptionButton().setBorder(BorderFactory.createLineBorder(Color.red, 1));
+            }
         }
         if (colorDopWorksPainter.getLineColor().equals(Color.GREEN)) {
             but.getDopWorksPainterButton().doClick();
+            if (colorDopWorksPainterDescription.getLineColor().equals(Color.GREEN)) {
+                dopWorksPainterDescriptionPushed = but.getDopWorksPainterDescriptionButton();
+                but.getDopWorksPainterDescriptionButton().setBorder(BorderFactory.createLineBorder(Color.red, 1));
+            }
         }
         if (colorDopWorksKuzovchik.getLineColor().equals(Color.GREEN)) {
             but.getDopWorksKuzovchikButton().doClick();
+            if (colorDopWorksKuzovchikDescription.getLineColor().equals(Color.GREEN)) {
+                dopWorksKuzovchikDescriptionPushed = but.getDopWorksKuzovchikDescriptionButton();
+                but.getDopWorksKuzovchikDescriptionButton().setBorder(BorderFactory.createLineBorder(Color.red, 1));
+            }
         }
     } // Проверка и нажатие кнопок добавленного элемента
 

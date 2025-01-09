@@ -204,12 +204,23 @@ public class SaveDialog extends JDialog {
             if (element.getOverlay() > 0)
                 line.append(" накладка окраска: ").append(element.getOverlay()).append(" н/ч.");
             if (element.getDopWorksPainter() > 0)
-                line.append(" Доп.работы по покраске: ").append(element.getDopWorksPainter()).append(" н/ч.");
+                if (element.getDescriptionDopWorksPainter().contains("null")) {
+                    line.append(" Доп.работы по покраске: ").append(element.getDopWorksPainter()).append(" н/ч.");
+                } else {
+                    line.append(" " + element.getDescriptionDopWorksPainter() + ": ").append(element.getDopWorksPainter()).append(" н/ч.");
+                }
             if (element.getDopWorksArmoturchik() > 0)
-                line.append(" Доп.работы арматурные: ").append(element.getDopWorksArmoturchik()).append(" н/ч.");
+                if (element.getDescriptionDopWorksArmaturchic().contains("null")) {
+                    line.append(" Доп.работы арматурные: ").append(element.getDopWorksArmoturchik()).append(" н/ч.");
+                } else {
+                    line.append(" " + element.getDescriptionDopWorksArmaturchic() + ": ").append(element.getDopWorksArmoturchik()).append(" н/ч.");
+                }
             if (element.getDopWorksKuzovchik() > 0)
-                line.append(" Доп.работы кузовные: ").append(element.getDopWorksKuzovchik()).append(" н/ч.");
-
+                if (element.getDescriptionDopWorksKuzovchik().contains("null")) {
+                    line.append(" Доп.работы кузовные: ").append(element.getDopWorksKuzovchik()).append(" н/ч.");
+                } else {
+                    line.append(" " + element.getDescriptionDopWorksKuzovchik() + ": ").append(element.getDopWorksKuzovchik()).append(" н/ч.");
+                }
             line.append(" Итого: ").append(element.getTotal()).append(" руб.");
         } else {
             line.append(" Итого: ").append(element.getTotal()).append(" руб.");

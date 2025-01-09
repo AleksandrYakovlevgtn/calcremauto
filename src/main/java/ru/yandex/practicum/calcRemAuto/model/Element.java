@@ -31,6 +31,9 @@ public class Element {
     double dopWorksPainter = 0;
     double dopWorksKuzovchik = 0;
     double lkmForElement = 0.0;
+    String descriptionDopWorksArmaturchic = "null";
+    String descriptionDopWorksPainter = "null";
+    String descriptionDopWorksKuzovchik = "null";
 
     {
         calculateTotal();

@@ -150,7 +150,7 @@ public class ExcelUpdater {
             cell.setCellValue((element.getName() + " c/у "));
         } else if (element.getName().contains("Полировка")) {
             cell.setCellValue((element.getName()));
-            adjustRowHeight(row, element);
+            adjustRowHeightPolirovka(row, element);
         }
         // Далее прописываем Ячейку норматива работ
         // Если элемент это остекление то
@@ -211,7 +211,15 @@ public class ExcelUpdater {
                 row = sheet.getRow(++rowForePaste); // Берем новую строку
             }
             cell = row.getCell(nameOfWork);  // Берем ячейку имени работ
-            cell.setCellValue(element.getName().replace("Замена", "") + " арматурные Доп.работы"); // Вставляем имя элемента и вид работ
+            // Если элемент не имеет описания доп.работ
+            if (element.getDescriptionDopWorksArmaturchic().equals("null")) {
+                // то вставляем готовую заглушку
+                cell.setCellValue(element.getName().replace("Замена", "") + " арматурные Доп.работы"); // Вставляем имя элемента и вид работ
+            } else {
+                // В противном случае вставляем описания доп.работ
+                cell.setCellValue(element.getName().replace("Замена", "") + " " + element.getDescriptionDopWorksArmaturchic()); // Вставляем имя элемента и вид работ
+                adjustRowHeightForLongWords(row, element.getDescriptionDopWorksArmaturchic());
+            }
             cell = row.getCell(narmotive);  // Берем ячейку норматив работ
             cell.setCellValue(element.getDopWorksArmoturchik()); // Вставляем значение Доп.работ
             cell = row.getCell(price);  // Берем ячейку стоимость норма часа
@@ -227,7 +235,15 @@ public class ExcelUpdater {
                 row = sheet.getRow(++rowForePaste); // Берем новую строку
             }
             cell = row.getCell(nameOfWork);  // Берем ячейку имени работ
-            cell.setCellValue(element.getName().replace("Замена", "") + " покрасочные Доп.работы"); // Вставляем имя элемента и вид работ
+            // Если элемент не имеет описания доп.работ
+            if (element.getDescriptionDopWorksPainter().equals("null")) {
+                // то вставляем готовую заглушку
+                cell.setCellValue(element.getName().replace("Замена", "") + " покрасочные Доп.работы"); // Вставляем имя элемента и вид работ
+            } else {
+                // В противном случае вставляем описания доп.работ
+                cell.setCellValue(element.getName().replace("Замена", "") + " " + element.getDescriptionDopWorksPainter()); // Вставляем имя элемента и вид работ
+                adjustRowHeightForLongWords(row, element.getDescriptionDopWorksPainter());
+            }
             cell = row.getCell(narmotive);  // Берем ячейку норматив работ
             cell.setCellValue(element.getDopWorksPainter()); // Вставляем значение Доп.работ
             cell = row.getCell(price);  // Берем ячейку стоимость норма часа
@@ -237,13 +253,21 @@ public class ExcelUpdater {
             total += (element.getDopWorksPainter() * prices.getHourlyRate()); // Добавляем к итоговой стоимости работ стоимость данной работы
         }
         if (element.getDopWorksKuzovchik() != 0) { // Если на элементе есть кузовные Доп.работы прописываем их
-            // Если в элементе отсутствуют работы для арматурщика или отсутствуют доп.работы для арматурщика или отсутствуют доп.работы маляра то не берем новую строку
+            // Если в элементе отсутствуют работы для арматурщика или отсутствуют доп.работы для арматурщика или отсутствуют доп.работы для маляра, то не берем новую строку
             if (element.getArmatureSide() != 0 || element.getDopWorksArmoturchik() != 0 || element.getDopWorksPainter() != 0) {
                 // Если есть то
                 row = sheet.getRow(++rowForePaste); // Берем новую строку
             }
             cell = row.getCell(nameOfWork);  // Берем ячейку имени работ
-            cell.setCellValue(element.getName().replace("Замена", "") + " кузовные Доп.работы"); // Вставляем имя элемента и вид работ
+            // Если элемент не имеет описания доп.работ
+            if (element.getDescriptionDopWorksKuzovchik().equals("null")) {
+                // то вставляем готовую заглушку
+                cell.setCellValue(element.getName().replace("Замена", "") + " кузовные Доп.работы"); // Вставляем имя элемента и вид работ
+            } else {
+                // В противном случае вставляем описания доп.работ
+                cell.setCellValue(element.getName().replace("Замена", "") + " " + element.getDescriptionDopWorksKuzovchik()); // Вставляем имя элемента и вид работ
+                adjustRowHeightForLongWords(row, element.getDescriptionDopWorksKuzovchik());
+            }
             cell = row.getCell(narmotive);  // Берем ячейку норматив работ
             cell.setCellValue(element.getDopWorksKuzovchik()); // Вставляем значение Доп.работ
             cell = row.getCell(price);  // Берем ячейку стоимость норма часа
@@ -451,9 +475,21 @@ public class ExcelUpdater {
         newRow.setHeightInPoints(defaultRowHeightInPoints);
     } // метод копирования строк со всеми параметрами
 
-    private void adjustRowHeight(Row row, Element element) {
+    private void adjustRowHeightPolirovka(Row row, Element element) {
         String[] points = element.getName().split("'");
-        int i = points.length / 3;
-        row.setHeightInPoints(i * 15);
+        int i = (points.length / 3) * 15; // Сколько нужно
+        float b = row.getHeightInPoints(); // Сколько стандарт
+        if (i > b) { // Если нужно больше чем стандарт
+            row.setHeightInPoints(i); // То выставляем размер ячейки
+        }// Если нет, то оставляем стандартный размер ячейки
     } // метод выставления высоты строки для длинных имен элемента полировки.
+
+    private static void adjustRowHeightForLongWords(Row row, String text) {
+        String[] points = text.split("\n");
+        double i = points.length + text.length();
+        if (i < 50) {
+            i = i * 1.5;
+        }
+        row.setHeightInPoints((int) i);
+    } // метод выставления высоты строки для длинных описаний доп.работ
 }

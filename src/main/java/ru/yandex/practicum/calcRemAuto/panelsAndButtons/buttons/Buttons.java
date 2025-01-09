@@ -52,7 +52,10 @@ public class Buttons {
     JButton paint1xButton = new JButton("Окраска с 1х");
     JButton paint2xButton = new JButton("2х");
     JButton dopWorksArmaturchikButton = new JButton("Арматурщик");
+    JButton dopWorksArmaturchikDescriptionButton = new JButton("Описание доп.работ Арматурщик");
     JButton dopWorksPainterButton = new JButton("Маляр");
+    JButton dopWorksPainterDescriptionButton = new JButton("Описание доп.работ Маляр");
     JButton dopWorksKuzovchikButton = new JButton("Кузовщик");
+    JButton dopWorksKuzovchikDescriptionButton = new JButton("Описание доп.работ Кузовщик");
     JTextField remontJText = new JTextField();
 }

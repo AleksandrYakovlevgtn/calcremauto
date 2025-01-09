@@ -139,7 +139,7 @@ public class SearchPanel {
     } // Создание слушателя поля ввода для отображения цвета рамки
 
     private void updateBorderColor() {
-        if (search.getText().length() < 6) {
+        if (search.getText().length() < 3) {
             search.setBorder(BorderFactory.createLineBorder(Color.red));
         } else {
             search.setBorder(BorderFactory.createLineBorder(Color.green));
@@ -152,42 +152,71 @@ public class SearchPanel {
         if (startDirectory.exists() && startDirectory.isDirectory()) {
             // Получаем список всех папок в стартовой директории
             File[] allFolders = startDirectory.listFiles(File::isDirectory);
-            File[] subFolders = new File[0];
 
             if (allFolders != null && allFolders.length > 0) {
                 List<File> matchingFolders = new ArrayList<>();
-                String name = "null";
 
                 for (File folder : allFolders) {
-                    if (folder.getName().contains(partialFolderName.toUpperCase())) {
+                    if (folder.getName().toUpperCase().contains(partialFolderName.toUpperCase())) {
                         matchingFolders.add(folder);
-                        subFolders = folder.listFiles(File::isDirectory);
-                        name = folder.getName();
                     }
                 }
 
                 if (!matchingFolders.isEmpty()) {
-                    StringBuilder message = new StringBuilder("На автомобиль " + name + " есть ранние расчеты:\n");
+                    File selectedFolder = null;
 
-                    String[] folderNames = Arrays.stream(subFolders)
-                            .map(folderi -> folderi.getName().substring(folderi.getName().lastIndexOf(File.separator) + 1))
-                            .toArray(String[]::new);
+                    if (matchingFolders.size() == 1) {
+                        // Если найдена только одна папка
+                        selectedFolder = matchingFolders.get(0);
+                    } else {
+                        // Если найдено несколько папок, предлагаем пользователю выбрать одну
+                        String[] matchingFolderNames = matchingFolders.stream()
+                                .map(File::getName)
+                                .toArray(String[]::new);
 
-                    Object chosenFolder = showInputDialog((message + "\nОт какой даты открыть расчет?"), folderNames, subFolders[0]);
-                    AUTOMOBILE_DIRECTORY = directories.getNAME_START_DIRECTORY() + directories.getSlash() + name.toUpperCase();
+                        // Используем метод showInputDialog для выбора папки
+                        Object chosenFolderName = showInputDialog(
+                                "Найдено несколько папок, выберите нужную:",
+                                matchingFolderNames,
+                                matchingFolders.get(0)  // передаем первый элемент в качестве значения по умолчанию
+                        );
 
-                    selectAction(chosenFolder);
+                        if (chosenFolderName != null) {
+                            selectedFolder = matchingFolders.stream()
+                                    .filter(folder -> folder.getName().equals(chosenFolderName.toString()))
+                                    .findFirst()
+                                    .orElse(null);
+                        }
+                    }
+
+                    if (selectedFolder != null) {
+                        File[] subFolders = selectedFolder.listFiles(File::isDirectory);
+                        if (subFolders != null && subFolders.length > 0) {
+                            StringBuilder message = new StringBuilder("На автомобиль " + selectedFolder.getName() + " есть ранние расчеты:\n");
+
+                            String[] folderNames = Arrays.stream(subFolders)
+                                    .map(File::getName)
+                                    .toArray(String[]::new);
+
+                            // Используем метод showInputDialog для выбора подпапки
+                            Object chosenSubFolder = showInputDialog((message + "\nОт какой даты открыть расчет?"), folderNames, subFolders[0]);
+                            AUTOMOBILE_DIRECTORY = directories.getNAME_START_DIRECTORY() + directories.getSlash() + selectedFolder.getName().toUpperCase();
+
+                            selectAction(chosenSubFolder);
+                        } else {
+                            showMessageDialog("Ранних расчетов автомобиля " + selectedFolder.getName() + " не найдено.");
+                        }
+                    }
                 } else {
-                    showMessageDialog("Ранних расчетов автомобиля  " + partialFolderName.toUpperCase() + " не найдено.");
+                    showMessageDialog("Ранних расчетов автомобиля " + partialFolderName.toUpperCase() + " не найдено.");
                 }
             } else {
-                showMessageDialog("Ранних расчетов автомобиля  " + partialFolderName.toUpperCase() + " не найдено.");
+                showMessageDialog("Ранних расчетов автомобиля " + partialFolderName.toUpperCase() + " не найдено.");
             }
         } else {
-            showMessageDialog("Ранних расчетов автомобиля  " + partialFolderName.toUpperCase() + " не найдено.");
+            showMessageDialog("Ранних расчетов автомобиля " + partialFolderName.toUpperCase() + " не найдено.");
         }
-
-    } // Открытие диалогового поля выбора расчета из найденных по гос/номера
+    }// Открытие диалогового поля выбора расчета из найденных по гос/номера
 
     private void selectAction(Object chosenFolder) {
         String chosenFolderPath = (chosenFolder != null) ? chosenFolder.toString() : "";
@@ -275,12 +304,58 @@ public class SearchPanel {
     private Object showInputDialog(String message, String[] folderNames, File defaultFolder) {
         return JOptionPane.showInputDialog(null, message, "Просмотр", JOptionPane.PLAIN_MESSAGE, null,
                 folderNames, defaultFolder);
-    } // Показ диалогового
+    } // Показ диалогового окна выбора авто и даты расчета
+
+    /*public static Object showInputDialog(String message, String[] folderNames, File defaultFolder) {
+        // Создайте новый JDialog
+        JDialog dialog = new JDialog((JFrame) null, "Просмотр", true);
+        dialog.setLayout(new BorderLayout());
+        dialog.setSize(300, 200);
+        dialog.setLocationRelativeTo(null); // Центрируйте окно на экране
+
+        // Создайте панель для отображения сообщения
+        JPanel messagePanel = new JPanel();
+        JLabel label = new JLabel("<html><div style='text-align: center;'>" + message + "</div></html>");
+        label.setHorizontalAlignment(JLabel.CENTER);
+        label.setPreferredSize(new Dimension(280, 50)); // Настройка размера для переносов
+        messagePanel.add(label);
+
+        // Создайте панель для выбора
+        JPanel selectionPanel = new JPanel();
+        JComboBox<String> comboBox = new JComboBox<>(folderNames);
+        comboBox.setSelectedItem(defaultFolder.getName());
+        selectionPanel.add(comboBox);
+
+        // Создайте панель для кнопки OK
+        JPanel buttonPanel = new JPanel();
+        JButton okButton = new JButton("OK");
+        okButton.addActionListener(e -> dialog.dispose());
+        buttonPanel.add(okButton);
+
+        // Добавьте панели в диалоговое окно
+        dialog.add(messagePanel, BorderLayout.NORTH);
+        dialog.add(selectionPanel, BorderLayout.CENTER);
+        dialog.add(buttonPanel, BorderLayout.SOUTH);
+
+        // Закройте диалог при нажатии на крестик
+        dialog.setDefaultCloseOperation();
+
+        // Отобразите диалог и дождитесь результата
+        dialog.setVisible(true);
+
+        // Получите выбранное значение
+        return comboBox.getSelectedItem();
+    }*/
+
+
+
+
+
 
     private int showOptionDialog(String fileContent) {
         return JOptionPane.showOptionDialog(null, fileContent, "Содержимое файла.", JOptionPane.DEFAULT_OPTION,
                 JOptionPane.QUESTION_MESSAGE, null, OPTIONS, OPTIONS[0]);
-    } // Показ диалогового
+    } // Показ диалогового окна со сметой
 
     private int showConfirmDialog(Object chosenFolder, String text) {
         return JOptionPane.showConfirmDialog(null, text + chosenFolder + "?",
