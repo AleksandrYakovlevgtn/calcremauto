@@ -1687,7 +1687,7 @@ public class AddWorkPanel {
                                     button.setBorder(BorderFactory.createLineBorder(Color.green));
                                 }
                                 //Если есть кнопка ремонт, то делим ее на значение "ремонт", "число" и "механик"
-                                if (check.contains("Ремонт") && button.getText().equals("Ремонт")) {
+                                if (button.getText().equals("Ремонт") && check.startsWith(button.getText())) { // Было button.getText().equals("Ремонт") && check.contains("Ремонт") ****************
                                     button.setBorder(BorderFactory.createLineBorder(Color.green));
                                     String[] split = check.split(" ");
                                     // Возвращаем значение "elementRemont" для того чтобы отобразить сколько у данного элемента это значение
@@ -1707,7 +1707,9 @@ public class AddWorkPanel {
                                                 break;
                                         }
                                     }
-                                } else if (check.contains(button.getText()) && (check.contains("Маляр") || check.contains("Кузовщик") || check.contains("Арматурщик"))) {
+                                    //Если есть кнопка доп.работ то необходимо вернуть значение норма/часов
+                                    // Кнопка доп работ имеет имя механика таким образом проверяем совпадает ли это имя с первым словом check
+                                } else if (check.startsWith(button.getText())) {
                                     String[] split = check.split(" ");
                                     switch (split[0]) {
                                         case "Арматурщик":
@@ -1723,7 +1725,8 @@ public class AddWorkPanel {
                                             button.setBorder(BorderFactory.createLineBorder(Color.green));
                                             break;
                                     }
-                                } else if ((button.getText().contains("Описание") && !check.contains("Ремонт")) && (check.contains("Маляр") || check.contains("Кузовщик") || check.contains("Арматурщик"))) {
+                                    // Дальше необходимо проверить есть ли описание доп.работ
+                                } else if ((button.getText().contains("Описание")) && (check.contains("Маляр") || check.contains("Кузовщик") || check.contains("Арматурщик"))) {
                                     String[] split = check.split(" ");
                                     if (split.length > 2) {
                                         String description = split[2].replaceAll("\u2400", ",").replaceAll("\u2422", " ");
@@ -2118,7 +2121,12 @@ public class AddWorkPanel {
         /*
         Проверяем по цвету рамки какие кнопки были нажаты ранее.
          */
-        LineBorder colorReplaceButton = (LineBorder) but.getReplaceButton().getBorder();
+        if (!elementButtonPushed.getText().contains("Проём")) {
+            LineBorder colorReplaceButton = (LineBorder) but.getReplaceButton().getBorder();
+            if (colorReplaceButton.getLineColor().equals(Color.GREEN)) {
+                but.getReplaceButton().doClick();
+            }
+        }
         LineBorder colorDisassembleButton = (LineBorder) but.getDisassembleButton().getBorder();
         LineBorder colorPaint1xButton = (LineBorder) but.getPaint1xButton().getBorder();
         LineBorder colorPaint2xButton = (LineBorder) but.getPaint2xButton().getBorder();
@@ -2130,9 +2138,7 @@ public class AddWorkPanel {
         LineBorder colorDopWorksKuzovchik = (LineBorder) but.getDopWorksKuzovchikButton().getBorder();
         LineBorder colorDopWorksKuzovchikDescription = (LineBorder) but.getDopWorksKuzovchikDescriptionButton().getBorder();
 
-        if (colorReplaceButton.getLineColor().equals(Color.GREEN)) {
-            but.getReplaceButton().doClick();
-        }
+
         if (colorDisassembleButton.getLineColor().equals(Color.GREEN)) {
             but.getDisassembleButton().doClick();
         }
