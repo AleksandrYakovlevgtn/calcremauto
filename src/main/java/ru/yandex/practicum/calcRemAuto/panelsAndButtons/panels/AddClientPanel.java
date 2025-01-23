@@ -44,9 +44,9 @@ public class AddClientPanel {
         name.addKeyListener(new KeyAdapter() {
             @Override
             public void keyTyped(KeyEvent e) {
-                // Поле имени принимает только буквы и ограничено по длине символов 10.
+                // Поле имени принимает только буквы, пробелы и ограничено по длине символов 30.
                 char c = e.getKeyChar();
-                if (!Character.isLetter(c) || name.getText().length() >= 10) {
+                if (!(Character.isLetter(c) || c == ' ') || name.getText().length() >= 30) {
                     e.consume();
                 }
             }
@@ -85,9 +85,9 @@ public class AddClientPanel {
         modelAuto.addKeyListener(new KeyAdapter() {
             @Override
             public void keyTyped(KeyEvent e) {
-                // Поле модель авто принимает только буквы и ограничено по длине символов 11.
+                // Поле модель авто принимает буквы, цифры, пробелы и ограничено по длине символов 20.
                 char c = e.getKeyChar();
-                if (!Character.isLetter(c) || modelAuto.getText().length() >= 11)
+                if (!(Character.isLetter(c) || Character.isDigit(c) || c == ' ') || modelAuto.getText().length() >= 20)
                     e.consume();
             }
         });

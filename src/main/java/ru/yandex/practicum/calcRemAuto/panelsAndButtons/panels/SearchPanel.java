@@ -17,13 +17,14 @@ import java.util.Scanner;
 import java.util.stream.Stream;
 import java.util.List;
 
+import lombok.extern.slf4j.Slf4j;
 import ru.yandex.practicum.calcRemAuto.model.NameDirectories;
 import ru.yandex.practicum.calcRemAuto.panelsAndButtons.buttons.Buttons;
 import ru.yandex.practicum.calcRemAuto.storage.OpenFolder;
 import ru.yandex.practicum.calcRemAuto.storage.WorkWithFile;
 import ru.yandex.practicum.calcRemAuto.telegram.TelegramFileSenderBot;
 
-
+@Slf4j
 public class SearchPanel {
     NameDirectories directories = new NameDirectories();
     private final String FILE_NAME = directories.getSMETA() + directories.getTxt();  //  Имя файла "смета.txt"
@@ -85,7 +86,7 @@ public class SearchPanel {
                     showErrorDialog("Неверный формат гос/номера!");
                 }
             } catch (Exception o) {
-                showErrorDialog("Необходимо заполнить поле гос/номера!");
+                showErrorDialog("Ошибка: " + o.getMessage());
             }
         });
     } // Создание окна поиска
@@ -114,6 +115,14 @@ public class SearchPanel {
                     }
                 } else {
                     e.consume();
+                }
+            }
+
+            // Добавляем обработку нажатия клавиши Enter
+            @Override
+            public void keyPressed(KeyEvent e) {
+                if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+                    but.getButtonSearch().doClick(); // Нажимаем кнопку программно
                 }
             }
         });
@@ -254,6 +263,8 @@ public class SearchPanel {
 
                     if (confirm == JOptionPane.YES_OPTION) {
                         boolean success = deleteFileOrDirectory(parentPath.toFile());
+                        // Проверяем последний ли мы удалили расчет если да то удаляем и папку авто так как там нет расчетов
+                        checkAndDeleteParentFolderIfEmpty(new File(AUTOMOBILE_DIRECTORY));
 
                         if (success) {
                             showInformationDialog("Расчет от " + chosenFolder + " удален.");
@@ -287,74 +298,91 @@ public class SearchPanel {
     private static boolean deleteFileOrDirectory(File fileOrDirectory) {
         if (fileOrDirectory.exists()) {
             if (fileOrDirectory.isDirectory()) {
+                // Получаем список файлов и поддиректорий
                 File[] files = fileOrDirectory.listFiles();
                 if (files != null) {
                     for (File file : files) {
+                        // Рекурсивно удаляем файлы и поддиректории
                         deleteFileOrDirectory(file);
                     }
                 }
+                // Проверяем, осталась ли директория пустой после удаления всего содержимого
+                if (fileOrDirectory.list().length == 0) {
+                    // Удаляем пустую директорию
+                    return fileOrDirectory.delete();
+                }
+            } else {
+                // Если это файл, просто удаляем его
+                return fileOrDirectory.delete();
             }
-            return fileOrDirectory.delete();
+
+            // Директория не была пустой, поэтому возвращаем true (удаление прошло успешно)
+            return true;
         } else {
             showErrorDialog("Файл или папка не существует: " + fileOrDirectory.getPath());
             return false;
         }
-    } // Метод удаления папки расчета
+    } // Метод удаления конкретной папки с расчетом
+
+    private static void checkAndDeleteParentFolderIfEmpty(File parentFolder) {
+        if (parentFolder.exists() && parentFolder.isDirectory()) {
+            // Получаем список файлов и поддиректорий в родительской папке
+            File[] contents = parentFolder.listFiles();
+            if (contents != null && contents.length == 0) {
+                // Родительская папка пуста, удаляем её
+                if (parentFolder.delete()) {
+                    log.info("Удалена и родительская папка: " + parentFolder);
+                } else {
+                    log.error("Не удалось удалить родительскую папку: " + parentFolder);
+                }
+            }
+        }
+    } // Метод для проверки и возможного удаления родительской папки
 
     private Object showInputDialog(String message, String[] folderNames, File defaultFolder) {
         return JOptionPane.showInputDialog(null, message, "Просмотр", JOptionPane.PLAIN_MESSAGE, null,
                 folderNames, defaultFolder);
     } // Показ диалогового окна выбора авто и даты расчета
 
-    /*public static Object showInputDialog(String message, String[] folderNames, File defaultFolder) {
-        // Создайте новый JDialog
-        JDialog dialog = new JDialog((JFrame) null, "Просмотр", true);
-        dialog.setLayout(new BorderLayout());
-        dialog.setSize(300, 200);
-        dialog.setLocationRelativeTo(null); // Центрируйте окно на экране
-
-        // Создайте панель для отображения сообщения
-        JPanel messagePanel = new JPanel();
-        JLabel label = new JLabel("<html><div style='text-align: center;'>" + message + "</div></html>");
-        label.setHorizontalAlignment(JLabel.CENTER);
-        label.setPreferredSize(new Dimension(280, 50)); // Настройка размера для переносов
-        messagePanel.add(label);
-
-        // Создайте панель для выбора
-        JPanel selectionPanel = new JPanel();
-        JComboBox<String> comboBox = new JComboBox<>(folderNames);
-        comboBox.setSelectedItem(defaultFolder.getName());
-        selectionPanel.add(comboBox);
-
-        // Создайте панель для кнопки OK
-        JPanel buttonPanel = new JPanel();
-        JButton okButton = new JButton("OK");
-        okButton.addActionListener(e -> dialog.dispose());
-        buttonPanel.add(okButton);
-
-        // Добавьте панели в диалоговое окно
-        dialog.add(messagePanel, BorderLayout.NORTH);
-        dialog.add(selectionPanel, BorderLayout.CENTER);
-        dialog.add(buttonPanel, BorderLayout.SOUTH);
-
-        // Закройте диалог при нажатии на крестик
-        dialog.setDefaultCloseOperation();
-
-        // Отобразите диалог и дождитесь результата
-        dialog.setVisible(true);
-
-        // Получите выбранное значение
-        return comboBox.getSelectedItem();
-    }*/
-
-
-
-
-
-
     private int showOptionDialog(String fileContent) {
-        return JOptionPane.showOptionDialog(null, fileContent, "Содержимое файла.", JOptionPane.DEFAULT_OPTION,
-                JOptionPane.QUESTION_MESSAGE, null, OPTIONS, OPTIONS[0]);
+        // Показываем JOptionPane с заданными размерами и позицией
+        JOptionPane optionPane = new JOptionPane(
+                wrapTextInScrollPane(fileContent),
+                JOptionPane.PLAIN_MESSAGE,
+                JOptionPane.DEFAULT_OPTION,
+                null,
+                OPTIONS,
+                OPTIONS[0]
+        );
+
+        // Получаем родительское окно (JFrame)
+        Window window = SwingUtilities.getWindowAncestor(panel);
+        if (!(window instanceof JFrame)) {
+            throw new IllegalStateException("Родительский component не является JFrame.");
+        }
+        JFrame frame = (JFrame) window;
+
+        Dimension frameSize = frame.getSize();
+        Point framePosition = frame.getLocationOnScreen();
+
+        // Создаем JDialog для показа сообщения
+        final JDialog dialog = optionPane.createDialog(panel, "Содержимое файла.");
+
+        // Устанавливаем размеры и позицию окна
+        dialog.setBounds(framePosition.x, framePosition.y, frameSize.width, frameSize.height);
+
+        // Отображение окна
+        dialog.setVisible(true);
+        // Получаем выбранный пользователем вариант
+        Object selectedOption = optionPane.getValue();
+        // Находим индекс выбранного варианта
+        for (int i = 0; i < OPTIONS.length; i++) {
+            if (OPTIONS[i].equals(selectedOption)) {
+                return i;
+            }
+        }
+        // Если ничего не выбрано, возвращаем -1
+        return -1;
     } // Показ диалогового окна со сметой
 
     private int showConfirmDialog(Object chosenFolder, String text) {
@@ -373,4 +401,20 @@ public class SearchPanel {
     private static void showErrorDialog(String message) {
         JOptionPane.showMessageDialog(null, message, "Ошибка", JOptionPane.ERROR_MESSAGE);
     } // Показ диалогового
+
+    private Component wrapTextInScrollPane(String text) {
+        JTextArea textArea = new JTextArea(text);
+        textArea.setLineWrap(true);      // Включаем перенос строк
+        textArea.setWrapStyleWord(true); // Перенос по словам
+        textArea.setEditable(false);     // Запрещаем редактирование
+
+        // Определяем максимальную ширину текста
+        int maxWidth = panel.getWidth() - 50; // Уменьшаем ширину на 50 пикселей для отступов
+
+        // Создаем JScrollPane с текстовым полем внутри
+        JScrollPane scrollPane = new JScrollPane(textArea);
+        scrollPane.setPreferredSize(new Dimension(maxWidth, Short.MAX_VALUE)); // Ограничиваем ширину
+
+        return scrollPane;
+    } // Оборачивает текст в JScrollPane и устанавливает максимальную ширину для showOptionDialog
 }

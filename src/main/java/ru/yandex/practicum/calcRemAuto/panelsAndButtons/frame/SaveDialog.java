@@ -36,9 +36,10 @@ public class SaveDialog extends JDialog {
         setSize(800, 600);
         setLocationRelativeTo(parentFrame);
 
-        checkBoxSendToTelegram.setSelected(false); // По умолчанию галка не установленна.
-        previewTextArea.setLineWrap(true);
-        previewTextArea.setEditable(false);
+        checkBoxSendToTelegram.setSelected(false); // По умолчанию галка не установлена.
+        previewTextArea.setLineWrap(true);         // Включаем перенос строк
+        previewTextArea.setWrapStyleWord(true);    // Перенос по словам
+        previewTextArea.setEditable(false);        // Запрещаем редактирование
 
         JPanel yesNoPanel = new JPanel(new GridBagLayout());
         JPanel yesNoPanel2 = new JPanel(new GridBagLayout());
@@ -63,8 +64,10 @@ public class SaveDialog extends JDialog {
 
         yesNoXYZPanel.add(yesNoPanel, BorderLayout.NORTH);
         panelABC.add(yesNoXYZPanel, BorderLayout.NORTH);
-        panelABC.add(previewTextArea, BorderLayout.CENTER);
-        add(panelABC, BorderLayout.CENTER);
+
+        // Оборачиваем previewTextArea в JScrollPane для возможности прокрутки
+        JScrollPane scrollPane = new JScrollPane(previewTextArea);
+        panelABC.add(scrollPane, BorderLayout.CENTER);
 
         String line = previewAddTextAndCreateTotal(client, elements, lkmTotalPrice); // Запуск метода отображения сметы
 
@@ -76,13 +79,16 @@ public class SaveDialog extends JDialog {
                 sendSmeta(workWithFaile.getDATE_DIRECTORY());
             }
             dispose();
-        });    // Кнопка да "сохранить" отправляет в класс WorkWithFile уже на оформление папок и файлов.
+        });
 
         but.getNoButton().addActionListener(e -> {
             answer = false;
             dispose();
-        }); // Кнопка нет "не сохранять" закрывает диалоговое окно.
+        });
+
+        add(panelABC, BorderLayout.CENTER);
     }
+
 
     private void sendSmeta(String path) {
         TelegramFileSenderBot telegramFileSenderBot = new TelegramFileSenderBot();
