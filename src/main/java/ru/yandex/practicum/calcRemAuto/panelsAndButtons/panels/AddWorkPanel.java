@@ -1,12 +1,14 @@
 package ru.yandex.practicum.calcRemAuto.panelsAndButtons.panels;
 
 import lombok.extern.slf4j.Slf4j;
+import ru.yandex.practicum.calcRemAuto.grammar.CustomDocumentHandler;
 import ru.yandex.practicum.calcRemAuto.model.Client;
 import ru.yandex.practicum.calcRemAuto.model.Element;
 import ru.yandex.practicum.calcRemAuto.model.Lkm;
 import ru.yandex.practicum.calcRemAuto.model.LkmPrices;
 import ru.yandex.practicum.calcRemAuto.panelsAndButtons.buttons.Buttons;
 import ru.yandex.practicum.calcRemAuto.panelsAndButtons.frame.SaveDialog;
+import ru.yandex.practicum.calcRemAuto.panelsAndButtons.frame.StartFrame;
 
 import javax.swing.*;
 import javax.swing.border.LineBorder;
@@ -16,10 +18,13 @@ import java.awt.*;
 import java.awt.event.ActionListener;
 import java.util.*;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
 import javax.swing.text.*;
+import javax.swing.text.BadLocationException;
 
 @Slf4j
 public class AddWorkPanel {
+    ExecutorService executor; // Для распараллеливания задач
     JFrame frame;
     List<Element> elementList = new ArrayList<>(); // Список добавленных элементов
     Map<String, Map<String, List<String>>> lineBorderColorMap = new HashMap<>(); // Таблица с нажатыми кнопками добавленных элементов
@@ -83,8 +88,15 @@ public class AddWorkPanel {
     LkmPrices lkmPrices = new LkmPrices();
     int lkmTotalPrice = 0;
 
-    public void startPanel(JPanel panel, Client client, JFrame startFrame) {
-        frame = startFrame;
+    public void startPanel(JPanel panel, Client client, JFrame frame) {
+        this.frame = frame;
+        // Получаем текущий экземпляр StartFrame
+        StartFrame startFrame = StartFrame.getCurrentInstance();
+        if (startFrame != null) {
+            // Используем ExecutorService из StartFrame
+            executor = startFrame.getExecutor();
+        }
+
         elementListTextViewing.setLineWrap(true);
         elementListTextViewing.setEditable(false);
 
@@ -174,7 +186,7 @@ public class AddWorkPanel {
             if (elementList.isEmpty()) {
                 JOptionPane.showMessageDialog(null, "Не добавлен ни один элемент\nСохранить нечего!", "Ошибка", JOptionPane.INFORMATION_MESSAGE);
             } else {
-                SaveDialog saveDialog = new SaveDialog(startFrame, client, elementList, lineBorderColorMap, lkm, lkmTotalPrice);
+                SaveDialog saveDialog = new SaveDialog(frame, client, elementList, lineBorderColorMap, lkm, lkmTotalPrice);
                 saveDialog.setVisible(true);
                 if (saveDialog.getAnswer()) {
                     FirstPanel firstPanel = new FirstPanel();
@@ -460,7 +472,6 @@ public class AddWorkPanel {
 
     public void WorksPanel(JPanel elementLeftRightSidePanel, JPanel panelAdd) {
         clearPushedButtonAfterElementAdd();
-
         // Удаляем лишние строчки из работ так как не везде есть молдинги, зеркала, ручки и стекла.
         if (elementLeftRightSidePanel.getComponents().length > 9) {
             for (int i = elementLeftRightSidePanel.getComponents().length - 1; i >= 9; i--) {
@@ -1149,6 +1160,13 @@ public class AddWorkPanel {
         but.getDopWorksArmaturchikDescriptionButton().addActionListener(e -> {
             if (dopWorksArmaturchikButtonPushed != null) {
                 log.info("Нажата кнопка описания доп.работ Арматурщик");
+                // Запуск задачи проверки грамматики в отдельном потоке
+                executor.submit(() -> {
+                    // Проверка грамматики
+                    CustomDocumentHandler handler1 = new CustomDocumentHandler(dopWorksArmaturchikDescription, 100);
+                    ((AbstractDocument) dopWorksArmaturchikDescription.getDocument()).setDocumentFilter(handler1);
+                    dopWorksArmaturchikDescription.getDocument().addDocumentListener(handler1);
+                });
                 // Создаем модальное окно
                 JDialog dialog = new JDialog(frame, "Описание доп.работ", true); // true - модальное окно
                 dialog.setSize(300, 300);
@@ -1159,7 +1177,6 @@ public class AddWorkPanel {
 
                 dopWorksArmaturchikDescription.setWrapStyleWord(true); // Включить перенос по словам
                 dopWorksArmaturchikDescription.setLineWrap(true); // Перенос строк
-                PlainDocument doc = (PlainDocument) dopWorksArmaturchikDescription.getDocument(); // Для ограничения вводимого текста.
                 // Если описание есть в памяти, то его и прописываем
                 if (inputDopWorksArmaturchikDescription != null) {
                     dopWorksArmaturchikDescription.setText(inputDopWorksArmaturchikDescription);
@@ -1169,27 +1186,10 @@ public class AddWorkPanel {
                     dopWorksArmaturchikDescription.setText("");
                     log.info("Произведена проверка текста описания доп.работ Арматурщик из памяти: в памяти нет ранее введенного текст, отправлен пустой символ.");
                 }
-                doc.setDocumentFilter(new DocumentFilter() {
-                    @Override
-                    public void insertString(FilterBypass fb, int offset, String string, AttributeSet attr) throws BadLocationException {
-                        if (fb.getDocument().getLength() + string.length() <= 100) {
-                            super.insertString(fb, offset, string, attr);
-                        }
-                    }
-
-                    @Override
-                    public void replace(FilterBypass fb, int offset, int length, String text, AttributeSet attrs) throws BadLocationException {
-                        if (fb.getDocument().getLength() + text.length() - length <= 100) {
-                            super.replace(fb, offset, length, text, attrs);
-                        }
-                    }
-                }); // Для ограничения вводимого текста.
 
                 textPanel.add(dopWorksArmaturchikDescription, BorderLayout.CENTER);
-
                 textPanel.setPreferredSize(new Dimension(200, 220));
                 dialog.add(textPanel, BorderLayout.NORTH);
-
 
                 // Панель для кнопок
                 JPanel buttonPanel = new JPanel();
@@ -1213,7 +1213,6 @@ public class AddWorkPanel {
                     log.info("Описание доп.работ Арматурщик выбрана кнопка Отменена");
                     dialog.dispose(); // Закрыть диалоговое окно
                 }); // Кнопка "Отмена"
-
                 buttonPanel.add(okButton);
                 buttonPanel.add(cancelButton);
 
@@ -1225,6 +1224,13 @@ public class AddWorkPanel {
         but.getDopWorksPainterDescriptionButton().addActionListener(e -> {
             if (dopWorksPainterButtonPushed != null) {
                 log.info("Нажата кнопка описания доп.работ Маляр");
+                // Запуск задачи проверки грамматики в отдельном потоке
+                executor.submit(() -> {
+                    // Проверка грамматики
+                    CustomDocumentHandler handler2 = new CustomDocumentHandler(dopWorksPainterDescription, 100);
+                    ((AbstractDocument) dopWorksPainterDescription.getDocument()).setDocumentFilter(handler2);
+                    dopWorksPainterDescription.getDocument().addDocumentListener(handler2);
+                });
                 // Создаем модальное окно
                 JDialog dialog = new JDialog(frame, "Описание доп.работ", true); // true - модальное окно
                 dialog.setSize(300, 300);
@@ -1236,7 +1242,6 @@ public class AddWorkPanel {
 
                 dopWorksPainterDescription.setWrapStyleWord(true); // Включить перенос по словам
                 dopWorksPainterDescription.setLineWrap(true); // Перенос строк
-                PlainDocument doc = (PlainDocument) dopWorksPainterDescription.getDocument(); // Для ограничения вводимого текста.
                 // Если описание есть в памяти, то его и прописываем
                 if (inputDopWorksPainterDescription != null) {
                     dopWorksPainterDescription.setText(inputDopWorksPainterDescription);
@@ -1246,27 +1251,10 @@ public class AddWorkPanel {
                     dopWorksPainterDescription.setText("");
                     log.info("Произведена проверка текста описания доп.работ Маляр из памяти: в памяти нет ранее введенного текст, отправлен пустой символ.");
                 }
-                doc.setDocumentFilter(new DocumentFilter() {
-                    @Override
-                    public void insertString(FilterBypass fb, int offset, String string, AttributeSet attr) throws BadLocationException {
-                        if (fb.getDocument().getLength() + string.length() <= 100) {
-                            super.insertString(fb, offset, string, attr);
-                        }
-                    }
-
-                    @Override
-                    public void replace(FilterBypass fb, int offset, int length, String text, AttributeSet attrs) throws BadLocationException {
-                        if (fb.getDocument().getLength() + text.length() - length <= 100) {
-                            super.replace(fb, offset, length, text, attrs);
-                        }
-                    }
-                }); // Для ограничения вводимого текста.
 
                 textPanel.add(dopWorksPainterDescription, BorderLayout.CENTER);
-
                 textPanel.setPreferredSize(new Dimension(200, 220));
                 dialog.add(textPanel, BorderLayout.NORTH);
-
 
                 // Панель для кнопок
                 JPanel buttonPanel = new JPanel();
@@ -1302,6 +1290,13 @@ public class AddWorkPanel {
         but.getDopWorksKuzovchikDescriptionButton().addActionListener(e -> {
             if (dopWorksKuzovchikButtonPushed != null) {
                 log.info("Нажата кнопка описания доп.работ Кузовщик");
+                // Запуск задачи проверки грамматики в отдельном потоке
+                executor.submit(() -> {
+                    // Проверка грамматики
+                    CustomDocumentHandler handler3 = new CustomDocumentHandler(dopWorksKuzovchikDescription, 100);
+                    ((AbstractDocument) dopWorksKuzovchikDescription.getDocument()).setDocumentFilter(handler3);
+                    dopWorksKuzovchikDescription.getDocument().addDocumentListener(handler3);
+                });
                 // Создаем модальное окно
                 JDialog dialog = new JDialog(frame, "Описание доп.работ", true); // true - модальное окно
                 dialog.setSize(300, 300);
@@ -1313,7 +1308,6 @@ public class AddWorkPanel {
 
                 dopWorksKuzovchikDescription.setWrapStyleWord(true); // Включить перенос по словам
                 dopWorksKuzovchikDescription.setLineWrap(true); // Перенос строк
-                PlainDocument doc = (PlainDocument) dopWorksKuzovchikDescription.getDocument(); // Для ограничения вводимого текста.
                 // Если описание есть в памяти, то его и прописываем
                 if (inputDopWorksKuzovchikDescription != null) {
                     dopWorksKuzovchikDescription.setText(inputDopWorksKuzovchikDescription);
@@ -1323,27 +1317,9 @@ public class AddWorkPanel {
                     dopWorksKuzovchikDescription.setText("");
                     log.info("Произведена проверка текста описания доп.работ Кузовщик из памяти: в памяти нет ранее введенного текст, отправлен пустой символ.");
                 }
-                doc.setDocumentFilter(new DocumentFilter() {
-                    @Override
-                    public void insertString(FilterBypass fb, int offset, String string, AttributeSet attr) throws BadLocationException {
-                        if (fb.getDocument().getLength() + string.length() <= 100) {
-                            super.insertString(fb, offset, string, attr);
-                        }
-                    }
-
-                    @Override
-                    public void replace(FilterBypass fb, int offset, int length, String text, AttributeSet attrs) throws BadLocationException {
-                        if (fb.getDocument().getLength() + text.length() - length <= 100) {
-                            super.replace(fb, offset, length, text, attrs);
-                        }
-                    }
-                }); // Для ограничения вводимого текста.
-
                 textPanel.add(dopWorksKuzovchikDescription, BorderLayout.CENTER);
-
                 textPanel.setPreferredSize(new Dimension(200, 220));
                 dialog.add(textPanel, BorderLayout.NORTH);
-
 
                 // Панель для кнопок
                 JPanel buttonPanel = new JPanel();

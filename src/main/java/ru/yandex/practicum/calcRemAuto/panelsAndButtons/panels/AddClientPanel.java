@@ -2,7 +2,7 @@ package ru.yandex.practicum.calcRemAuto.panelsAndButtons.panels;
 
 import ru.yandex.practicum.calcRemAuto.model.Client;
 import ru.yandex.practicum.calcRemAuto.panelsAndButtons.buttons.Buttons;
-import ru.yandex.practicum.calcRemAuto.panelsAndButtons.frame.StartFrame;
+import ru.yandex.practicum.calcRemAuto.panelsAndButtons.frame.FindParentFrame;
 
 import javax.swing.*;
 import javax.swing.border.LineBorder;
@@ -151,14 +151,13 @@ public class AddClientPanel {
 
                 if (allBordersAreGreen) {
                     AddWorkPanel addWorkPanel = new AddWorkPanel();
-                    StartFrame startFrame = new StartFrame();
                     client.setName(name.getText());
                     client.setFoneNumber(numberFone.getText());
                     client.setNumberAuto(numberAuto.getText());
                     client.setModelAuto(modelAuto.getText());
                     panel.removeAll();
                     panel.updateUI();
-                    addWorkPanel.startPanel(panel, client, startFrame.getFrame());
+                    addWorkPanel.startPanel(panel, client, FindParentFrame.findParentJFrame(panel));
                 }
             } catch (Exception o) {
                 JOptionPane.showMessageDialog(null, "Необходимо заполнить все поля!", "Ошибка", JOptionPane.ERROR_MESSAGE);
