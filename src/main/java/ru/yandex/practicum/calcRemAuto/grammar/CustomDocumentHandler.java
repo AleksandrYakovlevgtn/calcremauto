@@ -15,11 +15,11 @@ import java.util.concurrent.Executors;
 
 @Slf4j
 public class CustomDocumentHandler extends DocumentFilter implements DocumentListener {
-    private JTextComponent component;
-    private int maxLength;
-    private Highlighter highlighter;
-    private GrammarChecker grammarChecker;
-    private ExecutorService executor;
+    JTextComponent component;
+    int maxLength;
+    Highlighter highlighter;
+    GrammarChecker grammarChecker;
+    ExecutorService executor;
 
     public CustomDocumentHandler(JTextComponent component, int maxLength) {
         this.component = component;

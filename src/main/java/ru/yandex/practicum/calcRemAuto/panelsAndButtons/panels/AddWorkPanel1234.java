@@ -23,7 +23,7 @@ import javax.swing.text.*;
 import javax.swing.text.BadLocationException;
 
 @Slf4j
-public class AddWorkPanel {
+public class AddWorkPanel1234 {
     ExecutorService executor; // Для распараллеливания задач
     JFrame frame;
     List<Element> elementList = new ArrayList<>(); // Список добавленных элементов
@@ -32,22 +32,26 @@ public class AddWorkPanel {
     JPanel elementLeftRightSidePanel = new JPanel(); // Панель с элементами которые расположены по бокам авто
     JPanel elementCenterSide = new JPanel();   // Панель с элементами расположенными по центру авто
     JPanel panelGlass = new JPanel(); // Панель с остеклением авто
+    JPanel panelNotNormWork = new JPanel(); // Панель с ненормативными работами
     private String imagePath = "Системные/полировка_фон.png"; // Путь до фона. Картинка разложенного авто
     JPanel polirovkaPanel;// = new JPanel(new GridBagLayout()); // Панель для полировки использует фон на котором cheakBox,сы для элементов
     private JComboBox<String> remontComboBox = new JComboBox<>(new String[]{"Маляр", "Кузовщик", "Арматурщик"});
     JTextField remont = but.getRemontJText(); // Графа ввода н\ч ремонта элемента
-    JTextField dopWorksArmaturchik = new JTextField();  // Графа ввода доп работ Арматурщик
-    JTextField dopWorksPainter = new JTextField();  // Графа ввода доп работ Маляр
-    JTextField dopWorksKuzovchik = new JTextField();  // Графа ввода доп работ Кузовщик
+    JTextField dopWorksArmaturchik = new JTextField();  // Графа ввода норматива доп работ Арматурщик
+    JTextField dopWorksPainter = new JTextField();  // Графа ввода норматива доп работ Маляр
+    JTextField dopWorksKuzovchik = new JTextField();  // Графа ввода норматива доп работ Кузовщик
+    JTextField notNormWorkJTextField = new JTextField();  // Графа ввода норматива ненормативных работ
     JTextArea dopWorksArmaturchikDescription = new JTextArea();  // Графа ввода описания доп работ Арматурщик
     JTextArea dopWorksPainterDescription = new JTextArea();  // Графа ввода описания доп работ Маляр
     JTextArea dopWorksKuzovchikDescription = new JTextArea();  // Графа ввода описания доп работ Кузовщик
+    JTextArea notNormWorkDescription = new JTextArea();  // Графа ввода описания ненормативных работ
     JTextArea elementListTextViewing = new JTextArea(30, 19); // Окно отображения добавленных в List<Element> elementList элементов
     Double elementPaintSide = 0.0;  // Норматив окраски с одной или двух сторон
     double elementPaintAllForLkm = 0.0; //  Общее количество норматива для подсчета ЛКМ
     double elementArmatureSide = 0.0; // Норматив на арматурные работы
     Double elementKuzDetReplaceSide = 0.0; // Норматив на кузовные работы (сварка, замена приварных деталей)
-    String elementRemont; // Норматив на ремонтные работы (шпаклевка)
+    String elementRemontString; // Норматив на ремонтные работы (шпаклевка)
+    String notNormWorkNormativeString; // Норматив на не норматвиные работы
     Integer haveGlass = 0; // Значение есть ли на элементе остекление(вклеенное)
     // Далее идет гряда кнопок которые мы инициализируем при нажатии
     JButton sideButtonPushed; // Сторона
@@ -64,12 +68,14 @@ public class AddWorkPanel {
     JButton dopWorksArmaturchikButtonPushed; // доп.работы Арматурщик
     JButton dopWorksPainterButtonPushed;    // доп.работы Маляр
     JButton dopWorksKuzovchikButtonPushed;  // доп.работы Кузовщик
-    JButton dopWorksArmaturchikDescriptionPushed; // кнопка описания доп.работы Арматурщик
-    JButton dopWorksPainterDescriptionPushed; // кнопка описания доп.работы Маляр
-    JButton dopWorksKuzovchikDescriptionPushed; // кнопка описания доп.работы Кузовщик
-    String inputDopWorksArmaturchikDescription; // Описание доп.работ Арматурщик (тестовое вырожение)
-    String inputDopWorksPainterDescription; // Описание доп.работ Маляр (тестовое вырожение)
-    String inputDopWorksKuzovchikDescription; // Описание доп.работ Кузовщик (тестовое вырожение)
+    JButton dopWorksArmaturchikDescriptionPushed; // прожатие кнопки описания доп.работы Арматурщик
+    JButton dopWorksPainterDescriptionPushed; // прожатие кнопки описания доп.работы Маляр
+    JButton dopWorksKuzovchikDescriptionPushed; // прожатие кнопки описания доп.работы Кузовщик
+    JButton notNormWorkDescriptionPushed; // прожатие кнопки описания ненормативные работы
+    String inputDopWorksArmaturchikDescription; // Описание доп.работ Арматурщик (тестовое выражение)
+    String inputDopWorksPainterDescription; // Описание доп.работ Маляр (тестовое выражение)
+    String inputDopWorksKuzovchikDescription; // Описание доп.работ Кузовщик (тестовое выражение)
+    String inputNotNormWorkDescription; // Описание ненормативные работы (тестовое выражение)
     int gridYForDopWorksDescription;
     JCheckBox[] checkBoxes = {
             createCheckBox("Пер.Бампер"), createCheckBox("Пер.Лев.Крыло"),
@@ -130,6 +136,10 @@ public class AddWorkPanel {
         panelStartAdd.add(takeColorOfButtons(removeActionListener(but.getPolirovkaButton()), 1), new GridBagConstraints(0, 5, 1, 1, 1, 1,
                 GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
                 new Insets(2, 2, 2, 2), 0, 0));
+        panelStartAdd.add(takeColorOfButtons(removeActionListener(but.getNotNormWorkButton()), 1), new GridBagConstraints(0, 6, 1, 1, 1, 1,
+                GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
+                new Insets(2, 2, 2, 2), 0, 0));
+
         // Добавляем кнопки снизу с права "назад" и "сохранить"
         panelSaveAndBack.add(but.getButtonBack(), new GridBagConstraints(0, 0, 1, 1, 1, 1,
                 GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
@@ -171,10 +181,12 @@ public class AddWorkPanel {
             centerSidePanel(clearAll(panelAdd));
         });
         but.getPolirovkaButton().addActionListener(e -> {
-            // Только тут используем данный костыль так как в полировке нам необходима запустить проверку чекБоксов заранее
-            sideButtonPushed = but.getPolirovkaButton();
             sideButtonPushed = changeColorPushedButton(sideButtonPushed, but.getPolirovkaButton(), 4);
             polirovkaPanel(clearAll(panelAdd));
+        });
+        but.getNotNormWorkButton().addActionListener(e -> {
+            sideButtonPushed = changeColorPushedButton(sideButtonPushed, but.getNotNormWorkButton(), 1);
+            choiseNumberNotNormWorkPanel(clearAll(panelAdd));
         });
 
         but.getButtonBack().addActionListener(e -> {
@@ -470,6 +482,178 @@ public class AddWorkPanel {
         panelAdd.updateUI();
     } // Панель полировки
 
+    private void choiseNumberNotNormWorkPanel(JPanel panelAdd) {
+        JPanel panelXY = new JPanel();
+        JPanel panelXY2 = new JPanel();
+        JPanel panelNumber123 = new JPanel();
+        JPanel panelNumber456 = new JPanel();
+        JPanel panelNumber789 = new JPanel();
+
+        panelNotNormWork.setLayout(new GridBagLayout());
+        panelXY.setLayout(new BorderLayout());
+        panelXY2.setLayout(new BorderLayout());
+        panelNumber123.setLayout(new GridBagLayout());
+        panelNumber456.setLayout(new GridBagLayout());
+        panelNumber789.setLayout(new GridBagLayout());
+
+        panelNotNormWork.add(new JLabel("Выбери №работ."), new GridBagConstraints(0, 0, 1, 1, 1, 1,
+                GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
+                new Insets(2, 2, 2, 2), 0, 10));
+
+
+        panelNumber123.add(addActionListonerForNumberNotNormWork(takeColorOfButtons(removeActionListener(but.getNumber1notNormWork()), 1), panelAdd), new GridBagConstraints(0, 0, 1, 1, 1, 1,
+                GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
+                new Insets(2, 2, 2, 2), 0, 0));
+        panelNumber123.add(addActionListonerForNumberNotNormWork(takeColorOfButtons(removeActionListener(but.getNumber2notNormWork()), 1), panelAdd), new GridBagConstraints(1, 0, 1, 1, 1, 1,
+                GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
+                new Insets(2, 2, 2, 2), 0, 0));
+        panelNumber123.add(addActionListonerForNumberNotNormWork(takeColorOfButtons(removeActionListener(but.getNumber3notNormWork()), 1), panelAdd), new GridBagConstraints(2, 0, 1, 1, 1, 1,
+                GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
+                new Insets(2, 2, 2, 2), 0, 0));
+        panelNumber456.add(addActionListonerForNumberNotNormWork(takeColorOfButtons(removeActionListener(but.getNumber4notNormWork()), 1), panelAdd), new GridBagConstraints(0, 0, 1, 1, 1, 1,
+                GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
+                new Insets(2, 2, 2, 2), 0, 0));
+        panelNumber456.add(addActionListonerForNumberNotNormWork(takeColorOfButtons(removeActionListener(but.getNumber5notNormWork()), 1), panelAdd), new GridBagConstraints(1, 0, 1, 1, 1, 1,
+                GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
+                new Insets(2, 2, 2, 2), 0, 0));
+        panelNumber456.add(addActionListonerForNumberNotNormWork(takeColorOfButtons(removeActionListener(but.getNumber6notNormWork()), 1), panelAdd), new GridBagConstraints(2, 0, 1, 1, 1, 1,
+                GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
+                new Insets(2, 2, 2, 2), 0, 0));
+        panelNumber789.add(addActionListonerForNumberNotNormWork(takeColorOfButtons(removeActionListener(but.getNumber7notNormWork()), 1), panelAdd), new GridBagConstraints(0, 0, 1, 1, 1, 1,
+                GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
+                new Insets(2, 2, 2, 2), 0, 0));
+        panelNumber789.add(addActionListonerForNumberNotNormWork(takeColorOfButtons(removeActionListener(but.getNumber8notNormWork()), 1), panelAdd), new GridBagConstraints(1, 0, 1, 1, 1, 1,
+                GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
+                new Insets(2, 2, 2, 2), 0, 0));
+        panelNumber789.add(addActionListonerForNumberNotNormWork(takeColorOfButtons(removeActionListener(but.getNumber9notNormWork()), 1), panelAdd), new GridBagConstraints(2, 0, 1, 1, 1, 1,
+                GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
+                new Insets(2, 2, 2, 2), 0, 0));
+
+
+        panelNotNormWork.add(panelNumber123, new GridBagConstraints(0, 1, 1, 1, 1, 1,
+                GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
+                new Insets(0, 2, 0, 2), 0, 0));
+        panelNotNormWork.add(panelNumber456, new GridBagConstraints(0, 2, 1, 1, 1, 1,
+                GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
+                new Insets(0, 2, 0, 2), 0, 0));
+        panelNotNormWork.add(panelNumber789, new GridBagConstraints(0, 3, 1, 1, 1, 1,
+                GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
+                new Insets(0, 2, 0, 2), 0, 0));
+
+
+        panelXY.add(panelNotNormWork, BorderLayout.NORTH);
+        panelXY2.add(panelXY, BorderLayout.WEST);
+        panelAdd.add(panelXY2, BorderLayout.WEST);
+        panelAdd.updateUI();
+    }
+
+    private JButton addActionListonerForNumberNotNormWork(JButton buttonNumber, JPanel panelAdd) {
+        buttonNumber.addActionListener(e -> {
+            clearPushedButtonAfterElementAdd();
+            elementButtonPushed = changeColorPushedButton(elementButtonPushed, buttonNumber, 2);
+            notNormWorkAddWork(panelNotNormWork, clearCenter(panelAdd));
+        });
+        return buttonNumber;
+    }
+
+    private void notNormWorkAddWork(JPanel panelNotNormWork, JPanel panelAdd) {
+        clearPushedButtonAfterElementAdd();
+        // Используется для того что бы удалить new JLabel("Механик.") после повторного нажатия на номер работы.
+        if (panelNotNormWork.getComponents().length > 6) {
+            for (int i = panelNotNormWork.getComponents().length - 1; i >= 6; i--) {
+                panelNotNormWork.remove(i);
+            }
+            panelNotNormWork.updateUI();
+        }
+
+        panelNotNormWork.add(new JLabel("Описание."), new GridBagConstraints(1, 0, 1, 1, 1, 1,
+                GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
+                new Insets(2, 2, 2, 2), 0, 0));
+        panelNotNormWork.add(addDocumentListener(notNormWorkJTextField), new GridBagConstraints(1, 1, 1, 1, 0.7, 1,
+                GridBagConstraints.WEST, GridBagConstraints.NONE,
+                new Insets(2, 2, 2, 2), 0, 0));
+        panelNotNormWork.add(takeColorOfButtons(removeActionListener(addGearIconToButton(but.getNotNormWorkDescriptionButton())), 5), new GridBagConstraints(1, 1, 1, 1, 0.3, 1,
+                GridBagConstraints.EAST, GridBagConstraints.NONE,
+                new Insets(2, 2, 2, 2), 0, 0));
+
+
+        notNormWorkJTextField.setPreferredSize(new Dimension(35, 20)); //addGearIconToButton
+
+        but.getNotNormWorkDescriptionButton().addActionListener(e -> {
+            if (notNormWorkJTextField.getBackground() != Color.pink && notNormWorkJTextField.getText().length() > 0) {
+                log.info("Нажата кнопка описания ненормативных работ №" + elementButtonPushed.getText());
+                // Запуск задачи проверки грамматики в отдельном потоке
+                executor.submit(() -> {
+                    // Проверка грамматики
+                    CustomDocumentHandler handler1 = new CustomDocumentHandler(notNormWorkDescription, 50);
+                    ((AbstractDocument) notNormWorkDescription.getDocument()).setDocumentFilter(handler1);
+                    notNormWorkDescription.getDocument().addDocumentListener(handler1);
+                });
+                // Создаем модальное окно
+                JDialog dialog = new JDialog(frame, "Описание работ", true); // true - модальное окно
+                dialog.setSize(300, 300);
+                dialog.setLayout(new BorderLayout());
+                log.info("Создана и открыто окно ввода текста описания ненормативных работ");
+                JPanel textPanel = new JPanel();
+                textPanel.setLayout(new BorderLayout());
+
+                notNormWorkDescription.setWrapStyleWord(true); // Включить перенос по словам
+                notNormWorkDescription.setLineWrap(true); // Перенос строк
+                // Если описание есть в памяти, то его и прописываем
+                if (inputDopWorksArmaturchikDescription != null) {
+                    notNormWorkDescription.setText(inputNotNormWorkDescription);
+                    log.info("Произведена проверка текста описания ненормативных работ из памяти: он уже вводился и был сохранен в Map работ.");
+                } else {
+                    // Если же не было отправляем пустой текст
+                    notNormWorkDescription.setText("");
+                    log.info("Произведена проверка текста описания ненормативных работ из памяти: в памяти нет ранее введенного текст, отправлен пустой символ.");
+                }
+
+                textPanel.add(notNormWorkDescription, BorderLayout.CENTER);
+                textPanel.setPreferredSize(new Dimension(200, 220));
+                dialog.add(textPanel, BorderLayout.NORTH);
+
+                // Панель для кнопок
+                JPanel buttonPanel = new JPanel();
+                buttonPanel.setLayout(new FlowLayout());
+
+                JButton okButton = new JButton("OK");
+                okButton.addActionListener(e1 -> {
+                    if (notNormWorkDescription.getText().length() > 0) {
+                        notNormWorkDescriptionPushed = but.getNotNormWorkDescriptionButton();
+                        inputNotNormWorkDescription = notNormWorkDescription.getText();
+                        notNormWorkNormativeString = notNormWorkJTextField.getText();
+                        addAndRemovePanel(clearCenter(panelAdd));
+                        but.getNotNormWorkDescriptionButton().setBorder(BorderFactory.createLineBorder(Color.red, 1));
+                        panelNotNormWork.add(new JLabel("Механик."), new GridBagConstraints(1, 3, 1, 1, 1, 1,
+                                GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
+                                new Insets(2, 2, 2, 2), 0, 0));
+                    }
+                    log.info("Описание ненормативных работ выбрана кнопка ОК. Текст: " + notNormWorkDescription.getText());
+                    dialog.dispose(); // Закрыть диалоговое окно
+                }); // Кнопка "OK"
+
+                JButton cancelButton = new JButton("Отмена");
+                cancelButton.addActionListener(e1 -> {
+                    notNormWorkDescription.setText("");
+                    inputNotNormWorkDescription = "";
+                    but.getNotNormWorkDescriptionButton().setBorder(BorderFactory.createLineBorder(Color.lightGray, 1));
+                    notNormWorkDescriptionPushed = null;
+                    log.info("Описание ненормативных работ выбрана кнопка Отменена");
+                    dialog.dispose(); // Закрыть диалоговое окно
+                }); // Кнопка "Отмена"
+                buttonPanel.add(okButton);
+                buttonPanel.add(cancelButton);
+
+                dialog.add(buttonPanel, BorderLayout.SOUTH);
+                dialog.setLocationRelativeTo(frame); // Расположить относительно основного окна
+                dialog.setVisible(true); // Показываем диалог
+            }
+        });
+
+        panelAdd.updateUI();
+    }
+
     public void WorksPanel(JPanel elementLeftRightSidePanel, JPanel panelAdd) {
         clearPushedButtonAfterElementAdd();
         // Удаляем лишние строчки из работ так как не везде есть молдинги, зеркала, ручки и стекла.
@@ -583,7 +767,7 @@ public class AddWorkPanel {
         elementLeftRightSidePanel.add(takeColorOfButtons(removeActionListener(but.getDopWorksKuzovchikButton()), 3), new GridBagConstraints(1, gridY + 4, 1, 1, 0.7, 1,
                 GridBagConstraints.WEST, GridBagConstraints.NONE,
                 new Insets(2, 5, 2, 0), 0, 0));
-        // Текстовое поля доп. работ Правее их кнопок
+        // Текстовое поля ввода норматива доп. работ Правее их кнопок
         elementLeftRightSidePanel.add(addDocumentListener(dopWorksArmaturchik), new GridBagConstraints(2, gridY + 2, 1, 1, 1, 1,
                 GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
                 new Insets(2, 2, 2, 2), 0, 0));
@@ -609,7 +793,7 @@ public class AddWorkPanel {
                 GridBagConstraints.EAST, GridBagConstraints.NONE,
                 new Insets(2, 2, 2, 0), 0, 0));
 
-        remont.setText(elementRemont);
+        remont.setText(elementRemontString);
 
         but.getReplaceButton().addActionListener(e -> { // замена
             // Обозначаем нажатую кнопку и выставляем цвет рамки
@@ -734,7 +918,7 @@ public class AddWorkPanel {
                     if (remont.getBackground() != Color.pink && remont.getText().length() > 0) {
                         // добавляем перед последним символом точку переведя число в двоичное.
                         remontButtonPushed = but.getRepairButton();
-                        elementRemont = remont.getText();
+                        elementRemontString = remont.getText();
                         remontButtonPushed.setBorder(BorderFactory.createLineBorder(Color.red, 1));
                         addAndRemovePanel(clearCenter(panelAdd));
                         panelAdd.updateUI();
@@ -745,7 +929,7 @@ public class AddWorkPanel {
                 LineBorder color = (LineBorder) remontButtonPushed.getBorder();
                 // Если кнопка уже была нажата и элемент был добавлен (то есть имеет цвет рамки зеленый) мы убираем нормативы
                 if (color.getLineColor() == (Color.green)) {
-                    elementRemont = null;
+                    elementRemontString = null;
                     // Устанавливаем цвет кнопки на серый тем самым убрав ее из элемента
                     but.getRepairButton().setBorder(BorderFactory.createLineBorder(Color.lightGray, 1));
                     remontButtonPushed = null;
@@ -753,7 +937,7 @@ public class AddWorkPanel {
                     panelAdd.updateUI();
                 } else {
                     // Если кнопка была нажата, но элемент не был добавлен (то есть имеет цвет рамки красный) мы убираем нормативы
-                    elementRemont = null;
+                    elementRemontString = null;
                     // Устанавливаем цвет кнопки на серый тем самым убрав ее из элемента
                     but.getRepairButton().setBorder(BorderFactory.createLineBorder(Color.lightGray, 1));
                     remontButtonPushed = null;
@@ -1508,6 +1692,16 @@ public class AddWorkPanel {
                     GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
                     new Insets(2, 2, 2, 2), 30, 0));
         }
+        if (notNormWorkDescriptionPushed != null) {
+            addAndRemovePanel.add(remontComboBox, new GridBagConstraints(0, 4, 1, 1, 1, 1,
+                    GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
+                    new Insets(2, 2, 2, 2), 30, 0));
+            // Делаем комбо-бокс редактируемым
+            remontComboBox.setEditable(true);
+            // Устанавливаем пустой элемент по умолчанию
+            // Получаем редактор и приводим его к JTextComponent
+            ((JTextComponent) remontComboBox.getEditor().getEditorComponent()).setText("");
+        }
 
         panelXY.add(addAndRemovePanel, BorderLayout.NORTH);
         panelXY2.add(panelXY, BorderLayout.WEST);
@@ -1668,7 +1862,7 @@ public class AddWorkPanel {
                                     String[] split = check.split(" ");
                                     // Возвращаем значение "elementRemont" для того чтобы отобразить сколько у данного элемента это значение
                                     if (split.length > 1) {
-                                        elementRemont = split[1];
+                                        elementRemontString = split[1];
                                     }
                                     if (split.length > 2) {
                                         switch (split[2]) {
@@ -1758,6 +1952,38 @@ public class AddWorkPanel {
                     }
                 }
                 break;
+            // case 5 Для ненормированных работ
+            case 5:
+                if (lineBorderColorMap.get(sideButtonPushed.getText()) != null) {
+                    // находим первый ключ кнопку1 (сторона)
+                    Map<String, List<String>> panel5 = lineBorderColorMap.get(sideButtonPushed.getText());
+                    if (panel5.get(elementButtonPushed.getText()) != null) {
+                        // находим в значении ключа второй ключ (имя элемента) и берем его значение лист с работами
+                        List<String> listOfAddWorks = panel5.get(elementButtonPushed.getText());
+                        if (!listOfAddWorks.isEmpty()) {
+                            String check = listOfAddWorks.get(0);
+                            String[] split = check.split(" ");
+                            if (split.length > 2) {
+                                notNormWorkJTextField.setText(split[0]);
+                                inputNotNormWorkDescription = split[1].replaceAll("\u2400", ",").replaceAll("\u2422", " ");
+
+                                String notNormWorkDescriptionSplit = split[2];
+                                switch (notNormWorkDescriptionSplit) {
+                                    case "Арматурщик":
+                                        button.setBorder(BorderFactory.createLineBorder(Color.green));
+                                        break;
+                                    case "Маляр":
+                                        button.setBorder(BorderFactory.createLineBorder(Color.green));
+                                        break;
+                                    case "Кузовщик":
+                                        button.setBorder(BorderFactory.createLineBorder(Color.green));
+                                        break;
+                                }
+                            }
+                        }
+                    }
+                }
+                break;
             default:
                 throw new IllegalStateException("Не верное значение панели номер: " + panelNumber);
         }
@@ -1766,6 +1992,12 @@ public class AddWorkPanel {
 
     private JButton changeColorPushedButton(JButton lastPushedButton, JButton pushedButton,
                                             int panelNumber) {
+        if (pushedButton.getText().equals("Полировка")) {
+            // Только тут используем данный костыль так как в полировке нам необходима запустить проверку чекБоксов заранее
+            takeColorOfButtons(lastPushedButton, panelNumber);
+            sideButtonPushed = but.getPolirovkaButton();
+            lastPushedButton = pushedButton;
+        }
         //Сначала проверяем была ли старая кнопка нажата и ищем было ли у данной кнопки раньше "добавление" в элемент
         if (lastPushedButton != null) {
             // если было, у нее меняется рамка на зеленую если нет, то на серую.
@@ -1789,7 +2021,7 @@ public class AddWorkPanel {
                 paint1xOr2xButtonPushed.setBorder(BorderFactory.createLineBorder(Color.green, 1));
             }
             if (remontButtonPushed != null) {
-                color.add(remontButtonPushed.getText() + " " + elementRemont + " " + remontComboBox.getSelectedItem());
+                color.add(remontButtonPushed.getText() + " " + elementRemontString + " " + remontComboBox.getSelectedItem());
                 remontButtonPushed.setBorder(BorderFactory.createLineBorder(Color.green, 1));
             }
             if (zercaloButtonPushed != null) {
@@ -1862,6 +2094,10 @@ public class AddWorkPanel {
                     color.add(dopWorksKuzovchikButtonPushed.getText() + " " + dopWorksKuzovchik.getText());
                 }
             }
+            if (notNormWorkDescriptionPushed != null) {
+                notNormWorkDescriptionPushed.setBorder(BorderFactory.createLineBorder(Color.green, 1));
+                color.add(notNormWorkNormativeString + " " + inputNotNormWorkDescription.replaceAll(",", "\u2400").replaceAll(" ", "\u2422") + " " + remontComboBox.getSelectedItem());
+            }
         } else {
             // Итерируем по каждому JCheckBox в массиве
             for (JCheckBox checkBox : checkBoxes) {
@@ -1879,6 +2115,7 @@ public class AddWorkPanel {
         elementLeftRightSidePanel.removeAll();
         elementCenterSide.removeAll();
         panelGlass.removeAll();
+        panelNotNormWork.removeAll();
         if (layout.getLayoutComponent(BorderLayout.WEST) != null) {
             panel.remove(layout.getLayoutComponent(BorderLayout.WEST));
         }
@@ -1904,16 +2141,18 @@ public class AddWorkPanel {
         expanderButtonPushed = null;    // Кнопка расширитель
         overlayButtonPushed = null;     // Кнопка накладка
         glassButtonPushed = null;       // Кнопка остекление лобовое или заднее
-        elementRemont = null;           // Значение введенного числа норматива на ремонт
+        elementRemontString = null;           // Значение введенного числа норматива на ремонт
         dopWorksArmaturchikButtonPushed = null; // Кнопка доп.работы Арматурщик
         dopWorksPainterButtonPushed = null;     // Кнопка доп.работы Маляр
         dopWorksKuzovchikButtonPushed = null;   // Кнопка доп.работы Кузовщик
         dopWorksArmaturchikDescriptionPushed = null; // Кнопка описания доп.работы Арматурщик
         dopWorksPainterDescriptionPushed = null;     // Кнопка описания доп.работы Маляр
         dopWorksKuzovchikDescriptionPushed = null;   // Кнопка описания доп.работы Кузовщик
-        dopWorksArmaturchik.setText("");  // Графа ввода описания доп.работы Арматурщик
-        dopWorksPainter.setText("");      // Графа ввода описания доп.работы Маляр
-        dopWorksKuzovchik.setText("");    // Графа ввода описания доп.работы Кузовщик
+        notNormWorkDescriptionPushed = null;         // Кнопка описания ненормативных работ
+        dopWorksArmaturchik.setText("");  // Графа ввода норматива доп.работы Арматурщик
+        dopWorksPainter.setText("");      // Графа ввода норматива доп.работы Маляр
+        dopWorksKuzovchik.setText("");    // Графа ввода норматива доп.работы Кузовщик
+        notNormWorkJTextField.setText("");// Графа ввода норматива ненормативных работ
         remont.setText("");               // Графа ввода значения норматива ремонт
         elementKuzDetReplaceSide = 0.0;   // Норматив замены кузовной детали
         elementArmatureSide = 0.0;        // Норматив арматурных работ на детали
@@ -1922,6 +2161,7 @@ public class AddWorkPanel {
         inputDopWorksArmaturchikDescription = null;  // Введенный текст описания доп.работы Арматурщик
         inputDopWorksPainterDescription = null;      // Введенный текст описания доп.работы Маляр
         inputDopWorksKuzovchikDescription = null;    // Введенный текст описания доп.работы Кузовщик
+        inputNotNormWorkDescription = null;          // Введенный текст описания ненормативных работ
     } // Стирание (приведя их к null) нажатых в процессе кнопок
 
     private Element createElement() {
@@ -1943,7 +2183,7 @@ public class AddWorkPanel {
             // переведя в двоичное число
             if (remontButtonPushed != null) {
                 String rem;
-                rem = new StringBuilder(elementRemont).insert(elementRemont.length() - 1, ".").toString();
+                rem = new StringBuilder(elementRemontString).insert(elementRemontString.length() - 1, ".").toString();
                 element.setRemont(Double.parseDouble(rem));
                 element.setHoDoRemont((String) remontComboBox.getSelectedItem());
             }

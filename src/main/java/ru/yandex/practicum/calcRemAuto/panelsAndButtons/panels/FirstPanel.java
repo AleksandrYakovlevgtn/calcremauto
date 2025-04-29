@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 import ru.yandex.practicum.calcRemAuto.model.Client;
 import ru.yandex.practicum.calcRemAuto.panelsAndButtons.buttons.Buttons;
+import ru.yandex.practicum.calcRemAuto.panelsAndButtons.frame.StartFrame;
 
 import javax.swing.*;
 import java.awt.*;
@@ -35,7 +36,14 @@ public class FirstPanel {
             gbc.gridy++;
         }
 
-        but.getButtonCloseApp().addActionListener(e -> System.exit(0));
+        but.getButtonCloseApp().addActionListener(e -> {
+            StartFrame startFrame = StartFrame.getCurrentInstance();
+            if (startFrame != null) {
+                // Закрываем поток
+                startFrame.shutdownExecutor();
+            }
+            System.exit(0);
+        });
         but.getButtonSearch().addActionListener(e -> {
             SearchPanel searchPanel = new SearchPanel();
             panel.removeAll();

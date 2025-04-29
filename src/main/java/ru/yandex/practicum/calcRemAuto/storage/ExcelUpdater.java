@@ -292,7 +292,7 @@ public class ExcelUpdater {
         if (element.getRuchka() != 0) {
             row = sheet.getRow(++rowForePaste);
             cell = row.getCell(nameOfWork);
-            cell.setCellValue("ручка окраска");
+            cell.setCellValue(element.getName().replace("Замена","") + " ручка окраска");
             cell = row.getCell(narmotive);
             cell.setCellValue(element.getRuchka());
             cell = row.getCell(price);
@@ -304,7 +304,7 @@ public class ExcelUpdater {
         if (element.getMolding() != 0) {
             row = sheet.getRow(++rowForePaste);
             cell = row.getCell(nameOfWork);
-            cell.setCellValue("молдинг окраска");
+            cell.setCellValue(element.getName().replace("Замена","") + " молдинг окраска");
             cell = row.getCell(narmotive);
             cell.setCellValue(element.getMolding());
             cell = row.getCell(price);
@@ -316,7 +316,7 @@ public class ExcelUpdater {
         if (element.getZerkalo() != 0) {
             row = sheet.getRow(++rowForePaste);
             cell = row.getCell(nameOfWork);
-            cell.setCellValue("зеркало окраска");
+            cell.setCellValue(element.getName().replace("Замена","") + " зеркало окраска");
             cell = row.getCell(narmotive);
             cell.setCellValue(element.getZerkalo());
             cell = row.getCell(price);
@@ -328,7 +328,7 @@ public class ExcelUpdater {
         if (element.getOverlay() != 0) {
             row = sheet.getRow(++rowForePaste);
             cell = row.getCell(nameOfWork);
-            cell.setCellValue("накладка окраска");
+            cell.setCellValue(element.getName().replace("Замена","") + " накладка окраска");
             cell = row.getCell(narmotive);
             cell.setCellValue(element.getOverlay());
             cell = row.getCell(price);
@@ -340,7 +340,7 @@ public class ExcelUpdater {
         if (element.getExpander() != 0) {
             row = sheet.getRow(++rowForePaste);
             cell = row.getCell(nameOfWork);
-            cell.setCellValue("накладка окраска");
+            cell.setCellValue(element.getName().replace("Замена","") + " расширитель окраска");
             cell = row.getCell(narmotive);
             cell.setCellValue(element.getExpander());
             cell = row.getCell(price);
@@ -477,7 +477,7 @@ public class ExcelUpdater {
 
     private void adjustRowHeightPolirovka(Row row, Element element) {
         String[] points = element.getName().split("'");
-        int i = (points.length / 3) * 15; // Сколько нужно
+        int i = (points.length / 3) * 30; // Сколько нужно
         float b = row.getHeightInPoints(); // Сколько стандарт
         if (i > b) { // Если нужно больше чем стандарт
             row.setHeightInPoints(i); // То выставляем размер ячейки
@@ -488,7 +488,11 @@ public class ExcelUpdater {
         String[] points = text.split("\n");
         double i = points.length + text.length();
         if (i < 50) {
-            i = i * 1.5;
+            i = i * 1.2;
+        } else if (i > 50 && i < 75) {
+            i = 50;
+        }else {
+            i = 65;
         }
         row.setHeightInPoints((int) i);
     } // метод выставления высоты строки для длинных описаний доп.работ

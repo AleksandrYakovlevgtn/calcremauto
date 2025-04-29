@@ -11,6 +11,8 @@ public class NameDirectories {
     String NAME_START_DIRECTORY = "Расчеты";
     String DATE_DIRECTORY = (String.valueOf(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy_MM_dd"))));
     String OFFICIAL_DIRECTORY = "служебная";
+
+    String SYTEM_DIRECTORY = "Системные";
     String SMETA = "смета";
     String CLIENT = "клиент";
     String ITOGO = "итого";

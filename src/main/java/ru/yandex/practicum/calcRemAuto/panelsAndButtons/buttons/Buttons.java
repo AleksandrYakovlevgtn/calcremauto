@@ -21,7 +21,8 @@ public class Buttons {
     JButton buttonRight = new JButton("Правая");
     JButton buttonCenter = new JButton("Центр");
     JButton buttonGlass = new JButton("Остекление");
-    JButton PolirovkaButton = new JButton("Полировка");
+    JButton polirovkaButton = new JButton("Полировка");
+    JButton notNormWorkButton = new JButton("Ненормативные");
     JButton buttonFrontWing = new JButton("Пер.Крыло");
     JButton buttonFrontDoor = new JButton("Пер.Дверь");
     JButton buttonBackDoor = new JButton("Зад.Дверь");
@@ -57,5 +58,15 @@ public class Buttons {
     JButton dopWorksPainterDescriptionButton = new JButton("Описание доп.работ Маляр");
     JButton dopWorksKuzovchikButton = new JButton("Кузовщик");
     JButton dopWorksKuzovchikDescriptionButton = new JButton("Описание доп.работ Кузовщик");
+    JButton number1notNormWork = new JButton("1");
+    JButton number2notNormWork = new JButton("2");
+    JButton number3notNormWork = new JButton("3");
+    JButton number4notNormWork = new JButton("4");
+    JButton number5notNormWork = new JButton("5");
+    JButton number6notNormWork = new JButton("6");
+    JButton number7notNormWork = new JButton("7");
+    JButton number8notNormWork = new JButton("8");
+    JButton number9notNormWork = new JButton("9");
+    JButton notNormWorkDescriptionButton = new JButton("Описание ненормативных работ");
     JTextField remontJText = new JTextField();
 }

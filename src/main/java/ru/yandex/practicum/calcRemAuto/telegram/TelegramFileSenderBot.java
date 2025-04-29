@@ -63,7 +63,7 @@ public class TelegramFileSenderBot extends TelegramLongPollingBot {
 
     @Override
     public void onUpdateReceived(Update update) {
-        log.info("Что то хотели но не реализованно" + update.getMessage());
+        log.info("Что то хотел но не реализовал" + update.getMessage());
     }
 
     @Override

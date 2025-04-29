@@ -43,7 +43,7 @@ public class StartFrame {
         return panel;
     }
 
-    private void shutdownExecutor() {
+    public void shutdownExecutor() {
         executor.shutdown();
         try {
             if (!executor.awaitTermination(60, TimeUnit.SECONDS)) {
