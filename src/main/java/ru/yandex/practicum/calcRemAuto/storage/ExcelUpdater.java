@@ -121,6 +121,9 @@ public class ExcelUpdater {
             if (element.getDopWorksKuzovchik() != 0) {
                 elementNeededRow++;
             }
+            if (element.getNotNormWork() != 0) {
+                elementNeededRow++;
+            }
             for (int i = 0; i < elementNeededRow; i++) {
                 copyRow(sheet, sourceRow, targetRowNum, numOfWork);
                 targetRowNum++;
@@ -138,21 +141,33 @@ public class ExcelUpdater {
         int totalPrice = 39;// Ячейка с ценой работ
         Row row = sheet.getRow(rowForePaste);
         Cell cell = row.getCell(nameOfWork);
-        // Первое прописываем арматурные работы элемента в Ячейку с названием работ
+
+        // Первое прописываем арматурные работы элемента в Ячейку с названием работ. Но если работы "полировка" или "не нормативные" то их пишем сразу одной строкой!!!
+        // Сначала пишем правильно имя элемента для этого
         if (element.getName().contains("Замена")) {
             // Если работы по замене кузовной детали, то к имени прибавляем р/с для замены куз. Детали
             cell.setCellValue(element.getName().replace("Замена", "р/с для замены куз.детали"));
-        } else if (!element.getName().contains("Остекление") && element.getArmatureSide() != 0 && !element.getName().contains("Полировка")) {
+        } else if (!element.getName().contains("Остекление") && element.getArmatureSide() != 0 && !element.getName().contains("Полировка") && element.getNotNormWork() == 0) {
+            // Проверяем, что элемент не "Остекление","Полировка" и "не нормативный" так как этот элемент мы сразу пишем одной строкой!!!
             // Если работы не замена, то добавляем к имени р/с
             cell.setCellValue((element.getName() + " р/с "));
-        } else if (element.getName().contains("Остекление") && !element.getName().contains("Полировка")) {
-            // Если работы по остеклению, то добавляем к имени с/у
+        } else if (element.getName().contains("Остекление") && !element.getName().contains("Полировка") && element.getNotNormWork() == 0) {
+            // Если элемент остекление, то добавляем к имени с/у
             cell.setCellValue((element.getName() + " c/у "));
-        } else if (element.getName().contains("Полировка")) {
+        } else if (element.getName().contains("Полировка") && element.getNotNormWork() == 0) {
+            // Если элемент "Полировка" записываем в ячейку имя которое является списком имен элементов кузова под полировку
             cell.setCellValue((element.getName()));
+            // Так как этот список может быть внушительный, отправляем ячейку на растяжку под это имя, что бы все влезло!
+            adjustRowHeightPolirovka(row, element);
+        } else if (element.getNotNormWork() != 0){
+            // Если элемент "не нормативный" так же записываем в ячейку его имя
+            cell.setCellValue((element.getName()));
+            // И так же на всякий случай отправляем на растяжку ячейки. Имя не нормированных работ ограничивается 100 символами.
             adjustRowHeightPolirovka(row, element);
         }
+
         // Далее прописываем Ячейку норматива работ
+
         // Если элемент это остекление то
         if (element.getName().contains("Остекление")) {
             cell = row.getCell(narmotive); // Берем ячейку норматив работ
@@ -164,22 +179,36 @@ public class ExcelUpdater {
             total += (element.getGlass() * prices.getHourlyRate()); // Добавляем к итоговой стоимости работ стоимость данной работы
         } else { // Если элемент не стекло
             cell = row.getCell(narmotive); // Берем ячейку норматив работ
-            if (!element.getName().contains("Полировка")) {
-                cell.setCellValue(element.getArmatureSide()); // !!!!!!!!Вставляем значение арматурных работ если элемент не полировка!!!!!!!!!!!
-            } else {
+            if (!element.getName().contains("Полировка") && element.getNotNormWork() == 0) {
+                cell.setCellValue(element.getArmatureSide()); // !!!!!!!!Вставляем значение арматурных работ если элемент не полировка и не нормативный!!!!!!!!!!!
+            } else if (element.getName().contains("Полировка")){
                 cell.setCellValue(element.getPaintSide()); // !!!!!!!!Если элемент полировка сразу вставляем значение малярных работ!!!!!!!!!!
+            } else {
+                cell.setCellValue(element.getNotNormWork()); // Если элемент не стекло и не полировка, то он не нормативные работы!!!
             }
+            // Эти три строки стандартные ко всем так как стоимость норма часа к одному заказу не может изменятся.
             cell = row.getCell(price);// Берем ячейку стоимость норма часа
             cell.setCellValue(prices.getHourlyRate());// Вставляем значение стоимости норма часа
             cell = row.getCell(totalPrice);// Берем ячейку стоимость работы
-            if (!element.getName().contains("Полировка")) {
+
+            // Тут прописываем ячейку стоимости конкретной работы. Пример: р/с = 2н/ч таким образом вставляем значение (2 * на ставку)
+            // Проверяем на ниши однострочные элементы. (полировка и не нормативные)
+            if (!element.getName().contains("Полировка") && element.getNotNormWork() == 0) {
                 cell.setCellValue(element.getArmatureSide() * prices.getHourlyRate()); // Вставляем значение стоимости данной работы (норматив * цену норма часа)
                 total += (element.getArmatureSide() * prices.getHourlyRate()); // Добавляем к итоговой стоимости работ стоимость данной работы
-            } else {
+            } else if (element.getName().contains("Полировка")){
+                // Если полировка
                 cell.setCellValue(element.getPaintSide() * prices.getHourlyRate()); // Вставляем значение стоимости данной работы (норматив * цену норма часа)
                 total += (element.getPaintSide() * prices.getHourlyRate()); // Добавляем к итоговой стоимости работ стоимость данной работы
+            } else if (element.getNotNormWork() != 0) {
+                // И наконец "не нормативные работы". Больше мы с однострочными элементами не встретимся.
+                cell.setCellValue(element.getNotNormWork() * prices.getHourlyRate()); // Вставляем значение стоимости данной работы (норматив * цену норма часа)
+                total += (element.getNotNormWork() * prices.getHourlyRate()); // Добавляем к итоговой стоимости работ стоимость данной работы
             }
         }
+
+        // От сих пор начинается заполнение всех вспомогательных работ.
+
         if (element.getKuzDetReplaceSide() != 0) { // Если работы по замене кузовной приварной детали, то прописываем работы кузовщика по замене
             row = sheet.getRow(++rowForePaste); // Берем новую строку
             cell = row.getCell(nameOfWork); // Берем ячейку имени работ
@@ -292,7 +321,7 @@ public class ExcelUpdater {
         if (element.getRuchka() != 0) {
             row = sheet.getRow(++rowForePaste);
             cell = row.getCell(nameOfWork);
-            cell.setCellValue(element.getName().replace("Замена","") + " ручка окраска");
+            cell.setCellValue(element.getName().replace("Замена", "") + " ручка окраска");
             cell = row.getCell(narmotive);
             cell.setCellValue(element.getRuchka());
             cell = row.getCell(price);
@@ -304,7 +333,7 @@ public class ExcelUpdater {
         if (element.getMolding() != 0) {
             row = sheet.getRow(++rowForePaste);
             cell = row.getCell(nameOfWork);
-            cell.setCellValue(element.getName().replace("Замена","") + " молдинг окраска");
+            cell.setCellValue(element.getName().replace("Замена", "") + " молдинг окраска");
             cell = row.getCell(narmotive);
             cell.setCellValue(element.getMolding());
             cell = row.getCell(price);
@@ -316,7 +345,7 @@ public class ExcelUpdater {
         if (element.getZerkalo() != 0) {
             row = sheet.getRow(++rowForePaste);
             cell = row.getCell(nameOfWork);
-            cell.setCellValue(element.getName().replace("Замена","") + " зеркало окраска");
+            cell.setCellValue(element.getName().replace("Замена", "") + " зеркало окраска");
             cell = row.getCell(narmotive);
             cell.setCellValue(element.getZerkalo());
             cell = row.getCell(price);
@@ -328,7 +357,7 @@ public class ExcelUpdater {
         if (element.getOverlay() != 0) {
             row = sheet.getRow(++rowForePaste);
             cell = row.getCell(nameOfWork);
-            cell.setCellValue(element.getName().replace("Замена","") + " накладка окраска");
+            cell.setCellValue(element.getName().replace("Замена", "") + " накладка окраска");
             cell = row.getCell(narmotive);
             cell.setCellValue(element.getOverlay());
             cell = row.getCell(price);
@@ -340,7 +369,7 @@ public class ExcelUpdater {
         if (element.getExpander() != 0) {
             row = sheet.getRow(++rowForePaste);
             cell = row.getCell(nameOfWork);
-            cell.setCellValue(element.getName().replace("Замена","") + " расширитель окраска");
+            cell.setCellValue(element.getName().replace("Замена", "") + " расширитель окраска");
             cell = row.getCell(narmotive);
             cell.setCellValue(element.getExpander());
             cell = row.getCell(price);
@@ -362,6 +391,19 @@ public class ExcelUpdater {
             total += (element.getGlass() * prices.getHourlyRate());
             cell.setCellValue(element.getGlass() * prices.getHourlyRate());
         }
+        // Здесь прописываем не нормативные работы
+        /*if(element.getNotNormWork() != 0){
+            row = sheet.getRow(++rowForePaste);
+            cell = row.getCell(nameOfWork);
+            cell.setCellValue(element.getName());
+            cell = row.getCell(narmotive);
+            cell.setCellValue(element.getNotNormWork());
+            cell = row.getCell(price);
+            cell.setCellValue(prices.getHourlyRate());
+            cell = row.getCell(totalPrice);
+            total += (element.getNotNormWork() * prices.getHourlyRate());
+            cell.setCellValue(element.getNotNormWork() * prices.getHourlyRate());
+        }*/
     } // заполняет строки работами
 
     private void writeLkm(Row row, int lkmTotalPrice) {
@@ -491,7 +533,7 @@ public class ExcelUpdater {
             i = i * 1.2;
         } else if (i > 50 && i < 75) {
             i = 50;
-        }else {
+        } else {
             i = 65;
         }
         row.setHeightInPoints((int) i);

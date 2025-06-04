@@ -51,7 +51,7 @@ public class Element {
     public String toString() {
         StringBuilder result = new StringBuilder(" \n");
         if (paintSide > 0 || glass > 0) result.append(name).append("\n");
-        else if (paintSide <= 0 && glass <= 0) result.append(name).append(" не красим").append("\n");
+        else if (paintSide <= 0 && glass <= 0 && notNormWork <= 0) result.append(name).append(" не красим").append("\n");
         if (nameGlass != null && !nameGlass.equals("null")) result.append(nameGlass).append("\n");
         if (zerkalo > 0) result.append("Зеркало окраска.").append("\n");
         if (ruchka > 0) result.append("Ручка окраска.").append("\n");
@@ -62,7 +62,8 @@ public class Element {
         if (dopWorksArmoturchik > 0)
             result.append("Доп работа Арматурщик ").append(dopWorksArmoturchik).append("н/ч").append("\n");
         if (dopWorksPainter > 0) result.append("Доп работа Маляр ").append(dopWorksPainter).append("н/ч").append("\n");
-        if (dopWorksKuzovchik > 0) result.append("Доп работа Кузовщик ").append(dopWorksKuzovchik).append("н/ч").append("\n");
+        if (dopWorksKuzovchik > 0)
+            result.append("Доп работа Кузовщик ").append(dopWorksKuzovchik).append("н/ч").append("\n");
         if (notNormWork > 0) result.append("ненормативные ").append(notNormWork).append("н/ч").append("\n");
         result.append("малярные работы = ").append(paintSide).append("\n")
                 .append("арматурные работы = ").append(armatureSide).append("\n")

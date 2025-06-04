@@ -112,6 +112,29 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
             </plugin>
+
+            <!-- Новый плугин для задания параметров JVM -->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>3.0.0</version>
+                <configuration>
+                    <arguments>
+                        <!-- Параметры JVM -->
+                        <argument>-Xms28m</argument>
+                        <argument>-Xmx56m</argument>
+                        <argument>-XX:+UseG1GC</argument>
+                        <argument>-XX:+DisableExplicitGC</argument>
+
+                        <!-- Класс приложения -->
+                        <argument>-cp</argument>
+                        <argument>${project.build.outputDirectory}</argument>
+                        <!--suppress UnresolvedMavenProperty -->
+                        <argument>${start-class}</argument>
+                    </arguments>
+                </configuration>
+            </plugin>
+
         </plugins>
     </build>
     <repositories>

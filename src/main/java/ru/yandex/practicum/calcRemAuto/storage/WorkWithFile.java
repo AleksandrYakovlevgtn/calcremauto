@@ -15,11 +15,19 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.Set;
 
 @Slf4j
 @Getter
 @NoArgsConstructor
 public class WorkWithFile {
+    private static final Set<String> EXCLUDED_PROFESSIONS = Set.of(
+            "Маляр",
+            "Кузовщик",
+            "Арматурщик",
+            "null"
+    );
     private final Prices prices = new Prices();
     NameDirectories directories = new NameDirectories();
     ExcelUpdater exel = new ExcelUpdater();
@@ -63,8 +71,9 @@ public class WorkWithFile {
             writeLkmSmeta(lkm);                       // Запись файла сметы ЛКМ необходимых для данного ремонта
             saveListElements(OFFICIAL_DIRECTORY);     // Запись Списка элементов в файл
             saveMalyar(DATE_DIRECTORY);               // Запись сметы маляр
-            saveArmoterchik(DATE_DIRECTORY);          // Запись сметы арматурщик
+            saveArmoturchik(DATE_DIRECTORY);          // Запись сметы арматурщик
             saveKuzovchik(DATE_DIRECTORY);            // Запись сметы кузовщик
+            saveNonStaffMechanic(DATE_DIRECTORY);     // Запись в файл не фиксированных(сторонних) механиков.
             saveMap(OFFICIAL_DIRECTORY);              // Запись Таблицы работ(нажатых кнопок на элементах) в файл
         }
     } // Метод сохранения который через другие методы сохраняет все в файлы .txt
@@ -114,7 +123,9 @@ public class WorkWithFile {
 // Присвоить описание к параметру заменив "," на "\u2400" и " " на "\u2422" для дальнейшей правильной записи в файл. Так же дальше при извлечении из файла будет обратная замена
                 String.valueOf(element.getDescriptionDopWorksArmaturchic().replaceAll(",", "\u2400").replaceAll(" ", "\u2422").replaceAll("\n", "\u2028")),
                 String.valueOf(element.getDescriptionDopWorksPainter().replaceAll(",", "\u2400").replaceAll(" ", "\u2422").replaceAll("\n", "\u2028")),
-                String.valueOf(element.getDescriptionDopWorksKuzovchik().replaceAll(",", "\u2400").replaceAll(" ", "\u2422").replaceAll("\n", "\u2028"))};
+                String.valueOf(element.getDescriptionDopWorksKuzovchik().replaceAll(",", "\u2400").replaceAll(" ", "\u2422").replaceAll("\n", "\u2028")),
+                String.valueOf(element.getNotNormWork()),
+                String.valueOf(element.getDescriptionDopNotNormWork().replaceAll(",", "\u2400").replaceAll(" ", "\u2422").replaceAll("\n", "\u2028"))};
         return String.join(",", words);
     } // Метод разбития Элемента в строки для сохранения в файл
 
@@ -138,12 +149,20 @@ public class WorkWithFile {
                     } else if (element.getMolding() > 0 || element.getRuchka() > 0 || element.getZerkalo() > 0 || element.getOverlay() > 0 || element.getExpander() > 0) {
                         writer.write(element.getName() + " ");
                     }
-
-                    if (element.getRemont() > 0) {
-                        if (element.getHoDoRemont().toLowerCase().equals("маляр")) {
+                    // Если элемент имеет ремонт или в графе исполнитель ремонта указан "Маляр" то
+                    if (element.getRemont() > 0 || element.getHoDoRemont().toLowerCase().equals("маляр")) {
+                        // Проверяем что у элемента есть норматив на ремонт тем самым отсекаем, что он является не нормативной работой
+                        if (element.getHoDoRemont().toLowerCase().equals("маляр") && element.getRemont() != 0) {
                             writer.write("ремонт: " + element.getRemont() + "н/ч ");
+                        } else if (element.getHoDoRemont().toLowerCase().equals("маляр") && element.getNotNormWork() != 0) {
+                            // Если же в графе исполнитель ремонта указан "Маляр" и при этом есть норматив не нормативных работ то
+                            // мы отсекаем ремонт и прописываем в файл не нормативные работы
+                            writer.write(element.getName() + " " + element.getNotNormWork() + "н/ч " + "итого: " + ((int) (element.getNotNormWork() * prices.getMechanicHourlyRate())) + "руб.\n");
                         } else if (element.getHoDoRemont().toLowerCase().equals("кузовщик") &&
-                                !(element.getName().contains("Моторный отсек") || element.getName().contains("Задняя панель"))) {
+                                !(element.getName().contains("Моторный отсек") || element.getName().contains("Задняя панель"))
+                                && element.getRemont() != 0) {
+                            // Если же в графе исполнитель ремонта указан "Кузовщик", есть норматив ремонта и элемент не входит в перечень
+                            // то отнимаем у кузовщика для маляра 30% за ремонт
                             writer.write("ремонт 30%: " + (element.getRemont() * 0.3) + "н/ч ");
                         }
                     }
@@ -206,7 +225,9 @@ public class WorkWithFile {
                             line = line + (int) ((element.getRemont() * 0.3) * prices.getMechanicHourlyRate());
                         }
                     }
-                    writer.write("итого: " + line + "руб.\n");
+                    if (line > 0) {
+                        writer.write("итого: " + line + "руб.\n");
+                    }
                 }
             }
             writer.write("Итог: " + (int) total.getMalyr() + " руб.");
@@ -214,7 +235,7 @@ public class WorkWithFile {
     } // Запись в файл сметы для маляра
 
     @SneakyThrows
-    public void saveArmoterchik(String dateDirectory) {
+    public void saveArmoturchik(String dateDirectory) {
         try (PrintWriter writer = new PrintWriter(dateDirectory + directories.getSlash() + directories.getARMOTURCHIK() + directories.getTxt())) {
             for (Element element : elements) {
                 // Логика работы с арматурщиком
@@ -282,12 +303,18 @@ public class WorkWithFile {
 
                 int line = (int) ((element.getArmatureSide() + element.getGlass() + element.getDopWorksArmoturchik()) * prices.getMechanicHourlyRate());
                 if (element.getHoDoRemont().toLowerCase().equals("арматурщик")) {
-                    line = line + (int) (element.getRemont() * prices.getMechanicHourlyRate());
+                    if (element.getRemont() != 0) {
+                        line = line + (int) (element.getRemont() * prices.getMechanicHourlyRate());
+                    } else if (element.getRemont() == 0 && element.getNotNormWork() != 0) {
+                        line = line + (int) (element.getNotNormWork() * prices.getMechanicHourlyRate());
+                        writer.write(element.getName());
+                    }
                 }
                 if (line > 0) {
                     writer.write(" итого: " + line + "руб.\n");
                 }
             }
+
             writer.write("Итог: " + (int) total.getArmatyrchik() + " руб.");
         }
     } // Запись в файл сметы для арматурщика
@@ -299,35 +326,72 @@ public class WorkWithFile {
                 // Логика работы с кузовом
                 if (element.getKuzDetReplaceSide() > 0 || element.getHoDoRemont().toLowerCase().equals("кузовщик") || element.getDopWorksKuzovchik() > 0) {
                     double kuz = 0;
-                    String Kuzline = element.getName();
-                    if (element.getHoDoRemont().toLowerCase().equals("кузовщик")) {
-                        Kuzline = Kuzline.replace("замена", "") + (" ремонт: " + element.getRemont() + "н/ч ");
+                    String kuzline = element.getName();
+                    if (element.getHoDoRemont().toLowerCase().equals("кузовщик") && element.getRemont() != 0) {
+                        kuzline = kuzline.replace("замена", "") + (" ремонт: " + element.getRemont() + "н/ч ");
                         if (element.getName().contains("Моторный отсек") || element.getName().contains("Задняя панель")) {
                             kuz += element.getRemont();
                         } else {
                             kuz += (element.getRemont() * 0.7);
                         }
 
+                    } else if (element.getHoDoRemont().toLowerCase().equals("кузовщик") && element.getNotNormWork() != 0) {
+                        kuzline = kuzline + " " + element.getNotNormWork() + "н/ч ";
+                        kuz += element.getNotNormWork();
                     }
                     if (element.getKuzDetReplaceSide() > 0) {
-                        Kuzline = Kuzline + (": " + element.getKuzDetReplaceSide() + "н/ч ");
+                        kuzline = kuzline + (": " + element.getKuzDetReplaceSide() + "н/ч ");
                         kuz += element.getKuzDetReplaceSide();
                     }
                     if (element.getDopWorksKuzovchik() > 0) {
                         if (element.getDescriptionDopWorksKuzovchik().equals("null")) {
-                            Kuzline = Kuzline + (" доп.работы: " + element.getDopWorksKuzovchik() + "н/ч");
+                            kuzline = kuzline + (" доп.работы: " + element.getDopWorksKuzovchik() + "н/ч");
                         } else {
-                            Kuzline = Kuzline + (" доп.работы: " + element.getDescriptionDopWorksKuzovchik() + " " + element.getDopWorksKuzovchik() + "н/ч");
+                            kuzline = kuzline + (" доп.работы: " + element.getDescriptionDopWorksKuzovchik() + " " + element.getDopWorksKuzovchik() + "н/ч");
                         }
                         kuz += element.getDopWorksKuzovchik();
                     }
-                    Kuzline = Kuzline + (" Итого: " + ((int) (kuz * prices.getMechanicHourlyRate()) + " руб\n"));
-                    writer.write(Kuzline);
+                    kuzline = kuzline + (" Итого: " + ((int) (kuz * prices.getMechanicHourlyRate()) + " руб\n"));
+                    writer.write(kuzline);
                 }
             }
             writer.write("Итог: " + (int) total.getKuzovchik() + " руб.");
         }
     }   // Запись в файл сметы для кузовщика
+
+    @SneakyThrows
+    public void saveNonStaffMechanic(String dateDirectory) {
+        // Фильтруем список, удаляя нежелательные профили
+        List<Element> filteredElements = elements.stream()
+                .filter(e -> !EXCLUDED_PROFESSIONS.contains(e.getHoDoRemont()))
+                .collect(Collectors.toList());
+
+        // Теперь группируем отфильтрованные элементы по полю 'HoDoRemont'
+        Map<String, List<Element>> groupedElements = filteredElements.stream()
+                .collect(Collectors.groupingBy(Element::getHoDoRemont));
+
+        // Проходим по каждому уникальному имени группы
+        for (Map.Entry<String, List<Element>> entry : groupedElements.entrySet()) {
+
+            String hoDoRemontName = entry.getKey();
+            List<Element> groupElements = entry.getValue();
+
+            // Формируем имя файла исходя из каталога и имени группы
+            String filePath = dateDirectory + directories.getSlash() + hoDoRemontName + directories.getTxt();
+
+            try (PrintWriter writer = new PrintWriter(filePath)) {
+                double totalNotNormWork = 0;
+                // Записываем каждую строку с данными элемента
+                for (Element element : groupElements) {
+                    writer.write(element.getName() + " " + element.getNotNormWork() + " н/ч итого: " + (int) (element.getNotNormWork() * prices.getMechanicHourlyRate()) + "руб.\n");
+                    totalNotNormWork += element.getNotNormWork();
+                }
+                writer.write("Итог: " + (int) (totalNotNormWork * prices.getMechanicHourlyRate()) + "руб.");
+            } catch (Exception e) {
+                log.error("Ошибка записи файла: " + e.getMessage());
+            }
+        }
+    } // Запись в файл не фиксированных(сторонних) механиков.
 
     @SneakyThrows
     private List<Element> loadElementsList(String nameStartDirectory) {
@@ -370,6 +434,12 @@ public class WorkWithFile {
             if (parts.length >= 21) {
                 element.setDescriptionDopWorksKuzovchik(parts[20].replaceAll("\u2422", " ").replaceAll("\u2400", ",").replaceAll("\u2028", "\n"));
             }
+            if (parts.length >= 22) {
+                element.setNotNormWork(Double.parseDouble(parts[21]));
+            }
+            if (parts.length >= 23) {
+                element.setDescriptionDopNotNormWork(parts[22].replaceAll("\u2422", " ").replaceAll("\u2400", ",").replaceAll("\u2028", "\n"));
+            }
             elements.add(element);
         }
         return elements;
@@ -377,7 +447,7 @@ public class WorkWithFile {
 
     private String toStringTotal(Total total) {
         return String.format("%s,%s,%s,%s,%s", total.getMalyr(), total.getArmatyrchik(), total.getKuzovchik(),
-                total.getMaster(), total.getTotal());
+                total.getMaster(), total.getTotal(), total.getThirdPartyMechanic());
     } // Метод разбития Total в строки для сохранения в файл
 
     @SneakyThrows
@@ -387,8 +457,13 @@ public class WorkWithFile {
                 directories.getSlash() + directories.getITOGO() + directories.getTxt()))) {
             String[] parts = bufferedReader.readLine().split(",");
             if (parts.length == 5) {
+                // Данная реализация для возможности считывать старые расчеты из базы.
                 return new Total(Double.parseDouble(parts[0]), Double.parseDouble(parts[1]),
-                        Double.parseDouble(parts[2]), Double.parseDouble(parts[3]), Double.parseDouble(parts[4]));
+                        Double.parseDouble(parts[2]), Double.parseDouble(parts[3]), Double.parseDouble(parts[4]), 0);
+            } else if (parts.length == 6) {
+                // Данная реализация для новых расчетов, тех что после добавления не нормативных работ
+                return new Total(Double.parseDouble(parts[0]), Double.parseDouble(parts[1]),
+                        Double.parseDouble(parts[2]), Double.parseDouble(parts[3]), Double.parseDouble(parts[4]), Double.parseDouble(parts[5]));
             } else {
                 return new Total();
             }

@@ -14,6 +14,7 @@ public class Total {
     double kuzovchik = 0;
     double master = 0;
     double total = 0;
+    double thirdPartyMechanic = 0;
 
     @Override
     public String toString() {
@@ -21,6 +22,7 @@ public class Total {
                 " Арматурщик: " + armatyrchik +
                 " Кузовщик: " + kuzovchik +
                 " Мастер: " + master +
+                " Сторонний: " + thirdPartyMechanic +
                 " Работы: " + total;
     }
 }
