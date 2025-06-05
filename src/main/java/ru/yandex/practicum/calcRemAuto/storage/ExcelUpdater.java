@@ -4,10 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.poi.ss.util.CellRangeAddress;
-import ru.yandex.practicum.calcRemAuto.model.Client;
-import ru.yandex.practicum.calcRemAuto.model.Element;
-import ru.yandex.practicum.calcRemAuto.model.Mechanics;
-import ru.yandex.practicum.calcRemAuto.model.Prices;
+import ru.yandex.practicum.calcRemAuto.model.*;
 
 import javax.swing.*;
 import java.io.FileInputStream;
@@ -22,6 +19,7 @@ public class ExcelUpdater {
 
     Prices prices = new Prices(); // Класс с ценами
     Mechanics mechanics = new Mechanics(); // Класс с фамилиями механиков
+    OrderNumber orderNumber = new OrderNumber();
     int sourceRowNum = 22; // Номер строки (нумерация с 0) с которой начинаются работы
     int targetRowNum = 22; // Номер строки, под которой вставить скопированную строку (нумерация с 0)
     int total = 0; // Значение для подсчета итого и дальнейшей вставки
@@ -41,6 +39,7 @@ public class ExcelUpdater {
             writeTotal(sheet, lkmTotalPrice);  // заполняем итоговую сумму ремонта
             Row row = sheet.getRow(targetRowNum); // берем строку для лкм
             writeLkm(row, lkmTotalPrice); // Записываем стоимость Лакокрасочных материалов
+            writeOrderNumber(sheet);
 
             // Сохранение в новый файл
             FileOutputStream newFileOutputStream = new FileOutputStream(newFilePath);
@@ -83,6 +82,16 @@ public class ExcelUpdater {
         cell = row.getCell(clientTwoColum);
         cell.setCellValue(client.getNumberAuto());
     } // метод заполнения данных клиента
+
+    private void writeOrderNumber(Sheet sheet) {
+        int orderNumberRow = 4;   // Строка на которой номер заказ наряда
+        int orderNumberCell = 26; // Ячейка в которой номер заказ наряда
+        Row row = sheet.getRow(orderNumberRow);
+        Cell cell = row.getCell(orderNumberCell);
+        String existingText = cell.getStringCellValue(); // Читаем текущее значение ячейки
+        String updatedText = existingText + " " + generateOrderNumber();  // Объединяем старое значение с новым номером заказа
+        cell.setCellValue(updatedText); // Устанавливаем обновленное значение в ячейку
+    }
 
     private void calkNeededRows(Sheet sheet, List<Element> elements) {
         // Копируем и вставляем строку
@@ -159,7 +168,7 @@ public class ExcelUpdater {
             cell.setCellValue((element.getName()));
             // Так как этот список может быть внушительный, отправляем ячейку на растяжку под это имя, что бы все влезло!
             adjustRowHeightPolirovka(row, element);
-        } else if (element.getNotNormWork() != 0){
+        } else if (element.getNotNormWork() != 0) {
             // Если элемент "не нормативный" так же записываем в ячейку его имя
             cell.setCellValue((element.getName()));
             // И так же на всякий случай отправляем на растяжку ячейки. Имя не нормированных работ ограничивается 100 символами.
@@ -181,7 +190,7 @@ public class ExcelUpdater {
             cell = row.getCell(narmotive); // Берем ячейку норматив работ
             if (!element.getName().contains("Полировка") && element.getNotNormWork() == 0) {
                 cell.setCellValue(element.getArmatureSide()); // !!!!!!!!Вставляем значение арматурных работ если элемент не полировка и не нормативный!!!!!!!!!!!
-            } else if (element.getName().contains("Полировка")){
+            } else if (element.getName().contains("Полировка")) {
                 cell.setCellValue(element.getPaintSide()); // !!!!!!!!Если элемент полировка сразу вставляем значение малярных работ!!!!!!!!!!
             } else {
                 cell.setCellValue(element.getNotNormWork()); // Если элемент не стекло и не полировка, то он не нормативные работы!!!
@@ -196,7 +205,7 @@ public class ExcelUpdater {
             if (!element.getName().contains("Полировка") && element.getNotNormWork() == 0) {
                 cell.setCellValue(element.getArmatureSide() * prices.getHourlyRate()); // Вставляем значение стоимости данной работы (норматив * цену норма часа)
                 total += (element.getArmatureSide() * prices.getHourlyRate()); // Добавляем к итоговой стоимости работ стоимость данной работы
-            } else if (element.getName().contains("Полировка")){
+            } else if (element.getName().contains("Полировка")) {
                 // Если полировка
                 cell.setCellValue(element.getPaintSide() * prices.getHourlyRate()); // Вставляем значение стоимости данной работы (норматив * цену норма часа)
                 total += (element.getPaintSide() * prices.getHourlyRate()); // Добавляем к итоговой стоимости работ стоимость данной работы
@@ -391,19 +400,6 @@ public class ExcelUpdater {
             total += (element.getGlass() * prices.getHourlyRate());
             cell.setCellValue(element.getGlass() * prices.getHourlyRate());
         }
-        // Здесь прописываем не нормативные работы
-        /*if(element.getNotNormWork() != 0){
-            row = sheet.getRow(++rowForePaste);
-            cell = row.getCell(nameOfWork);
-            cell.setCellValue(element.getName());
-            cell = row.getCell(narmotive);
-            cell.setCellValue(element.getNotNormWork());
-            cell = row.getCell(price);
-            cell.setCellValue(prices.getHourlyRate());
-            cell = row.getCell(totalPrice);
-            total += (element.getNotNormWork() * prices.getHourlyRate());
-            cell.setCellValue(element.getNotNormWork() * prices.getHourlyRate());
-        }*/
     } // заполняет строки работами
 
     private void writeLkm(Row row, int lkmTotalPrice) {
@@ -538,4 +534,35 @@ public class ExcelUpdater {
         }
         row.setHeightInPoints((int) i);
     } // метод выставления высоты строки для длинных описаний доп.работ
+
+    private String generateOrderNumber() {
+        // Шаг 1: Получить фамилию механика и извлечь первую букву
+        String masterLastName = mechanics.getMaster();
+        char firstLetter = Character.toUpperCase(masterLastName.charAt(0)); // Первая буква фамилии в верхнем регистре
+
+        // Шаг 2: Префикс номера заказа
+        String prefix = "И" + firstLetter;
+
+        // Шаг 3: Количество нулей изначально 8 штук
+        String zeros = "00000000";
+
+        // Шаг 4: Текущее значение порядка
+        int currentOrderNumber;
+        try {
+            currentOrderNumber = orderNumber.getCurrentValue(); // Получаем число из памяти
+            orderNumber.increment();                            // Обновляем в памяти число, добавив 1
+        } catch (IOException ignored) {
+            log.error("Ошибка при получении текущего значения числа номера заказа: ", ignored);
+            currentOrderNumber = 0;
+        }
+
+        // Подсчет количества нулей, которое надо убрать
+        int numDigitsInOrder = String.valueOf(currentOrderNumber).length();
+        String zerosToRemove = zeros.substring(numDigitsInOrder);
+
+        // Шаг 5: Генерация финального номера заказа
+        String finalOrderNumber = prefix + zerosToRemove + currentOrderNumber;
+        return finalOrderNumber;
+    } // метод генерации номера заказа
+
 }
