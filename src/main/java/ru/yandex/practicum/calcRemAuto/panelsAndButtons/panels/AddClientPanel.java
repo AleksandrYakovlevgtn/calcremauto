@@ -1,5 +1,6 @@
 package ru.yandex.practicum.calcRemAuto.panelsAndButtons.panels;
 
+import ru.yandex.practicum.calcRemAuto.logToFail.LogToFailManager;
 import ru.yandex.practicum.calcRemAuto.model.Client;
 import ru.yandex.practicum.calcRemAuto.panelsAndButtons.buttons.Buttons;
 import ru.yandex.practicum.calcRemAuto.panelsAndButtons.frame.FindParentFrame;
@@ -16,6 +17,7 @@ import java.util.stream.Stream;
 import java.text.ParseException;
 
 public class AddClientPanel {
+    static LogToFailManager logManager = new LogToFailManager();
 
     JTextField name = new JTextField(); // Поле ввода имени клиента
     JFormattedTextField numberFone;    // Поле ввода телефонного номера
@@ -24,6 +26,7 @@ public class AddClientPanel {
     Buttons but = new Buttons(); // Класс с кнопками
 
     public void clientAdd(JPanel panel, Client client) {
+        logManager.log("Запущен метод clientAdd в классе AddClientPanel");
         panel.setLayout(new BorderLayout());
         // Панель для полей ввода
         JPanel addClienPanel = new JPanel(new GridBagLayout());
@@ -139,17 +142,20 @@ public class AddClientPanel {
         panel.add(buttonsXYZPanel, BorderLayout.SOUTH);
 
         but.getButtonBack().addActionListener(e -> {
+            logManager.log("Нажата кнопка Назад");
             panel.removeAll();
             FirstPanel firstPanel = new FirstPanel();
             firstPanel.createFirstPanel(panel);
         });
         but.getButtonNext().addActionListener(e -> {
+            logManager.log("Нажата кнопка Далее.");
             try {
                 boolean allBordersAreGreen = Stream.of(name, numberFone, numberAuto, modelAuto)
                         .map(component -> (LineBorder) component.getBorder())
                         .allMatch(border -> border.getLineColor().equals(Color.green));
 
                 if (allBordersAreGreen) {
+                    logManager.log("Произведена проверка всех полей и создается AddWorkPanel");
                     AddWorkPanel addWorkPanel = new AddWorkPanel();
                     client.setName(name.getText());
                     client.setFoneNumber(numberFone.getText());
@@ -235,6 +241,7 @@ public class AddClientPanel {
     } // Изменение цвета графы телефонного номера
 
     private void printIfClientDuNotNull(Client client) {
+        logManager.log("Запущен метод printIfClientDuNotNull.");
         if (client.getName() != null) {
             name.setText(client.getName());
             numberFone.setValue(client.getFoneNumber());

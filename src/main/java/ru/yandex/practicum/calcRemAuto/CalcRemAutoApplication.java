@@ -13,6 +13,7 @@ import ru.yandex.practicum.calcRemAuto.panelsAndButtons.frame.StartFrame;
 
 import javax.swing.*;
 import java.awt.*;
+import java.io.IOException;
 
 @Slf4j
 @SpringBootApplication

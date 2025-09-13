@@ -1,5 +1,6 @@
 package ru.yandex.practicum.calcRemAuto.panelsAndButtons.frame;
 
+import ru.yandex.practicum.calcRemAuto.logToFail.LogToFailManager;
 import ru.yandex.practicum.calcRemAuto.model.*;
 import ru.yandex.practicum.calcRemAuto.panelsAndButtons.buttons.Buttons;
 import ru.yandex.practicum.calcRemAuto.storage.WorkWithFile;
@@ -11,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 
 public class SaveDialog extends JDialog {
+    static LogToFailManager logManager = new LogToFailManager();
     Prices prices = new Prices(); // Класс с ценами нормативов.
     Mechanics mechanics = new Mechanics();
     JCheckBox checkBoxSendToTelegram = new JCheckBox("Отправить в telegram смету?"); // Чек галка отправки в telegram
@@ -31,6 +33,8 @@ public class SaveDialog extends JDialog {
         this.elements = elements;
         this.lineBorderColorMap = lineBorderColorMap;
         this.lkm = lkm;
+
+        logManager.log("Запущен метод SaveDialog в классе SaveDialog");
 
         setLayout(new BorderLayout());
         setSize(800, 600);
@@ -72,16 +76,19 @@ public class SaveDialog extends JDialog {
         String line = previewAddTextAndCreateTotal(client, elements, lkmTotalPrice); // Запуск метода отображения сметы
 
         but.getYesButton().addActionListener(e -> {
+            logManager.log("Нажата кнопка Да");
             answer = true;
             WorkWithFile workWithFaile = new WorkWithFile(client, total, elements, lineBorderColorMap, lkm);
             workWithFaile.save(line, lkmTotalPrice);
             if (checkBoxSendToTelegram.isSelected()) { // Если галку не сняли, то отправляем смету в telegram
+                logManager.log("Галка телеграм установленна. Инициализирована отправка сметы.");
                 sendSmeta(workWithFaile.getDATE_DIRECTORY());
             }
             dispose();
         });
 
         but.getNoButton().addActionListener(e -> {
+            logManager.log("Нажата кнопка Нет");
             answer = false;
             dispose();
         });
@@ -91,18 +98,22 @@ public class SaveDialog extends JDialog {
 
 
     private void sendSmeta(String path) {
+        logManager.log("Запущен метод sendSmeta в классе SaveDialog");
         TelegramFileSenderBot telegramFileSenderBot = new TelegramFileSenderBot();
         telegramFileSenderBot.sendFile(path);
     } // Метод отправки в телеграм смет
 
     public boolean getAnswer() {
+        logManager.log("Запущен метод getAnswer в классе SaveDialog");
         return answer;
     } // метод возвращающий значение для выполнения действия в родительском окне (закрыть или оставить панель на окне)
 
     private String previewAddTextAndCreateTotal(Client client, List<Element> elements, int lkmTotalPrice) {
+        logManager.log("Запущен метод previewAddTextAndCreateTotal в классе SaveDialog");
         // StringBuilder для хранения строк
         StringBuilder line = new StringBuilder();
-
+        logManager.log("Создан StringBuilder line");
+        logManager.log("Начата  Итерация по списку элементов.");
         // Итерация по элементам
         for (Element element : elements) {
             // Обновление total на основе текущего элемента и добавление строки для текущего элемента
@@ -119,24 +130,30 @@ public class SaveDialog extends JDialog {
     } // Метод отображения строк элемента и подсчета total
 
     private double calculateMalyr(Element element) {
+        logManager.log("Запущен метод calculateMalyr в классе SaveDialog");
         // Сначала высчитываем работы маляра
         double total = (element.getPaintSide() + element.getMolding()
                 + element.getRuchka() + element.getZerkalo() + element.getExpander()
                 + element.getOverlay() + element.getDopWorksPainter()) * prices.getMechanicHourlyRate();
+        logManager.log("Обновлено значение total для маляра: " + total);
+        logManager.log("Начинается расчет для маляра, сначала проверяется ремонт.");
         // Далее рассчитываем ремонт. Нужно учесть кто делал ремонт
         if (element.getHoDoRemont().equals("Маляр") || (element.getHoDoRemont().toLowerCase().equals("кузовщик")
                 && !(element.getName().contains("Моторный отсек") || element.getName().contains("Задняя панель")))) {
             // Проверяем если это элемент не нормированных работ то считаем их и минуем пункт ремонта.
             if (element.getNotNormWork() > 0) {
                 total = total + (element.getNotNormWork() * prices.getMechanicHourlyRate());
+                logManager.log("Обновлено значение total для маляра: " + total + " элемент не нормированные работы считаем их и минуем пункт ремонта.");
             } else {
                 // Если это работы по ремонту, то проверяем их
                 // Если ремонт делал маляр то весь норматив его
                 if (element.getHoDoRemont().equals("Маляр")) {
                     total = total + (element.getRemont() * prices.getMechanicHourlyRate());
+                    logManager.log("Обновлено значение total для маляра: " + total + " Ремонт производит Маляр.");
                 } else {
                     // Если ремонт выполнял кузовщик и это не моторный отсек и задняя панель, то начисляем малеру 30% от норматива на шпатлевку.
                     total = total + ((element.getRemont() * 0.3) * prices.getMechanicHourlyRate());
+                    logManager.log("Обновлено значение total для маляра: " + total + " Ремонт производит кузовщик, маляру 30% от норматива.");
                 }
             }
         }
@@ -144,37 +161,48 @@ public class SaveDialog extends JDialog {
     }// Метод для расчета значения Маляр на основе текущего элемента
 
     private double calculateArmatyrchik(Element element) {
+        logManager.log("Запущен метод calculateArmatyrchik в классе SaveDialog");
         // Сначала высчитываем работы арматурщика
         double total = (element.getArmatureSide() + element.getGlass() + element.getDopWorksArmoturchik()) * prices.getMechanicHourlyRate();
+        logManager.log("Обновлено значение total для арматурщика: " + total);
+        logManager.log("Начинается расчет для арматурщика, сначала проверяется ремонт.");
         // Если арматурщик выполнял ремонт, то добавляем норматив на ремонт
         if (element.getHoDoRemont().equals("Арматурщик")) {
             // Проверяем если это элемент не нормированных работ то считаем их и минуем пункт ремонта.
             if (element.getNotNormWork() > 0) {
                 total = total + (element.getNotNormWork() * prices.getMechanicHourlyRate());
+                logManager.log("Обновлено значение total для арматурщика: " + total + " элемент не нормированные работы считаем их и минуем пункт ремонта.");
             } else {
                 // Если это нормированные работы, а работы по ремонту, то суммируем их
                 total = total + (element.getRemont() * prices.getMechanicHourlyRate());
+                logManager.log("Обновлено значение total для маляра: " + total + " Ремонт производит арматурщик.");
             }
         }
         return total;
     } // Метод для расчета значения Арматурщик на основе текущего элемента
 
     private double calculateKuzovchik(Element element) {
+        logManager.log("Запущен метод calculateKuzovchik в классе SaveDialog");
         // Сначала высчитываем нормативы кузовных работ
         double total = (element.getKuzDetReplaceSide() + element.getDopWorksKuzovchik()) * prices.getMechanicHourlyRate();
+        logManager.log("Обновлено значение total для кузовщик: " + total);
+        logManager.log("Начинается расчет для кузовщика, сначала проверяется ремонт.");
         // Далее необходимо просчитать ремонт
         if (element.getHoDoRemont().equals("Кузовщик")) {
             // Проверяем если это элемент не нормированных работ то считаем их и минуем пункт ремонта.
             if (element.getNotNormWork() > 0) {
                 total = total + (element.getNotNormWork() * prices.getMechanicHourlyRate());
+                logManager.log("Обновлено значение total для кузовщика: " + total + " элемент не нормированные работы считаем их и минуем пункт ремонта.");
             } else {
                 // Если это работы по ремонту, то проверяем их
                 if (element.getName().contains("Моторный отсек") || element.getName().contains("Задняя панель")) {
                     // Если ремонт производился на элементы из списка, то засчитываем 100%
                     total = total + (element.getRemont() * prices.getMechanicHourlyRate());
+                    logManager.log("Обновлено значение total для маляра: " + total + " Ремонт производит кузовщик. Элемент Моторный отсек или Задняя панель 100% кузовщику.");
                 } else {
                     // Если ремонт не из списка, то делим на 70% кузовщик и 30% маляру на шпатлевку
                     total = total + ((element.getRemont() * 0.7) * prices.getMechanicHourlyRate());
+                    logManager.log("Обновлено значение total для маляра: " + total + " Ремонт производит кузовщик. Элемент не Моторный отсек и Задняя панель 70% кузовщику.");
                 }
             }
         }
@@ -182,10 +210,12 @@ public class SaveDialog extends JDialog {
     }// Метод для расчета значения Кузовщик на основе текущего элемента
 
     private double calculateThirdPartyMechanic(Element element) {
+        logManager.log("Запущен метод calculateThirdPartyMechanic в классе SaveDialog");
         return (element.getNotNormWork() * prices.getMechanicHourlyRate());
     } // Метод для расчета значения Стороннего механика на основе текущего элемента
 
     private double calculateMaster(Element element) {
+        logManager.log("Запущен метод calculateMaster в классе SaveDialog");
         return (element.getRemont() + element.getMolding() + element.getRuchka()
                 + element.getZerkalo() + element.getExpander() + element.getOverlay()
                 + element.getPaintSide() + element.getGlass() + element.getKuzDetReplaceSide()
@@ -194,6 +224,7 @@ public class SaveDialog extends JDialog {
     }// Метод для расчета значения Мастер на основе текущего элемента
 
     private void updateTotalValues(Element element) {
+        logManager.log("Запущен метод updateTotalValues в классе SaveDialog");
         total.setMalyr(total.getMalyr() + calculateMalyr(element));
         total.setArmatyrchik(total.getArmatyrchik() + calculateArmatyrchik(element));
         total.setKuzovchik(total.getKuzovchik() + calculateKuzovchik(element));
@@ -202,16 +233,19 @@ public class SaveDialog extends JDialog {
     } // Метод для обновления значений total механиков на основе текущего элемента
 
     private void updateTotal() {
+        logManager.log("Запущен метод updateTotal в классе SaveDialog");
         total.setTotal(total.getTotal() + total.getArmatyrchik() + total.getMalyr() + total.getKuzovchik() + total.getThirdPartyMechanic() + total.getMaster());
     }// Метод для обновления общего значения total(всех механиков в куче). Таким образом высчитывается всего за работы
 
     private String buildPreviewText(Client client, StringBuilder line, int lkmTotalPrice) {
+        logManager.log("Запущен метод buildPreviewText в классе SaveDialog");
         return client.toString()
                 + "\n" + "Автомаляр: " + mechanics.getMalyr() + " Арматурщик: " + (mechanics.getArmoturchik()) + " Кузовщик: " + (mechanics.getKuzovchik())
                 + "\n" + total.toString() + " ЛКМ: " + lkmTotalPrice + " Итого: " + (total.getTotal() + lkmTotalPrice) + "\n" + line.toString();
     }// Метод для построения окончательной строки текста для previewTextArea
 
     private String takeLine(Element element) {
+        logManager.log("Запущен метод takeLine в классе SaveDialog");
         StringBuilder line = new StringBuilder(element.getName());
         if (!element.getName().startsWith("Полировка")) {
             line.append(probels.substring(element.getName().length()));
@@ -256,6 +290,7 @@ public class SaveDialog extends JDialog {
         } else if (element.getNotNormWork() > 0) {             // Такая строчка если не нормированные работы
             line.append(" Итого: ").append(element.getTotal()).append(" руб.");
         }
+        logManager.log("Строка создана и производится return line.append(\"\\n\").toString()");
         return line.append("\n").toString();
     } // Создание текста отображения сметы. Строка элемента, работ по нему и сколько он стоит.
 }

@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import ru.yandex.practicum.calcRemAuto.logToFail.LogToFailManager;
 import ru.yandex.practicum.calcRemAuto.model.*;
 import ru.yandex.practicum.calcRemAuto.panelsAndButtons.panels.AddWorkPanel;
 
@@ -28,6 +29,7 @@ public class WorkWithFile {
             "Арматурщик",
             "null"
     );
+    static LogToFailManager logManager = new LogToFailManager();
     private final Prices prices = new Prices();
     NameDirectories directories = new NameDirectories();
     ExcelUpdater exel = new ExcelUpdater();
@@ -41,6 +43,7 @@ public class WorkWithFile {
     String OFFICIAL_DIRECTORY; // директория начальная/госНомер/дата_расчета/служебная Для записи служебных данных.
 
     public WorkWithFile(Client client, Total total, List<Element> elements, Map<String, Map<String, List<String>>> lineBorderColorMap, Lkm lkm) {
+        logManager.log("Запущен Конструктор WorkWithFile в классе WorkWithFile");
         this.client = client;
         this.lineBorderColorMap = lineBorderColorMap;
         this.total = total;
@@ -51,6 +54,7 @@ public class WorkWithFile {
 
     @SneakyThrows
     public void save(String text, int lkmTotalPrice) {
+        logManager.log("Запущен метод save в классе WorkWithFile");
         DATE_DIRECTORY = GOS_NUMBER + directories.getSlash() + directories.getDATE_DIRECTORY();
         OFFICIAL_DIRECTORY = DATE_DIRECTORY + directories.getSlash() + directories.getOFFICIAL_DIRECTORY();
 
@@ -63,6 +67,8 @@ public class WorkWithFile {
              PrintWriter dataClient = new PrintWriter(OFFICIAL_DIRECTORY + directories.getSlash() + directories.getCLIENT() + directories.getTxt());
              PrintWriter dataTotal = new PrintWriter(OFFICIAL_DIRECTORY + directories.getSlash() + directories.getITOGO() + directories.getTxt());
              PrintWriter dataLkm = new PrintWriter(OFFICIAL_DIRECTORY + directories.getSlash() + directories.getLKM() + directories.getTxt())) {
+
+            logManager.log("Начата процедура поэтапной записи в файлы в классе WorkWithFile");
 
             out.println(text);                        // Запись файла сметы
             dataClient.write(toStringClient(client)); // Запись файла данных клиента
@@ -79,6 +85,7 @@ public class WorkWithFile {
     } // Метод сохранения который через другие методы сохраняет все в файлы .txt
 
     public void createDirectories() throws IOException {
+        logManager.log("Запущен метод createDirectories в классе WorkWithFile");
         createDirectoryIfNeeded(directories.getNAME_START_DIRECTORY());
         createDirectoryIfNeeded(GOS_NUMBER);
         createDirectoryIfNeeded(DATE_DIRECTORY);
@@ -86,12 +93,15 @@ public class WorkWithFile {
     } // Метод для распределения создания папок
 
     private void createDirectoryIfNeeded(String directory) throws IOException {
+        logManager.log("Запущен метод createDirectoryIfNeeded в классе WorkWithFile для пути: " + directory);
         if (!Files.exists(Path.of(directory))) {
             Files.createDirectory(Path.of(directory));
+            logManager.log("Директория создана для пути: " + directory);
         }
     } // Проверка и создание папок
 
     public void load(File file, JPanel panel) {
+        logManager.log("Запущен метод load в классе WorkWithFile.");
         client = loadClient(String.valueOf(file));
         total = loadTotal(String.valueOf(file));
         lineBorderColorMap = loadMap(String.valueOf(file));
@@ -102,6 +112,7 @@ public class WorkWithFile {
     } // Загрузка из файлов
 
     private String toStringElement(Element element) {
+        logManager.log("Запущен метод toStringElement в классе WorkWithFile.");
         String[] words = {element.getName(),
                 String.valueOf(element.getPaintSide()),
                 String.valueOf(element.getArmatureSide()),
@@ -131,6 +142,7 @@ public class WorkWithFile {
 
     @SneakyThrows
     public void saveListElements(String officialDirectory) {
+        logManager.log("Запущен метод saveListElements в классе WorkWithFile.");
         try (PrintWriter writer = new PrintWriter(officialDirectory + directories.getSlash() + directories.getLIST_OF_ELEMENTS() + directories.getTxt())) {
             for (Element element : elements) {
                 writer.write(toStringElement(element) + "\n");
@@ -140,30 +152,39 @@ public class WorkWithFile {
 
     @SneakyThrows
     public void saveMalyar(String dateDirectory) {
+        logManager.log("Запущен метод saveMalyar в классе WorkWithFile.");
         try (PrintWriter writer = new PrintWriter(dateDirectory + directories.getSlash() + directories.getMALYAR() + directories.getTxt())) {
+            logManager.log("Начата итерация по элементам из списка.");
             for (Element element : elements) {
                 // Логика работы с маляром
                 if (!element.getName().contains("Остекление")) {
+                    logManager.log("Элемент не Остекление.");
                     if (element.getPaintSide() > 0) {
                         writer.write(element.getName() + " " + element.getPaintSide() + "н/ч ");
+                        logManager.log("Произведена запись: element.getPaintSide() > 0, записано значение element.getName() + \" \" + element.getPaintSide().");
                     } else if (element.getMolding() > 0 || element.getRuchka() > 0 || element.getZerkalo() > 0 || element.getOverlay() > 0 || element.getExpander() > 0) {
                         writer.write(element.getName() + " ");
+                        logManager.log("У элемента есть окраска навесного, записано значение element.getName() + \" \".");
                     }
+                    logManager.log("Начинается проверка на, то что элемент имеет ремонт или в графе исполнитель ремонта указан \"Маляр\".");
                     // Если элемент имеет ремонт или в графе исполнитель ремонта указан "Маляр" то
                     if (element.getRemont() > 0 || element.getHoDoRemont().toLowerCase().equals("маляр")) {
                         // Проверяем что у элемента есть норматив на ремонт тем самым отсекаем, что он является не нормативной работой
                         if (element.getHoDoRemont().toLowerCase().equals("маляр") && element.getRemont() != 0) {
                             writer.write("ремонт: " + element.getRemont() + "н/ч ");
+                            logManager.log("У элемента есть ремонт и исполнитель Маляр. Произведена запись: \"ремонт: \" + element.getRemont() + \"н/ч \"");
                         } else if (element.getHoDoRemont().toLowerCase().equals("маляр") && element.getNotNormWork() != 0) {
                             // Если же в графе исполнитель ремонта указан "Маляр" и при этом есть норматив не нормативных работ то
                             // мы отсекаем ремонт и прописываем в файл не нормативные работы
                             writer.write(element.getName() + " " + element.getNotNormWork() + "н/ч " + "итого: " + ((int) (element.getNotNormWork() * prices.getMechanicHourlyRate())) + "руб.\n");
+                            logManager.log("У элемента нет ремонта, но есть не нормативные работы для Маляра. Произведена запись: element.getName() + \" \" + element.getNotNormWork() + \"н/ч \" + \"итого: \" + ((int) (element.getNotNormWork() * prices.getMechanicHourlyRate())) + \"руб.\\n\"");
                         } else if (element.getHoDoRemont().toLowerCase().equals("кузовщик") &&
                                 !(element.getName().contains("Моторный отсек") || element.getName().contains("Задняя панель"))
                                 && element.getRemont() != 0) {
                             // Если же в графе исполнитель ремонта указан "Кузовщик", есть норматив ремонта и элемент не входит в перечень
                             // то отнимаем у кузовщика для маляра 30% за ремонт
                             writer.write("ремонт 30%: " + (element.getRemont() * 0.3) + "н/ч ");
+                            logManager.log("У элемента есть ремонт но исполнитель Кузовщик. Произведена запись: \"ремонт 30%: \" + (element.getRemont() * 0.3) + \"н/ч \"");
                         }
                     }
 
@@ -171,6 +192,7 @@ public class WorkWithFile {
 
                     if (element.getRuchka() > 0) {
                         writer.write("ручка");
+                        logManager.log("У элемента есть окраска навесного - ручка, записано значение \"ручка\".");
                         hasItem = true;
                     }
                     if (element.getZerkalo() > 0) {
@@ -178,6 +200,7 @@ public class WorkWithFile {
                             writer.write(", ");
                         }
                         writer.write("зеркало");
+                        logManager.log("У элемента есть окраска навесного - зеркало, записано значение \"зеркало\".");
                         hasItem = true;
                     }
                     if (element.getMolding() > 0) {
@@ -185,6 +208,7 @@ public class WorkWithFile {
                             writer.write(", ");
                         }
                         writer.write("молдинг");
+                        logManager.log("У элемента есть окраска навесного - молдинг, записано значение \"молдинг\".");
                         hasItem = true;
                     }
                     if (element.getOverlay() > 0) {
@@ -192,6 +216,7 @@ public class WorkWithFile {
                             writer.write(", ");
                         }
                         writer.write("накладка");
+                        logManager.log("У элемента есть окраска навесного - накладка, записано значение \"накладка\".");
                         hasItem = true;
                     }
                     if (element.getExpander() > 0) {
@@ -199,17 +224,22 @@ public class WorkWithFile {
                             writer.write(", ");
                         }
                         writer.write("расширитель");
+                        logManager.log("У элемента есть окраска навесного - расширитель, записано значение \"расширитель\".");
                     }
                     if (element.getMolding() > 0 || element.getRuchka() > 0 || element.getZerkalo() > 0 || element.getOverlay() > 0 || element.getExpander() > 0) {
                         writer.write(" окраска ");
+                        logManager.log("У элемента есть окраска навесного, добавлена запись  \" окраска\".");
                     }
                     if (element.getDopWorksPainter() > 0) {
                         if (element.getDescriptionDopWorksPainter().equals("null")) {
                             writer.write("доп.работы: " + element.getDopWorksPainter() + "н/ч ");
+                            logManager.log("У элемента есть доп работы для Маляр но нет их описания произведена запись: \"доп.работы: \" + element.getDopWorksPainter() + \"н/ч \"");
                         } else {
                             writer.write((element.getName().replace("Замена", "")) + " " + element.getDescriptionDopWorksPainter() + " " + element.getDopWorksPainter() + "н/ч ");
+                            logManager.log("У элемента есть доп работы для Маляр и есть описания, произведена запись: element.getName().replace(\"Замена\", \"\")) + \" \" + element.getDescriptionDopWorksPainter() + \" \" + element.getDopWorksPainter() + \"н/ч \"");
                         }
                     }
+                    logManager.log("Начинается расчет стоимости работ за элемент для Маляр.");
                     // Расчеты оплаты за элемент механику
                     int line = (int) ((element.getPaintSide() + element.getRuchka() +
                             element.getZerkalo() + element.getMolding() + element.getOverlay() +
@@ -227,34 +257,47 @@ public class WorkWithFile {
                     }
                     if (line > 0) {
                         writer.write("итого: " + line + "руб.\n");
+                        logManager.log("Расчет завершен произведена запись: \"итого: \" + line + \"руб.\\n\"");
                     }
                 }
             }
+            logManager.log("Итерация по элементам из списка завершена.");
             writer.write("Итог: " + (int) total.getMalyr() + " руб.");
+            logManager.log("Произведена запись итоговой стоимости работ за все элементы из списка для Маляр: \"Итог: \" + (int) total.getMalyr() + \" руб.\".");
         }
     } // Запись в файл сметы для маляра
 
     @SneakyThrows
     public void saveArmoturchik(String dateDirectory) {
+        logManager.log("Запущен метод saveArmoturchik в классе WorkWithFile.");
         try (PrintWriter writer = new PrintWriter(dateDirectory + directories.getSlash() + directories.getARMOTURCHIK() + directories.getTxt())) {
+            logManager.log("Начата итерация по элементам из списка.");
             for (Element element : elements) {
                 // Логика работы с арматурщиком
                 if (!element.getName().contains("Полировка")) {
+                    logManager.log("Элемент не Полировка.");
                     if (element.getArmatureSide() > 0) {
                         writer.write(element.getName() + " " + element.getArmatureSide() + "н/ч ");
+                        logManager.log("element.getName() + \" \" + element.getArmatureSide() + \"н/ч ");
                     } else if (element.getName().contains("Остекление")) {
+                        logManager.log("Элемент Остекление.");
                         writer.write(element.getName() + " " + element.getGlass() + "н/ч ");
+                        logManager.log("Произведена запись: element.getName() + \" \" + element.getGlass() + \"н/ч \"");
                     }
                 }
 
+                logManager.log("Начинается проверка на, то что элемент имеет ремонт или в графе исполнитель ремонта указан \"арматурщик\".");
+
                 if (element.getRemont() > 0 && element.getHoDoRemont().toLowerCase().equals("арматурщик")) {
                     writer.write("ремонт: " + element.getRemont() + "н/ч ");
+                    logManager.log("Произведена запись: \"ремонт: \" + element.getRemont() + \"н/ч ");
                 }
 
                 boolean hasItem = false; // Флаг для проверки наличия предыдущих элементов
 
                 if (element.getRuchka() > 0) {
                     writer.write("ручка");
+                    logManager.log("У элемента есть окраска навесного - ручка, записано значение \"ручка\".");
                     hasItem = true;
                 }
                 if (element.getZerkalo() > 0) {
@@ -262,6 +305,7 @@ public class WorkWithFile {
                         writer.write(", ");
                     }
                     writer.write("зеркало");
+                    logManager.log("У элемента есть окраска навесного - зеркало, записано значение \"зеркало\".");
                     hasItem = true;
                 }
                 if (element.getMolding() > 0) {
@@ -269,6 +313,7 @@ public class WorkWithFile {
                         writer.write(", ");
                     }
                     writer.write("молдинг");
+                    logManager.log("У элемента есть окраска навесного - молдинг, записано значение \"молдинг\".");
                     hasItem = true;
                 }
                 if (element.getOverlay() > 0) {
@@ -276,6 +321,7 @@ public class WorkWithFile {
                         writer.write(", ");
                     }
                     writer.write("накладка");
+                    logManager.log("У элемента есть окраска навесного - накладка, записано значение \"накладка\".");
                     hasItem = true;
                 }
                 if (element.getExpander() > 0) {
@@ -283,23 +329,30 @@ public class WorkWithFile {
                         writer.write(", ");
                     }
                     writer.write("расширитель");
+                    logManager.log("У элемента есть окраска навесного - расширитель, записано значение \"расширитель\".");
                 }
                 if (element.getMolding() > 0 || element.getRuchka() > 0 || element.getZerkalo() > 0 || element.getOverlay() > 0 || element.getExpander() > 0) {
                     writer.write(" c/у под окрас ");
+                    logManager.log("У элемента есть окраска навесного, добавлена запись  \" c/у под окрас\".");
                 }
                 if (element.getDopWorksArmoturchik() > 0) {
                     if (element.getDescriptionDopWorksArmaturchic().equals("null")) {
                         writer.write("доп.работы " + element.getDopWorksArmoturchik() + "н/ч ");
+                        logManager.log("У элемента есть доп работы для Арматурщик но нет их описания произведена запись: \"доп.работы: \" + element.getDopWorksArmoturchik() + \"н/ч \"");
                     } else {
                         writer.write((element.getName().replace("Замена", "")) + " " + element.getDescriptionDopWorksArmaturchic() + " " + element.getDopWorksArmoturchik() + "н/ч ");
+                        logManager.log("У элемента есть доп работы для Арматурщик и есть описания, произведена запись: (element.getName().replace(\"Замена\", \"\")) + \" \" + element.getDescriptionDopWorksArmaturchic() + \" \" + element.getDopWorksArmoturchik() + \"н/ч \")");
                     }
                 }
 
                 if (element.getGlass() > 0) {
                     if (!element.getNameGlass().equals("null")) {
                         writer.write(" " + element.getNameGlass());
+                        logManager.log("У элемента есть остекление, произведена запись: \" \" + element.getNameGlass()");
                     }
                 }
+
+                logManager.log("Начинается расчет стоимости работ за элемент для Арматурщик.");
 
                 int line = (int) ((element.getArmatureSide() + element.getGlass() + element.getDopWorksArmoturchik()) * prices.getMechanicHourlyRate());
                 if (element.getHoDoRemont().toLowerCase().equals("арматурщик")) {
@@ -312,19 +365,25 @@ public class WorkWithFile {
                 }
                 if (line > 0) {
                     writer.write(" итого: " + line + "руб.\n");
+                    logManager.log("Расчет завершен произведена запись: \"итого: \" + line + \"руб.\\n\"");
                 }
             }
 
+            logManager.log("Итерация по элементам из списка завершена.");
             writer.write("Итог: " + (int) total.getArmatyrchik() + " руб.");
+            logManager.log("Произведена запись итоговой стоимости работ за все элементы из списка для Арматурщик: \"Итог: \" + (int) total.getArmatyrchik() + \" руб.\".");
         }
     } // Запись в файл сметы для арматурщика
 
     @SneakyThrows
     public void saveKuzovchik(String dateDirectory) {
+        logManager.log("Запущен метод saveKuzovchik в классе WorkWithFile.");
         try (PrintWriter writer = new PrintWriter(dateDirectory + directories.getSlash() + directories.getKUZOVCHIK() + directories.getTxt())) {
+            logManager.log("Начата итерация по элементам из списка.");
             for (Element element : elements) {
-                // Логика работы с кузовом
+                // Логика работы с кузовщиком
                 if (element.getKuzDetReplaceSide() > 0 || element.getHoDoRemont().toLowerCase().equals("кузовщик") || element.getDopWorksKuzovchik() > 0) {
+                    logManager.log("Элемент имеет кузовные работы или ремонт выполняет кузовщик либо присутствуют доп работы для кузовщика.");
                     double kuz = 0;
                     String kuzline = element.getName();
                     if (element.getHoDoRemont().toLowerCase().equals("кузовщик") && element.getRemont() != 0) {
@@ -353,14 +412,18 @@ public class WorkWithFile {
                     }
                     kuzline = kuzline + (" Итого: " + ((int) (kuz * prices.getMechanicHourlyRate()) + " руб\n"));
                     writer.write(kuzline);
+                    logManager.log("Расчет завершен произведена запись: " + kuzline);
                 }
             }
+            logManager.log("Итерация по элементам из списка завершена.");
             writer.write("Итог: " + (int) total.getKuzovchik() + " руб.");
+            logManager.log("Произведена запись итоговой стоимости работ за все элементы из списка для Кузовщика: \"Итог: \" + (int) total.getKuzovchik() + \" руб.\"");
         }
     }   // Запись в файл сметы для кузовщика
 
     @SneakyThrows
     public void saveNonStaffMechanic(String dateDirectory) {
+        logManager.log("Запущен метод saveNonStaffMechanic в классе WorkWithFile.");
         // Фильтруем список, удаляя нежелательные профили
         List<Element> filteredElements = elements.stream()
                 .filter(e -> !EXCLUDED_PROFESSIONS.contains(e.getHoDoRemont()))
@@ -387,14 +450,16 @@ public class WorkWithFile {
                     totalNotNormWork += element.getNotNormWork();
                 }
                 writer.write("Итог: " + (int) (totalNotNormWork * prices.getMechanicHourlyRate()) + "руб.");
+                logManager.log("Расчет завершен произведена запись: \"Итог: \" " + (int) (totalNotNormWork * prices.getMechanicHourlyRate()) + "руб.");
             } catch (Exception e) {
-                log.error("Ошибка записи файла: " + e.getMessage());
+                logManager.log("Ошибка записи файла: " + e.getMessage());
             }
         }
     } // Запись в файл не фиксированных(сторонних) механиков.
 
     @SneakyThrows
     private List<Element> loadElementsList(String nameStartDirectory) {
+        logManager.log("Запущен метод loadElementsList в классе WorkWithFile.");
         List<Element> elements = new ArrayList<>();
         FileReader fileReader = new FileReader(nameStartDirectory + directories.getSlash() + directories.getOFFICIAL_DIRECTORY() +
                 directories.getSlash() + directories.getLIST_OF_ELEMENTS() + directories.getTxt());
@@ -446,12 +511,14 @@ public class WorkWithFile {
     } // Метод загрузки из файла List<Element> elements
 
     private String toStringTotal(Total total) {
+        logManager.log("Запущен метод toStringTotal в классе WorkWithFile.");
         return String.format("%s,%s,%s,%s,%s", total.getMalyr(), total.getArmatyrchik(), total.getKuzovchik(),
                 total.getMaster(), total.getTotal(), total.getThirdPartyMechanic());
     } // Метод разбития Total в строки для сохранения в файл
 
     @SneakyThrows
     private Total loadTotal(String officialDirectory) {
+        logManager.log("Запущен метод loadTotal в классе WorkWithFile.");
         try (BufferedReader bufferedReader = new BufferedReader(new FileReader(officialDirectory +
                 directories.getSlash() + directories.getOFFICIAL_DIRECTORY() +
                 directories.getSlash() + directories.getITOGO() + directories.getTxt()))) {
@@ -471,11 +538,13 @@ public class WorkWithFile {
     } // Метод загрузки из файла Total
 
     private String toStringClient(Client client) {
+        logManager.log("Запущен метод toStringClient в классе WorkWithFile.");
         return String.format("%s,%s,%s,%s", client.getName(), client.getFoneNumber(), client.getNumberAuto(), client.getModelAuto());
     } // Метод разбития Client в строки для сохранения в файл
 
     @SneakyThrows
     private Client loadClient(String officialDirectory) {
+        logManager.log("Запущен метод loadClient в классе WorkWithFile.");
         try (BufferedReader bufferedReader = new BufferedReader(new FileReader(officialDirectory + "/служебная/клиент.txt"))) {
             String[] parts = bufferedReader.readLine().split(",");
             if (parts.length == 4) {
@@ -488,6 +557,7 @@ public class WorkWithFile {
 
     @SneakyThrows
     public void writeLkmSmeta(Lkm lkm) {
+        logManager.log("Запущен метод writeLkmSmeta в классе WorkWithFile.");
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(DATE_DIRECTORY + directories.getSlash() + directories.getLKM_NEEDED() + directories.getTxt()))) {
             writer.write("Круг p80 " + lkm.getP80() + "шт.");
             writer.newLine();
@@ -532,6 +602,7 @@ public class WorkWithFile {
     } // Метод записывает файл необходимых ЛКМ на данный расчет
 
     private String toStringLkm(Lkm lkm) {
+        logManager.log("Запущен метод toStringLkm в классе WorkWithFile.");
         return String.format("%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s",
                 lkm.getP80(), lkm.getP180(), lkm.getP280(), lkm.getP400(), lkm.getP500(),
                 lkm.getStripP80(), lkm.getStripP120(), lkm.getStripP180(),
@@ -543,6 +614,7 @@ public class WorkWithFile {
 
     @SneakyThrows
     private Lkm loadLkm(String officialDirectory) {
+        logManager.log("Запущен метод loadLkm в классе WorkWithFile.");
         try (BufferedReader bufferedReader = new BufferedReader(new FileReader(officialDirectory + "/служебная/Лкм.txt"))) {
             String[] parts = bufferedReader.readLine().split(",");
             if (parts.length == 20) {
@@ -579,6 +651,7 @@ public class WorkWithFile {
 
     @SneakyThrows
     private void saveMap(String officialDirectory) {
+        logManager.log("Запущен метод saveMap в классе WorkWithFile.");
         try (BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(officialDirectory +
                 directories.getSlash() + directories.getMAP_OF_WORKS() + directories.getTxt()))) {
             for (Map.Entry<String, Map<String, List<String>>> entry : lineBorderColorMap.entrySet()) {
@@ -598,6 +671,7 @@ public class WorkWithFile {
 
     @SneakyThrows
     private Map<String, Map<String, List<String>>> loadMap(String officialDirectory) {
+        logManager.log("Запущен метод loadMap в классе WorkWithFile.");
         Map<String, Map<String, List<String>>> loadedMap = new HashMap<>();
         try (BufferedReader bufferedReader = new BufferedReader(new FileReader(officialDirectory +
                 directories.getSlash() + directories.getOFFICIAL_DIRECTORY() +

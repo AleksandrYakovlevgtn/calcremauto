@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.poi.ss.util.CellRangeAddress;
+import ru.yandex.practicum.calcRemAuto.logToFail.LogToFailManager;
 import ru.yandex.practicum.calcRemAuto.model.*;
 
 import javax.swing.*;
@@ -16,7 +17,7 @@ import java.util.List;
 
 @Slf4j
 public class ExcelUpdater {
-
+    static LogToFailManager logManager = new LogToFailManager();
     Prices prices = new Prices(); // Класс с ценами
     Mechanics mechanics = new Mechanics(); // Класс с фамилиями механиков
     OrderNumber orderNumber = new OrderNumber();
@@ -25,6 +26,7 @@ public class ExcelUpdater {
     int total = 0; // Значение для подсчета итого и дальнейшей вставки
 
     public void createOrderExelFile(Client client, List<Element> elements, int lkmTotalPrice, String path) {
+        logManager.log("Запущен метод createOrderExelFile в классе ExcelUpdater");
         try {
             String originalFilePath = "Системные/Болванка.xlsx"; // путь по которому лежит болванка
             String newFilePath = path + "/ЗаказНаряд.xlsx "; // Путь по которому новый файл сохраняется. Путь калькуляции
@@ -50,14 +52,15 @@ public class ExcelUpdater {
             newFileOutputStream.close();
             workbook.close();
 
-            log.info("Файл успешно обновлен и сохранен по новому пути: " + newFilePath);
+            logManager.log("Файл успешно обновлен и сохранен по новому пути: " + newFilePath);
         } catch (IOException e) {
-            log.error(e.getMessage());
+            logManager.log(e.getMessage());
             JOptionPane.showMessageDialog(null, e.getMessage(), "Ошибка", JOptionPane.ERROR_MESSAGE);
         }
     } // метод формирования заказ наряда через меньшие методы.
 
     private void writeDate(Sheet sheet) {
+        logManager.log("Запущен метод writeDate в классе ExcelUpdater");
         int dateRow = 7;
         int dateCell = 33;
         Row row = sheet.getRow(dateRow);
@@ -66,6 +69,7 @@ public class ExcelUpdater {
     } // Метод заполнения даты от которой оформлен заказ
 
     private void writeClient(Sheet sheet, Client client) {
+        logManager.log("Запущен метод writeClient в классе ExcelUpdater");
         int clientFirstRow = 10;
         int clientTwoRow = 12;
         int clientTwoColum = 32;
@@ -84,6 +88,7 @@ public class ExcelUpdater {
     } // метод заполнения данных клиента
 
     private void writeOrderNumber(Sheet sheet) {
+        logManager.log("Запущен метод writeOrderNumber в классе ExcelUpdater");
         int orderNumberRow = 4;   // Строка на которой номер заказ наряда
         int orderNumberCell = 26; // Ячейка в которой номер заказ наряда
         Row row = sheet.getRow(orderNumberRow);
@@ -94,6 +99,7 @@ public class ExcelUpdater {
     }
 
     private void calkNeededRows(Sheet sheet, List<Element> elements) {
+        logManager.log("Запущен метод calkNeededRows в классе ExcelUpdater");
         // Копируем и вставляем строку
         int numOfWork = 1;
         Row sourceRow = sheet.getRow(sourceRowNum);
@@ -144,6 +150,7 @@ public class ExcelUpdater {
     } // метод высчитывает необходимое количество строк для работ
 
     private void writeInCalculatedRowsElement(Element element, Sheet sheet, int rowForePaste) {
+        logManager.log("Запущен метод writeInCalculatedRowsElement в классе ExcelUpdater");
         int nameOfWork = 8; // Ячейка с названием работ
         int narmotive = 25; // Ячейка с нормативом работ
         int price = 29;     // Ячейка с ценой норма часа
@@ -403,6 +410,7 @@ public class ExcelUpdater {
     } // заполняет строки работами
 
     private void writeLkm(Row row, int lkmTotalPrice) {
+        logManager.log("Запущен метод writeLkm в классе ExcelUpdater");
         int numWork = 1;
         int nameOfWork = 8;
         int narmotive = 25;
@@ -418,6 +426,7 @@ public class ExcelUpdater {
     } // Заполняем строку ЛКМ
 
     private void writeTotal(Sheet sheet, int lkmTotalPrice) {
+        logManager.log("Запущен метод writeTotal в классе ExcelUpdater");
         int totalPrice = 40; // Номер ячейки под работами итого
         int totalTotalPrice = 32; // Номер ячейки итого итоговое
         Row row = sheet.getRow(targetRowNum + 1);
@@ -429,6 +438,7 @@ public class ExcelUpdater {
     } // заполняет итоговою сумму ремонта
 
     private void writeMaster(Sheet sheet) {
+        logManager.log("Запущен метод writeMaster в классе ExcelUpdater");
         int row1 = 15;
         int cel1 = 32;
         int row2 = 42;
@@ -442,6 +452,7 @@ public class ExcelUpdater {
     } // заполняет параметры мастера
 
     private void copyRow(Sheet sheet, Row sourceRow, int targetRowNum, int numOfWork) {
+        logManager.log("Запущен метод copyRow в классе ExcelUpdater");
         // Задает высоту строки по умолчанию в пунктах
         float defaultRowHeightInPoints = 20.0f;
         // Устанавливает высоту исходной строки
@@ -514,6 +525,7 @@ public class ExcelUpdater {
     } // метод копирования строк со всеми параметрами
 
     private void adjustRowHeightPolirovka(Row row, Element element) {
+        logManager.log("Запущен метод adjustRowHeightPolirovka в классе ExcelUpdater");
         String[] points = element.getName().split("'");
         int i = (points.length / 3) * 30; // Сколько нужно
         float b = row.getHeightInPoints(); // Сколько стандарт
@@ -523,6 +535,7 @@ public class ExcelUpdater {
     } // метод выставления высоты строки для длинных имен элемента полировки.
 
     private static void adjustRowHeightForLongWords(Row row, String text) {
+        logManager.log("Запущен метод adjustRowHeightForLongWords в классе ExcelUpdater");
         String[] points = text.split("\n");
         double i = points.length + text.length();
         if (i < 50) {
@@ -536,6 +549,7 @@ public class ExcelUpdater {
     } // метод выставления высоты строки для длинных описаний доп.работ
 
     private String generateOrderNumber() {
+        logManager.log("Запущен метод generateOrderNumber в классе ExcelUpdater");
         // Шаг 1: Получить фамилию механика и извлечь первую букву
         String masterLastName = mechanics.getMaster();
         char firstLetter = Character.toUpperCase(masterLastName.charAt(0)); // Первая буква фамилии в верхнем регистре
@@ -552,7 +566,7 @@ public class ExcelUpdater {
             currentOrderNumber = orderNumber.getCurrentValue(); // Получаем число из памяти
             orderNumber.increment();                            // Обновляем в памяти число, добавив 1
         } catch (IOException ignored) {
-            log.error("Ошибка при получении текущего значения числа номера заказа: ", ignored);
+            logManager.log("Ошибка при получении текущего значения числа номера заказа: " + ignored);
             currentOrderNumber = 0;
         }
 

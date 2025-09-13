@@ -18,6 +18,7 @@ import java.util.stream.Stream;
 import java.util.List;
 
 import lombok.extern.slf4j.Slf4j;
+import ru.yandex.practicum.calcRemAuto.logToFail.LogToFailManager;
 import ru.yandex.practicum.calcRemAuto.model.NameDirectories;
 import ru.yandex.practicum.calcRemAuto.panelsAndButtons.buttons.Buttons;
 import ru.yandex.practicum.calcRemAuto.storage.OpenFolder;
@@ -26,6 +27,7 @@ import ru.yandex.practicum.calcRemAuto.telegram.TelegramFileSenderBot;
 
 @Slf4j
 public class SearchPanel {
+    static LogToFailManager logManager = new LogToFailManager();
     NameDirectories directories = new NameDirectories();
     private final String FILE_NAME = directories.getSMETA() + directories.getTxt();  //  Имя файла "смета.txt"
     private static final String[] OPTIONS = {"Открыть папку", "Пересчитать", "Удалить", "Назад", "Telegram", "Отмена"};  // Кнопки
@@ -35,6 +37,7 @@ public class SearchPanel {
     private String AUTOMOBILE_DIRECTORY; // Директория до расчетов "расчеты/госНомер"
 
     public void createSearchPanel(JPanel panel) {
+        logManager.log("Запущен метод createSearchPanel в классе SearchPanel");
         this.panel = panel;
         addKeyListener();
         addDocumentListener();
@@ -68,12 +71,14 @@ public class SearchPanel {
         panel.updateUI();
 
         but.getButtonBack().addActionListener(e -> {
+            logManager.log("Нажата кнопка Назад");
             FirstPanel firstPanel = new FirstPanel();
             panel.removeAll();
             firstPanel.createFirstPanel(panel);
         });
 
         but.getButtonSearch().addActionListener(e -> {
+            logManager.log("Нажата кнопка Поиск. текст в графе гос/номера: " + search.getText());
             try {
                 boolean allBordersAreGreen = Stream.of(search)
                         .map(component -> (LineBorder) component.getBorder())
@@ -84,9 +89,11 @@ public class SearchPanel {
                     searchAndDeleteFolder(search.getText());
                 } else {
                     showErrorDialog("Неверный формат гос/номера!");
+                    logManager.log("Открылось окно ошибки: Неверный формат гос/номера!");
                 }
             } catch (Exception o) {
                 showErrorDialog("Ошибка: " + o.getMessage());
+                logManager.log("Отловили ошибку:" + o.getMessage());
             }
         });
     } // Создание окна поиска
@@ -156,6 +163,7 @@ public class SearchPanel {
     } // Метод обновления цвета рамки
 
     private void searchAndDeleteFolder(String partialFolderName) {
+        logManager.log("Запущен метод searchAndDeleteFolder");
         File startDirectory = new File(directories.getNAME_START_DIRECTORY());
 
         if (startDirectory.exists() && startDirectory.isDirectory()) {
@@ -228,6 +236,7 @@ public class SearchPanel {
     }// Открытие диалогового поля выбора расчета из найденных по гос/номера
 
     private void selectAction(Object chosenFolder) {
+        logManager.log("Запущен метод selectAction.");
         String chosenFolderPath = (chosenFolder != null) ? chosenFolder.toString() : "";
 
         if (chosenFolder != null) {
@@ -245,16 +254,19 @@ public class SearchPanel {
 
                 int selection = showOptionDialog(fileContent.toString());
                 if (selection == 0) {
+                    logManager.log("Произведен выбор: Открыть папку.");
                     OpenFolder openFolder = new OpenFolder();
                     openFolder.open(AUTOMOBILE_DIRECTORY + "/" + chosenFolderPath);
                 }
 
                 if (selection == 1) {
+                    logManager.log("Произведен выбор: Пересчитать.");
                     WorkWithFile workWithFaile = new WorkWithFile();
                     File fileX = new File(AUTOMOBILE_DIRECTORY + "/" + chosenFolderPath);
                     workWithFaile.load(fileX, panel);
                 }
                 if (selection == 2) {
+                    logManager.log("Произведен выбор: Удалить.");
                     String filePath = file.getPath();
                     Path path = Paths.get(filePath);
                     Path parentPath = path.getParent();
@@ -268,34 +280,43 @@ public class SearchPanel {
 
                         if (success) {
                             showInformationDialog("Расчет от " + chosenFolder + " удален.");
+                            logManager.log("Расчет от " + chosenFolder + " удален.");
                         } else {
+                            logManager.log("Не удалось удалить расчет от " + chosenFolder + ".");
                             showErrorDialog("Не удалось удалить расчет от " + chosenFolder + ".");
                         }
                     }
                 }
                 if (selection == 3) {
+                    logManager.log("Произведен выбор: Назад.");
                     searchAndDeleteFolder(search.getText());
                 }
                 if (selection == 4) {
+                    logManager.log("Произведен выбор: Тelegram.");
                     int result = showConfirmDialog(chosenFolder, "Отправить смету в telegram?");
                     if (result == JOptionPane.YES_OPTION) {
+                        logManager.log("Произведен выбор: Да.");
                         sendSmeta(chosenFolderPath);
                     } else {
+                        logManager.log("Произведен выбор: Нет.");
                         searchAndDeleteFolder(search.getText());
                     }
                 }
             } catch (FileNotFoundException e) {
+                logManager.log("Отловлена ошибка FileNotFoundException" + e.getMessage());
                 showErrorDialog("Ошибка: Файл не найден.");
             }
         }
     }  // Обработка выбора метода "searchAndDeleteFolder"
 
     private void sendSmeta(String path) {
+        logManager.log("Запущен метод sendSmeta.");
         TelegramFileSenderBot telegramFileSenderBot = new TelegramFileSenderBot();
         telegramFileSenderBot.sendFile(AUTOMOBILE_DIRECTORY + "/" + path);
     } // Отправка в телеграм смет
 
     private static boolean deleteFileOrDirectory(File fileOrDirectory) {
+        logManager.log("Запущен метод deleteFileOrDirectory.");
         if (fileOrDirectory.exists()) {
             if (fileOrDirectory.isDirectory()) {
                 // Получаем список файлов и поддиректорий
@@ -325,6 +346,7 @@ public class SearchPanel {
     } // Метод удаления конкретной папки с расчетом
 
     private static void checkAndDeleteParentFolderIfEmpty(File parentFolder) {
+        logManager.log("Запущен метод checkAndDeleteParentFolderIfEmpty.");
         if (parentFolder.exists() && parentFolder.isDirectory()) {
             // Получаем список файлов и поддиректорий в родительской папке
             File[] contents = parentFolder.listFiles();
@@ -332,19 +354,23 @@ public class SearchPanel {
                 // Родительская папка пуста, удаляем её
                 if (parentFolder.delete()) {
                     log.info("Удалена и родительская папка: " + parentFolder);
+                    logManager.log("Удалена и родительская папка: " + parentFolder);
                 } else {
                     log.error("Не удалось удалить родительскую папку: " + parentFolder);
+                    logManager.log("Не удалось удалить родительскую папку: " + parentFolder);
                 }
             }
         }
     } // Метод для проверки и возможного удаления родительской папки
 
     private Object showInputDialog(String message, String[] folderNames, File defaultFolder) {
+        logManager.log("Запущен метод showInputDialog.Папка:" + folderNames.toString());
         return JOptionPane.showInputDialog(null, message, "Просмотр", JOptionPane.PLAIN_MESSAGE, null,
                 folderNames, defaultFolder);
     } // Показ диалогового окна выбора авто и даты расчета
 
     private int showOptionDialog(String fileContent) {
+        logManager.log("Запущен метод showOptionDialog.Показ диалогового окна со сметой");
         // Показываем JOptionPane с заданными размерами и позицией
         JOptionPane optionPane = new JOptionPane(
                 wrapTextInScrollPane(fileContent),
@@ -386,23 +412,28 @@ public class SearchPanel {
     } // Показ диалогового окна со сметой
 
     private int showConfirmDialog(Object chosenFolder, String text) {
+        logManager.log("Запущен метод showConfirmDialog.Выбор:" + text + chosenFolder);
         return JOptionPane.showConfirmDialog(null, text + chosenFolder + "?",
                 "Подтверждение удаления.", JOptionPane.YES_NO_OPTION);
     } // Показ диалогового
 
     private static void showMessageDialog(String message) {
+        logManager.log("Запущен метод showMessageDialog.Сообщение: " + message);
         JOptionPane.showMessageDialog(null, message);
     } // Показ диалогового
 
     private static void showInformationDialog(String message) {
+        logManager.log("Запущен метод showInformationDialog.Сообщение: " + message);
         JOptionPane.showMessageDialog(null, message, "Успех", JOptionPane.INFORMATION_MESSAGE);
     } // Показ диалогового
 
     private static void showErrorDialog(String message) {
+        logManager.log("Запущен метод showErrorDialog.Сообщение: " + message);
         JOptionPane.showMessageDialog(null, message, "Ошибка", JOptionPane.ERROR_MESSAGE);
     } // Показ диалогового
 
     private Component wrapTextInScrollPane(String text) {
+        logManager.log("Запущен метод wrapTextInScrollPane.Список: " + text);
         JTextArea textArea = new JTextArea(text);
         textArea.setLineWrap(true);      // Включаем перенос строк
         textArea.setWrapStyleWord(true); // Перенос по словам

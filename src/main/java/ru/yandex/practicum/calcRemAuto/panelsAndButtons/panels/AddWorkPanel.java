@@ -1,6 +1,7 @@
 package ru.yandex.practicum.calcRemAuto.panelsAndButtons.panels;
 
 import ru.yandex.practicum.calcRemAuto.grammar.CustomDocumentHandler;
+import ru.yandex.practicum.calcRemAuto.logToFail.LogToFailManager;
 import ru.yandex.practicum.calcRemAuto.model.Client;
 import ru.yandex.practicum.calcRemAuto.model.Element;
 import ru.yandex.practicum.calcRemAuto.model.Lkm;
@@ -47,12 +48,18 @@ public class AddWorkPanel {
     JTextArea dopWorksKuzovchikDescription = new JTextArea();  // Графа ввода описания доп работ Кузовщик
     JTextArea elementListTextViewing = new JTextArea(30, 19); // Окно отображения добавленных в List<Element> elementList элементов
     Double elementPaintSide = 0.0;  // Норматив окраски с одной или двух сторон
+    CorrectionPanel correctionPanelPaintSide = new CorrectionPanel(elementPaintSide, newValue -> {
+        elementPaintSide = newValue;
+    });
     double elementPaintAllForLkm = 0.0; //  Общее количество норматива для подсчета ЛКМ
     double elementArmatureSide = 0.0; // Норматив на арматурные работы
+    CorrectionPanel correctionPanelArmatureSide = new CorrectionPanel(elementArmatureSide, newValue -> {
+        elementArmatureSide = newValue;
+    });
     Double elementKuzDetReplaceSide = 0.0; // Норматив на кузовные работы (сварка, замена приварных деталей)
     String elementRemontString; // Норматив на ремонтные работы (шпаклевка)
     String notNormWorkNormativeString; // Норматив на ненорматвиные работы
-    String notNormWorkHoDoString;  // значение механика для правильного отображения его в не нармотивных работах
+    String notNormWorkHoDoString;  // значение механика для правильного отображения его в не нормативных работах
     Integer haveGlass = 0; // Значение есть ли на элементе остекление(вклеенное)
     // Далее идет гряда кнопок которые мы инициализируем при нажатии
     JButton sideButtonPushed; // Сторона
@@ -94,8 +101,10 @@ public class AddWorkPanel {
     Lkm lkm = new Lkm();
     LkmPrices lkmPrices = new LkmPrices();
     int lkmTotalPrice = 0;
+    static LogToFailManager logManager = new LogToFailManager();
 
     public void startPanel(JPanel panel, Client client, JFrame frame) {
+        logManager.log("Запущен метод startPanel в классе AddWorkPanel");
         this.frame = frame;
         // Получаем текущий экземпляр StartFrame
         StartFrame startFrame = StartFrame.getCurrentInstance();
@@ -166,39 +175,49 @@ public class AddWorkPanel {
         panelStartAdd.updateUI();
         // Назначаем действия кнопкам
         but.getButtonLeft().addActionListener(e -> {
+            logManager.log("Нажата кнопка Левая");
             sideButtonPushed = changeColorPushedButton(sideButtonPushed, but.getButtonLeft(), 1);
             leftRightSidePanel(clearAll(panelAdd));
         });
         but.getButtonRight().addActionListener(e -> {
+            logManager.log("Нажата кнопка Правая");
             sideButtonPushed = changeColorPushedButton(sideButtonPushed, but.getButtonRight(), 1);
             leftRightSidePanel(clearAll(panelAdd));
         });
         but.getButtonGlass().addActionListener(e -> {
+            logManager.log("Нажата кнопка Остекление");
             sideButtonPushed = changeColorPushedButton(sideButtonPushed, but.getButtonGlass(), 1);
             glassSidePanel(clearAll(panelAdd));
         });
         but.getButtonCenter().addActionListener(e -> {
+            logManager.log("Нажата кнопка Центр");
             sideButtonPushed = changeColorPushedButton(sideButtonPushed, but.getButtonCenter(), 1);
             centerSidePanel(clearAll(panelAdd));
         });
         but.getPolirovkaButton().addActionListener(e -> {
+            logManager.log("Нажата кнопка Полировка");
             sideButtonPushed = changeColorPushedButton(sideButtonPushed, but.getPolirovkaButton(), 4);
             polirovkaPanel(clearAll(panelAdd));
         });
         but.getNotNormWorkButton().addActionListener(e -> {
+            logManager.log("Нажата кнопка Ненормативные");
             sideButtonPushed = changeColorPushedButton(sideButtonPushed, but.getNotNormWorkButton(), 1);
             choiseNumberNotNormWorkPanel(clearAll(panelAdd));
         });
 
         but.getButtonBack().addActionListener(e -> {
+            logManager.log("Нажата кнопка Назад");
             panel.removeAll();
             AddClientPanel addClientPanel = new AddClientPanel();
             addClientPanel.clientAdd(panel, client);
         }); // Кнопка назад
         but.getButtonSave().addActionListener(e -> {
+            logManager.log("Нажата кнопка Сохранить");
             if (elementList.isEmpty()) {
+                logManager.log("Не добавлен ни один элемент Сохранить нечего!");
                 JOptionPane.showMessageDialog(null, "Не добавлен ни один элемент\nСохранить нечего!", "Ошибка", JOptionPane.INFORMATION_MESSAGE);
             } else {
+                logManager.log("Начинается создание saveDialog");
                 SaveDialog saveDialog = new SaveDialog(frame, client, elementList, lineBorderColorMap, lkm, lkmTotalPrice);
                 saveDialog.setVisible(true);
                 if (saveDialog.getAnswer()) {
@@ -211,6 +230,7 @@ public class AddWorkPanel {
     } // Начальная панель Стороны авто + назад и сохранить
 
     private void leftRightSidePanel(JPanel panelAdd) {
+        logManager.log("Запущен метод leftRightSidePanel.");
         JPanel panelXYZ = new JPanel();
         JPanel panelXYZ2 = new JPanel();
 
@@ -252,41 +272,49 @@ public class AddWorkPanel {
         panelAdd.updateUI();
 
         but.getButtonFrontWing().addActionListener(e -> {
+            logManager.log("Нажата кнопка Переднее крыло.");
             clearPushedButtonAfterElementAdd();
             elementButtonPushed = changeColorPushedButton(elementButtonPushed, but.getButtonFrontWing(), 2);
             WorksPanel(elementLeftRightSidePanel, clearCenter(panelAdd));
         });
         but.getButtonFrontDoor().addActionListener(e -> {
+            logManager.log("Нажата кнопка Передняя дверь.");
             clearPushedButtonAfterElementAdd();
             elementButtonPushed = changeColorPushedButton(elementButtonPushed, but.getButtonFrontDoor(), 2);
             WorksPanel(elementLeftRightSidePanel, clearCenter(panelAdd));
         });
         but.getButtonBackDoor().addActionListener(e -> {
+            logManager.log("Нажата кнопка Задняя дверь.");
             clearPushedButtonAfterElementAdd();
             elementButtonPushed = changeColorPushedButton(elementButtonPushed, but.getButtonBackDoor(), 2);
             WorksPanel(elementLeftRightSidePanel, clearCenter(panelAdd));
         });
         but.getButtonBackWing().addActionListener(e -> {
+            logManager.log("Нажата кнопка Заднее крыло.");
             clearPushedButtonAfterElementAdd();
             elementButtonPushed = changeColorPushedButton(elementButtonPushed, but.getButtonBackWing(), 2);
             WorksPanel(elementLeftRightSidePanel, clearCenter(panelAdd));
         });
         but.getButtonDoorStep().addActionListener(e -> {
+            logManager.log("Нажата кнопка Порог.");
             clearPushedButtonAfterElementAdd();
             elementButtonPushed = changeColorPushedButton(elementButtonPushed, but.getButtonDoorStep(), 2);
             WorksPanel(elementLeftRightSidePanel, clearCenter(panelAdd));
         });
         but.getButtonBalk().addActionListener(e -> {
+            logManager.log("Нажата кнопка Брус.");
             clearPushedButtonAfterElementAdd();
             elementButtonPushed = changeColorPushedButton(elementButtonPushed, but.getButtonBalk(), 2);
             WorksPanel(elementLeftRightSidePanel, clearCenter(panelAdd));
         });
         but.getButtonFrontDoorway().addActionListener(e -> {
+            logManager.log("Нажата кнопка Передний проем двери.");
             clearPushedButtonAfterElementAdd();
             elementButtonPushed = changeColorPushedButton(elementButtonPushed, but.getButtonFrontDoorway(), 2);
             WorksPanel(elementLeftRightSidePanel, clearCenter(panelAdd));
         });
         but.getButtonBackDoorway().addActionListener(e -> {
+            logManager.log("Нажата кнопка Задний проем двери.");
             clearPushedButtonAfterElementAdd();
             elementButtonPushed = changeColorPushedButton(elementButtonPushed, but.getButtonBackDoorway(), 2);
             WorksPanel(elementLeftRightSidePanel, clearCenter(panelAdd));
@@ -294,6 +322,7 @@ public class AddWorkPanel {
     } // Панель с элементами Левая\Правая часть авто
 
     private void centerSidePanel(JPanel panelAdd) {
+        logManager.log("Запущен метод centerSidePanel.");
         JPanel panelXYZ = new JPanel(new BorderLayout());
         JPanel panelXYZ2 = new JPanel(new BorderLayout());
 
@@ -330,36 +359,43 @@ public class AddWorkPanel {
         panelAdd.updateUI();
 
         but.getFrontBumperButton().addActionListener(e -> {
+            logManager.log("Нажата кнопка Передний бампер.");
             clearPushedButtonAfterElementAdd();
             elementButtonPushed = changeColorPushedButton(elementButtonPushed, but.getFrontBumperButton(), 2);
             WorksPanel(elementCenterSide, clearCenter(panelAdd));
         });
         but.getBonnetButton().addActionListener(e -> {
+            logManager.log("Нажата кнопка Капот.");
             clearPushedButtonAfterElementAdd();
             elementButtonPushed = changeColorPushedButton(elementButtonPushed, but.getBonnetButton(), 2);
             WorksPanel(elementCenterSide, clearCenter(panelAdd));
         });
         but.getRoofButton().addActionListener(e -> {
+            logManager.log("Нажата кнопка Крыша.");
             clearPushedButtonAfterElementAdd();
             elementButtonPushed = changeColorPushedButton(elementButtonPushed, but.getRoofButton(), 2);
             WorksPanel(elementCenterSide, clearCenter(panelAdd));
         });
         but.getTrunkLidButton().addActionListener(e -> {
+            logManager.log("Нажата кнопка Крышка багажника.");
             clearPushedButtonAfterElementAdd();
             elementButtonPushed = changeColorPushedButton(elementButtonPushed, but.getTrunkLidButton(), 2);
             WorksPanel(elementCenterSide, clearCenter(panelAdd));
         });
         but.getRearBumperButton().addActionListener(e -> {
+            logManager.log("Нажата кнопка Задний бампер.");
             clearPushedButtonAfterElementAdd();
             elementButtonPushed = changeColorPushedButton(elementButtonPushed, but.getRearBumperButton(), 2);
             WorksPanel(elementCenterSide, clearCenter(panelAdd));
         });
         but.getEngineCompartmentButton().addActionListener(e -> {
+            logManager.log("Нажата кнопка Моторный отсек.");
             clearPushedButtonAfterElementAdd();
             elementButtonPushed = changeColorPushedButton(elementButtonPushed, but.getEngineCompartmentButton(), 2);
             WorksPanel(elementCenterSide, clearCenter(panelAdd));
         });
         but.getBackPanelButton().addActionListener(e -> {
+            logManager.log("Нажата кнопка Задняя панель.");
             clearPushedButtonAfterElementAdd();
             elementButtonPushed = changeColorPushedButton(elementButtonPushed, but.getBackPanelButton(), 2);
             WorksPanel(elementCenterSide, clearCenter(panelAdd));
@@ -367,6 +403,7 @@ public class AddWorkPanel {
     } // Панель с элементами Центральная часть авто
 
     private void glassSidePanel(JPanel panelAdd) {
+        logManager.log("Запущен метод glassSidePanel.");
         JPanel panelXY = new JPanel();
         JPanel panelXY2 = new JPanel();
 
@@ -390,6 +427,7 @@ public class AddWorkPanel {
         panelAdd.updateUI();
 
         but.getButtonWindshield().addActionListener(e -> {
+            logManager.log("Нажата кнопка Лобовое.");
             if (sideButtonPushed.getText().equals("Остекление")) {
                 if (elementButtonPushed == null || elementButtonPushed.getText().equals(but.getButtonRearWindow().getText())) {
                     elementButtonPushed = changeColorPushedButton(elementButtonPushed, but.getButtonWindshield(), 2);
@@ -402,6 +440,7 @@ public class AddWorkPanel {
             }
         }); // Лобовое стекло
         but.getButtonRearWindow().addActionListener(e -> {
+            logManager.log("Нажата кнопка Заднее.");
             if (sideButtonPushed.getText().equals("Остекление")) {
                 if (elementButtonPushed == null || elementButtonPushed.getText().equals(but.getButtonWindshield().getText())) {
                     elementButtonPushed = changeColorPushedButton(elementButtonPushed, but.getButtonRearWindow(), 2);
@@ -416,18 +455,19 @@ public class AddWorkPanel {
     } // Панель с остеклением
 
     private void polirovkaPanel(JPanel panelAdd) {
+        logManager.log("Запущен метод polirovkaPanel.");
         polirovkaPanel = setPanelBackground(polirovkaPanel, imagePath);
-        JPanel test = new JPanel(new GridBagLayout());
-        test.setPreferredSize(new Dimension(300, 200));
+        JPanel poli = new JPanel(new GridBagLayout());
+        poli.setPreferredSize(new Dimension(300, 200));
         JPanel xyzPanel = new JPanel(new GridBagLayout());
         xyzPanel.setOpaque(false);
         xyzPanel.setPreferredSize(new Dimension(300, 200));
         polirovkaPanel.add(xyzPanel);
 
-        test.add(polirovkaPanel, new GridBagConstraints(0, 0, 1, 1, 1, 1,
+        poli.add(polirovkaPanel, new GridBagConstraints(0, 0, 1, 1, 1, 1,
                 GridBagConstraints.NORTH, GridBagConstraints.NONE,
                 new Insets(2, 2, 1, 2), 300, 200));
-        panelAdd.add(test, BorderLayout.WEST);
+        panelAdd.add(poli, BorderLayout.WEST);
 
         // Позиции чекбоксов
         GridBagConstraints[] constraints = {
@@ -484,6 +524,7 @@ public class AddWorkPanel {
     } // Панель полировки
 
     public void WorksPanel(JPanel elementLeftRightSidePanel, JPanel panelAdd) {
+        logManager.log("Запущен метод WorksPanel.");
         clearPushedButtonAfterElementAdd();
         // Удаляем лишние строчки из работ так как не везде есть молдинги, зеркала, ручки и стекла.
         if (elementLeftRightSidePanel.getComponents().length > 9) {
@@ -516,6 +557,13 @@ public class AddWorkPanel {
         elementLeftRightSidePanel.add(takeColorOfButtons(removeActionListener(but.getDisassembleButton()), 3), new GridBagConstraints(2, 1, 1, 1, 1, 1,
                 GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
                 new Insets(2, 2, 2, 2), 0, 0));
+        // Добавляем панель с кнопками увеличения уменьшения норматива работ. Для арматурщика и маляра
+        elementLeftRightSidePanel.add(correctionPanelArmatureSide, new GridBagConstraints(3, 1, 1, 1, 1, 1,
+                GridBagConstraints.CENTER, GridBagConstraints.NONE,
+                new Insets(2, 0, 2, 2), 0, 0));
+        elementLeftRightSidePanel.add(correctionPanelPaintSide, new GridBagConstraints(3, 2, 1, 1, 1, 1,
+                GridBagConstraints.CENTER, GridBagConstraints.NONE,
+                new Insets(2, 0, 2, 2), 0, 0));
 
         elementLeftRightSidePanel.add(takeColorOfButtons(removeActionListener(but.getPaint1xButton()), 3), new GridBagConstraints(1, 2, 1, 1, 1, 1,
                 GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
@@ -625,6 +673,7 @@ public class AddWorkPanel {
         remont.setText(elementRemontString);
 
         but.getReplaceButton().addActionListener(e -> { // замена
+            logManager.log("Нажата кнопка замена.");
             // Обозначаем нажатую кнопку и выставляем цвет рамки
             zamenaOrRsButtonPushed = but.getReplaceButton();
             but.getDisassembleButton().setBorder(BorderFactory.createLineBorder(Color.lightGray, 1));
@@ -643,30 +692,39 @@ public class AddWorkPanel {
                 but.getPaint1xButton().doClick();
                 elementArmatureSide = 3.4;
                 elementKuzDetReplaceSide = 8.0;
+                logManager.log("Установлено значение для elementKuzDetReplaceSide = 8");
             } else if (elementButtonPushed.getText().equals("Крыша")) {
                 // При замене приварной крыше идет окраска с 1 стороны +30% от кузовщика и надбавка к арматуре.
                 but.getPaint1xButton().doClick();
                 elementArmatureSide = 4;
                 elementKuzDetReplaceSide = 12.0;
+                logManager.log("Установлено значение для elementKuzDetReplaceSide = 12");
             } else {
                 // Во всех остальных случаях окраска с 1 стороны и обычный норматив арматурщику.
                 but.getPaint1xButton().doClick();
                 elementArmatureSide = 2.0;
             }
+            correctionPanelArmatureSide.updateValue(elementArmatureSide);
+            logManager.log("Установлено значение для elementArmatureSide = " + elementArmatureSide);
             addAndRemovePanel(clearCenter(panelAdd));
             panelAdd.updateUI();
         }); // замена
         but.getDisassembleButton().addActionListener(e -> { // Р\С
+            logManager.log("Нажата кнопка Р\\С.");
             zamenaOrRsButtonPushed = but.getDisassembleButton();
             but.getReplaceButton().setBorder(BorderFactory.createLineBorder(Color.lightGray, 1));
             but.getDisassembleButton().setBorder(BorderFactory.createLineBorder(Color.red, 1));
             elementKuzDetReplaceSide = 0.0;
+            logManager.log("Установлено значение для elementKuzDetReplaceSide = 0");
             but.getPaint1xButton().doClick();
             elementArmatureSide = 2.0;
+            correctionPanelArmatureSide.updateValue(elementArmatureSide);
+            logManager.log("Установлено значение для elementArmatureSide = " + elementArmatureSide);
             addAndRemovePanel(clearCenter(panelAdd));
             panelAdd.updateUI();
         }); // р\с
         but.getPaint1xButton().addActionListener(e -> { // окраска 1х
+            logManager.log("Нажата кнопка окраска 1х.");
             // Обозначаем нажатую кнопку и выставляем цвет рамки
             paint1xOr2xButtonPushed = but.getPaint1xButton();
             but.getPaint2xButton().setBorder(BorderFactory.createLineBorder(Color.lightGray, 1));
@@ -680,40 +738,51 @@ public class AddWorkPanel {
                 if (elementButtonPushed.getText().equals("Брус") || elementButtonPushed.getText().equals("Порог")) {
                     // При замене этих элементах норматив окраски 2н\ч + 30% от кузовщика
                     if (zamenaOrRsButtonPushed.equals(but.getReplaceButton())) {
+                        logManager.log("Установлено значение для elementPaintSide = 2 + 2.4");
                         elementPaintSide = 2 + 2.4;
                     } else {
                         // При окраске без замены
+                        logManager.log("Установлено значение для elementPaintSide = 2");
                         elementPaintSide = 2.0;
                     }
                 } else {
                     // А при замене крыла
                     if (zamenaOrRsButtonPushed.equals(but.getReplaceButton())) {
+                        logManager.log("Установлено значение для elementPaintSide = 3 + 2.4");
                         elementPaintSide = 3 + 2.4;
                     } else {
                         // При окраске без замены крыла
+                        logManager.log("Установлено значение для elementPaintSide = 3");
                         elementPaintSide = 3.0;
                     }
                 }
             } else if (elementButtonPushed.getText().equals("Крыша")) {
                 if (zamenaOrRsButtonPushed.equals(but.getReplaceButton())) {
                     // При замене крыши норматив окраски 6н\ч + 1н\ч от кузовщика за герметизацию швов
+                    logManager.log("Установлено значение для elementPaintSide = 6.0 + 1");
                     elementPaintSide = 6.0 + 1;
                 } else {
                     // При окраске без замены
+                    logManager.log("Установлено значение для elementPaintSide = 6.0");
                     elementPaintSide = 6.0;
                 }
             } else if (elementButtonPushed.getText().equals("Капот")
                     || elementButtonPushed.getText().equals("Крышка баг.")) {
                 // если окраска с 1х капота или крышки багажника, то норматив 4.5.
+                logManager.log("Установлено значение для elementPaintSide = 4.5");
                 elementPaintSide = 4.5;
             } else {
                 // Во всех остальных элементах окраска просто 3н\ч
+                logManager.log("Установлено значение для elementPaintSide = 3");
                 elementPaintSide = 3.0;
             }
+            correctionPanelPaintSide.updateValue(elementPaintSide);
+            logManager.log("Установлено значение для elementPaintSide = " + elementPaintSide);
             addAndRemovePanel(clearCenter(panelAdd));
             panelAdd.updateUI();
         }); // окраска 1х
         but.getPaint2xButton().addActionListener(e -> { // окраска 2х
+            logManager.log("Нажата кнопка 2х.");
             // Обозначаем нажатую кнопку и выставляем цвет рамки
             paint1xOr2xButtonPushed = but.getPaint2xButton();
             but.getPaint1xButton().setBorder(BorderFactory.createLineBorder(Color.lightGray, 1));
@@ -724,23 +793,29 @@ public class AddWorkPanel {
             }
             if (elementButtonPushed.getText().equals("Крыша")) {
                 // если окраска с 2х крыши (хотя это и крайне невозможно), то норматив 6х1.5= 9.
+                logManager.log("Установлено значение для elementPaintSide = 9.0");
                 elementPaintSide = 9.0;
             } else if (elementButtonPushed.getText().equals("Брус")
                     || elementButtonPushed.getText().equals("Порог")) {
                 // если окраска с 2х бруса или порога (хотя это и крайне невозможно), то норматив 2х1.5= 3.
+                logManager.log("Установлено значение для elementPaintSide = 3");
                 elementPaintSide = 3.0;
             } else if (elementButtonPushed.getText().equals("Капот")
                     || elementButtonPushed.getText().equals("Крышка баг.")) {
                 // если окраска с 2х капота или крышки багажника, то норматив 6.
+                logManager.log("Установлено значение для elementPaintSide = 6");
                 elementPaintSide = 6.0;
             } else {
                 // При всех остальных элементах норматив 4.5
+                logManager.log("Установлено значение для elementPaintSide = 4.5");
                 elementPaintSide = 4.5;
             }
+            correctionPanelPaintSide.updateValue(elementPaintSide);
             addAndRemovePanel(clearCenter(panelAdd));
             panelAdd.updateUI();
         }); // окраска 2х
         but.getRepairButton().addActionListener(e -> { // ремонт
+            logManager.log("Нажата кнопка ремонт.");
             // проверяем добелена ли окраска и разборка.
             if (remontButtonPushed == null) {
                 if (zamenaOrRsButtonPushed != null && paint1xOr2xButtonPushed != null) {
@@ -748,12 +823,14 @@ public class AddWorkPanel {
                         // добавляем перед последним символом точку переведя число в двоичное.
                         remontButtonPushed = but.getRepairButton();
                         elementRemontString = remont.getText();
+                        logManager.log("Значение ремонт = " + elementRemontString);
                         remontButtonPushed.setBorder(BorderFactory.createLineBorder(Color.red, 1));
                         addAndRemovePanel(clearCenter(panelAdd));
                         panelAdd.updateUI();
                     }
                 }
             } else {
+                logManager.log("Нажата кнопка ремонт повторно.");
                 // Если ремонт уже добавлен, а мы хотим ее убрать необходимо повторно нажать на кнопку
                 LineBorder color = (LineBorder) remontButtonPushed.getBorder();
                 // Если кнопка уже была нажата и элемент был добавлен (то есть имеет цвет рамки зеленый) мы убираем нормативы
@@ -776,13 +853,16 @@ public class AddWorkPanel {
             }
         });  // ремонт
         but.getRuchkaButton().addActionListener(e -> {       // ручка
+            logManager.log("Нажата кнопка ручка.");
             // Если окраска только ручки выставляем 0.6 арматура
             if (ruchkaButtonPushed == null) {
                 if (paint1xOr2xButtonPushed == null) {
                     if (elementArmatureSide > 0.1) {
                         elementArmatureSide = elementArmatureSide + 0.6;
+                        logManager.log("Установлено значение для elementArmatureSide = elementArmatureSide + 0.6");
                     } else {
                         elementArmatureSide = 0.6;
+                        logManager.log("Установлено значение для elementArmatureSide = 0.6");
                     }
                 }
                 addAndRemovePanel(clearCenter(panelAdd));
@@ -790,6 +870,7 @@ public class AddWorkPanel {
                 ruchkaButtonPushed = but.getRuchkaButton();
                 but.getRuchkaButton().setBorder(BorderFactory.createLineBorder(Color.red, 1));
             } else {
+                logManager.log("Нажата кнопка ручка повторно.Норматив стерт");
                 // Если ручка уже добавлена, а мы хотим ее убрать необходимо повторно нажать на кнопку
                 LineBorder color = (LineBorder) ruchkaButtonPushed.getBorder();
                 // Если кнопка уже была нажата и элемент был добавлен (то есть имеет цвет рамки зеленый) мы убираем нормативы
@@ -824,13 +905,16 @@ public class AddWorkPanel {
             }
         });  // ручка
         but.getMoldingButton().addActionListener(e -> {
+            logManager.log("Нажата кнопка молдинг.");
             // Если окраска только молдинга выставляем 0.6 арматура
             if (moldingButtonPushed == null) {
                 if (paint1xOr2xButtonPushed == null) {
                     if (elementArmatureSide > 0.1) {
                         elementArmatureSide = elementArmatureSide + 0.6;
+                        logManager.log("Установлено значение для elementArmatureSide = elementArmatureSide + 0.6");
                     } else {
                         elementArmatureSide = 0.6;
+                        logManager.log("Установлено значение для elementArmatureSide =  0.6");
                     }
                 }
                 addAndRemovePanel(clearCenter(panelAdd));
@@ -838,6 +922,7 @@ public class AddWorkPanel {
                 moldingButtonPushed = but.getMoldingButton();
                 but.getMoldingButton().setBorder(BorderFactory.createLineBorder(Color.red, 1));
             } else {
+                logManager.log("Нажата кнопка молдинг повторно.Норматив стерт");
                 // Если молдинг уже добавлен, а мы хотим его убрать необходимо повторно нажать на кнопку
                 LineBorder color = (LineBorder) moldingButtonPushed.getBorder();
                 // Если кнопка уже была нажата и элемент был добавлен (то есть имеет цвет рамки зеленый) мы убираем нормативы
@@ -872,13 +957,16 @@ public class AddWorkPanel {
             }
         }); // молдинг
         but.getZerkaloButton().addActionListener(e -> {
+            logManager.log("Нажата кнопка зеркало.");
             // Если окраска только зеркала выставляем 0.6 арматура
             if (zercaloButtonPushed == null) {
                 if (paint1xOr2xButtonPushed == null) {
                     if (elementArmatureSide > 0.1) {
                         elementArmatureSide = elementArmatureSide + 0.6;
+                        logManager.log("Установлено значение для elementArmatureSide = elementArmatureSide + 0.6");
                     } else {
                         elementArmatureSide = 0.6;
+                        logManager.log("Установлено значение для elementArmatureSide = 0.6");
                     }
                 }
                 addAndRemovePanel(clearCenter(panelAdd));
@@ -903,6 +991,7 @@ public class AddWorkPanel {
                     addAndRemovePanel(clearCenter(panelAdd));
                     panelAdd.updateUI();
                 } else {
+                    logManager.log("Нажата кнопка зеркало повторно.Норматив стерт");
                     // Если кнопка была нажата, но элемент не был добавлен (то есть имеет цвет рамки красный) мы убираем нормативы
                     if (paint1xOr2xButtonPushed == null) {
                         if (elementArmatureSide >= 0.6) {
@@ -920,12 +1009,14 @@ public class AddWorkPanel {
             }
         }); // зеркало
         but.getButtonWindshield().addActionListener(e -> {
+            logManager.log("Нажата кнопка Остекление Лобовое.");
             if (!sideButtonPushed.getText().equals("Остекление")) {
                 if (glassButtonPushed == null || (haveGlass == 1 && !glassButtonPushed.getText().equals(but.getButtonWindshield().getText()))) {
                     haveGlass++;
                     glassButtonPushed = but.getButtonWindshield();
                     but.getButtonWindshield().setBorder(BorderFactory.createLineBorder(Color.red, 1));
                 } else {
+                    logManager.log("Нажата кнопка Остекление Лобовое повторно.Норматив стерт");
                     haveGlass--;
                     if (haveGlass > 0) {
                         glassButtonPushed = but.getButtonRearWindow();
@@ -937,12 +1028,14 @@ public class AddWorkPanel {
             }
         }); // лобовое стекло
         but.getButtonRearWindow().addActionListener(e -> {
+            logManager.log("Нажата кнопка Остекление Заднее.");
             if (!sideButtonPushed.getText().equals("Остекление")) {
                 if (glassButtonPushed == null || (haveGlass == 1 && !glassButtonPushed.getText().equals(but.getButtonRearWindow().getText()))) {
                     haveGlass++;
                     glassButtonPushed = but.getButtonRearWindow();
                     but.getButtonRearWindow().setBorder(BorderFactory.createLineBorder(Color.red, 1));
                 } else {
+                    logManager.log("Нажата кнопка Остекление Заднее повторно.Норматив стерт");
                     haveGlass--;
                     if (haveGlass > 0) {
                         glassButtonPushed = but.getButtonWindshield();
@@ -954,6 +1047,7 @@ public class AddWorkPanel {
             }
         }); // заднее стекло
         but.getExpanderButton().addActionListener(e -> {
+            logManager.log("Нажата кнопка расширителя.");
             // Если окраска только расширителя выставляем 0.6 арматура
             if (expanderButtonPushed == null) {
                 if (paint1xOr2xButtonPushed == null) {
@@ -968,6 +1062,7 @@ public class AddWorkPanel {
                 expanderButtonPushed = but.getExpanderButton();
                 but.getExpanderButton().setBorder(BorderFactory.createLineBorder(Color.red, 1));
             } else {
+                logManager.log("Нажата кнопка расширителя повторно.Норматив стерт");
                 // Если расширитель уже добавлен, а мы хотим его убрать необходимо повторно нажать на кнопку
                 LineBorder color = (LineBorder) expanderButtonPushed.getBorder();
                 // Если кнопка уже была нажата и элемент был добавлен (то есть имеет цвет рамки зеленый) мы убираем нормативы
@@ -1002,6 +1097,7 @@ public class AddWorkPanel {
             }
         });  // Расширитель
         but.getOverlayButton().addActionListener(e -> {
+            logManager.log("Нажата кнопка накладка.");
             // Если окраска только накладки порога выставляем 0.6 арматура
             if (overlayButtonPushed == null) {
                 if (paint1xOr2xButtonPushed == null) {
@@ -1016,6 +1112,7 @@ public class AddWorkPanel {
                 overlayButtonPushed = but.getOverlayButton();
                 but.getOverlayButton().setBorder(BorderFactory.createLineBorder(Color.red, 1));
             } else {
+                logManager.log("Нажата кнопка накладка повторно.Норматив стерт");
                 // Если накладка порога уже добавлена, а мы хотим её убрать необходимо повторно нажать на кнопку
                 LineBorder color = (LineBorder) overlayButtonPushed.getBorder();
                 // Если кнопка уже была нажата и элемент был добавлен (то есть имеет цвет рамки зеленый) мы убираем нормативы
@@ -1056,7 +1153,7 @@ public class AddWorkPanel {
                     dopWorksArmaturchikButtonPushed.setBorder(BorderFactory.createLineBorder(Color.red, 1));
                     addAndRemovePanel(clearCenter(panelAdd));
                     panelAdd.updateUI();
-                    log.info("Нажата кнопка доп работы Арматурщик.\nДо этого не была прожата!");
+                    logManager.log("Нажата кнопка доп работы Арматурщик. До этого не была прожата!");
                 }
             } else {
                 // Если доп. работы уже добавлены, а мы хотим их убрать необходимо повторно нажать на кнопку
@@ -1072,7 +1169,7 @@ public class AddWorkPanel {
                     but.getDopWorksArmaturchikDescriptionButton().setBorder(BorderFactory.createLineBorder(Color.lightGray, 1));
                     dopWorksArmaturchikDescriptionPushed = null;
                     panelAdd.updateUI();
-                    log.info("Нажата кнопка доп работы Арматурщик.\nДо этого была прожата и элемент был добавлен!\nНормативы, описание стерты и прожатие стерто!");
+                    logManager.log("Нажата кнопка доп работы Арматурщик.\nДо этого была прожата и элемент был добавлен!\nНормативы, описание стерты и прожатие стерто!");
                 } else {
                     // Если кнопка была нажата, но элемент не был добавлен (то есть имеет цвет рамки красный) мы убираем нормативы
                     dopWorksArmaturchik.setText("");
@@ -1085,7 +1182,7 @@ public class AddWorkPanel {
                     dopWorksArmaturchikDescriptionPushed = null;
                     addAndRemovePanel(clearCenter(panelAdd));
                     panelAdd.updateUI();
-                    log.info("Нажата кнопка доп работы Арматурщик.\nДо этого была прожата но элемент не был добавлен!\nНормативы, описание стерты и прожатие стерто!");
+                    logManager.log("Нажата кнопка доп работы Арматурщик.\nДо этого была прожата но элемент не был добавлен!\nНормативы, описание стерты и прожатие стерто!");
                 }
             }
         }); // Доп работы арматурщик
@@ -1096,7 +1193,7 @@ public class AddWorkPanel {
                     dopWorksPainterButtonPushed.setBorder(BorderFactory.createLineBorder(Color.red, 1));
                     addAndRemovePanel(clearCenter(panelAdd));
                     panelAdd.updateUI();
-                    log.info("Нажата кнопка доп работы Маляр.\nДо этого не была прожата!");
+                    logManager.log("Нажата кнопка доп работы Маляр.\nДо этого не была прожата!");
                 }
             } else {
                 // Если доп. работы уже добавлены, а мы хотим их убрать необходимо повторно нажать на кнопку
@@ -1112,7 +1209,7 @@ public class AddWorkPanel {
                     but.getDopWorksPainterDescriptionButton().setBorder(BorderFactory.createLineBorder(Color.lightGray, 1));
                     dopWorksPainterDescriptionPushed = null;
                     panelAdd.updateUI();
-                    log.info("Нажата кнопка доп работы Маляр.\nДо этого была прожата и элемент был добавлен!\nНормативы, описание стерты и прожатие стерто!");
+                    logManager.log("Нажата кнопка доп работы Маляр.\nДо этого была прожата и элемент был добавлен!\nНормативы, описание стерты и прожатие стерто!");
                 } else {
                     // Если кнопка была нажата, но элемент не был добавлен (то есть имеет цвет рамки красный) мы убираем нормативы
                     dopWorksPainter.setText("");
@@ -1125,7 +1222,7 @@ public class AddWorkPanel {
                     dopWorksPainterDescriptionPushed = null;
                     addAndRemovePanel(clearCenter(panelAdd));
                     panelAdd.updateUI();
-                    log.info("Нажата кнопка доп работы Маляр.\nДо этого была прожата но элемент не был добавлен!\nНормативы, описание стерты и прожатие стерто!");
+                    logManager.log("Нажата кнопка доп работы Маляр.\nДо этого была прожата но элемент не был добавлен!\nНормативы, описание стерты и прожатие стерто!");
                 }
             }
         });    // Доп работы маляр
@@ -1136,7 +1233,7 @@ public class AddWorkPanel {
                     dopWorksKuzovchikButtonPushed.setBorder(BorderFactory.createLineBorder(Color.red, 1));
                     addAndRemovePanel(clearCenter(panelAdd));
                     panelAdd.updateUI();
-                    log.info("Нажата кнопка доп работы Кузовщик.\nДо этого не была прожата!");
+                    logManager.log("Нажата кнопка доп работы Кузовщик.\nДо этого не была прожата!");
                 }
             } else {
                 // Если доп. работы уже добавлены, а мы хотим их убрать необходимо повторно нажать на кнопку
@@ -1152,7 +1249,7 @@ public class AddWorkPanel {
                     but.getDopWorksKuzovchikDescriptionButton().setBorder(BorderFactory.createLineBorder(Color.lightGray, 1));
                     dopWorksKuzovchikDescriptionPushed = null;
                     panelAdd.updateUI();
-                    log.info("Нажата кнопка доп работы Кузовщик.\nДо этого была прожата и элемент был добавлен!\nНормативы, описание стерты и прожатие стерто!");
+                    logManager.log("Нажата кнопка доп работы Кузовщик.\nДо этого была прожата и элемент был добавлен!\nНормативы, описание стерты и прожатие стерто!");
                 } else {
                     // Если кнопка была нажата, но элемент не был добавлен (то есть имеет цвет рамки красный) мы убираем нормативы
                     dopWorksKuzovchik.setText("");
@@ -1165,14 +1262,14 @@ public class AddWorkPanel {
                     dopWorksKuzovchikDescriptionPushed = null;
                     addAndRemovePanel(clearCenter(panelAdd));
                     panelAdd.updateUI();
-                    log.info("Нажата кнопка доп работы Кузовщик.\nДо этого была прожата но элемент не был добавлен!\nНормативы, описание стерты и прожатие стерто!");
+                    logManager.log("Нажата кнопка доп работы Кузовщик.\nДо этого была прожата но элемент не был добавлен!\nНормативы, описание стерты и прожатие стерто!");
                 }
             }
         }); // Доп работы кузовщик
 
         but.getDopWorksArmaturchikDescriptionButton().addActionListener(e -> {
             if (dopWorksArmaturchikButtonPushed != null) {
-                log.info("Нажата кнопка описания доп.работ Арматурщик");
+                logManager.log("Нажата кнопка описания доп.работ Арматурщик");
                 // Запуск задачи проверки грамматики в отдельном потоке
                 executor.submit(() -> {
                     // Проверка грамматики
@@ -1184,7 +1281,7 @@ public class AddWorkPanel {
                 JDialog dialog = new JDialog(frame, "Описание доп.работ", true); // true - модальное окно
                 dialog.setSize(300, 300);
                 dialog.setLayout(new BorderLayout());
-                log.info("Создана и открыто окно ввода текста описания доп.работ Арматурщик");
+                logManager.log("Создана и открыто окно ввода текста описания доп.работ Арматурщик");
                 JPanel textPanel = new JPanel();
                 textPanel.setLayout(new BorderLayout());
 
@@ -1193,11 +1290,11 @@ public class AddWorkPanel {
                 // Если описание есть в памяти, то его и прописываем
                 if (inputDopWorksArmaturchikDescription != null) {
                     dopWorksArmaturchikDescription.setText(inputDopWorksArmaturchikDescription);
-                    log.info("Произведена проверка текста описания доп.работ Арматурщик из памяти: он уже вводился и был сохранен в Map работ.");
+                    logManager.log("Произведена проверка текста описания доп.работ Арматурщик из памяти: он уже вводился и был сохранен в Map работ.");
                 } else {
                     // Если же не было отправляем пустой текст
                     dopWorksArmaturchikDescription.setText("");
-                    log.info("Произведена проверка текста описания доп.работ Арматурщик из памяти: в памяти нет ранее введенного текст, отправлен пустой символ.");
+                    logManager.log("Произведена проверка текста описания доп.работ Арматурщик из памяти: в памяти нет ранее введенного текст, отправлен пустой символ.");
                 }
 
                 textPanel.add(dopWorksArmaturchikDescription, BorderLayout.CENTER);
@@ -1213,7 +1310,7 @@ public class AddWorkPanel {
                     dopWorksArmaturchikDescriptionPushed = but.getDopWorksArmaturchikDescriptionButton();
                     but.getDopWorksArmaturchikDescriptionButton().setBorder(BorderFactory.createLineBorder(Color.red, 1));
                     inputDopWorksArmaturchikDescription = dopWorksArmaturchikDescription.getText();
-                    log.info("Описание доп.работ Арматурщик выбрана кнопка ОК. Текст: " + dopWorksArmaturchikDescription.getText());
+                    logManager.log("Описание доп.работ Арматурщик выбрана кнопка ОК. Текст: " + dopWorksArmaturchikDescription.getText());
                     dialog.dispose(); // Закрыть диалоговое окно
                 }); // Кнопка "OK"
 
@@ -1223,7 +1320,7 @@ public class AddWorkPanel {
                     inputDopWorksArmaturchikDescription = "";
                     but.getDopWorksArmaturchikDescriptionButton().setBorder(BorderFactory.createLineBorder(Color.lightGray, 1));
                     dopWorksArmaturchikDescriptionPushed = null;
-                    log.info("Описание доп.работ Арматурщик выбрана кнопка Отменена");
+                    logManager.log("Описание доп.работ Арматурщик выбрана кнопка Отменена");
                     dialog.dispose(); // Закрыть диалоговое окно
                 }); // Кнопка "Отмена"
                 buttonPanel.add(okButton);
@@ -1236,7 +1333,7 @@ public class AddWorkPanel {
         }); // Кнопка ввода описания доп.работ Арматурщик
         but.getDopWorksPainterDescriptionButton().addActionListener(e -> {
             if (dopWorksPainterButtonPushed != null) {
-                log.info("Нажата кнопка описания доп.работ Маляр");
+                logManager.log("Нажата кнопка описания доп.работ Маляр");
                 // Запуск задачи проверки грамматики в отдельном потоке
                 executor.submit(() -> {
                     // Проверка грамматики
@@ -1251,18 +1348,18 @@ public class AddWorkPanel {
 
                 JPanel textPanel = new JPanel();
                 textPanel.setLayout(new BorderLayout());
-                log.info("Создана и открыто окно ввода текста описания доп.работ Маляр");
+                logManager.log("Создана и открыто окно ввода текста описания доп.работ Маляр");
 
                 dopWorksPainterDescription.setWrapStyleWord(true); // Включить перенос по словам
                 dopWorksPainterDescription.setLineWrap(true); // Перенос строк
                 // Если описание есть в памяти, то его и прописываем
                 if (inputDopWorksPainterDescription != null) {
                     dopWorksPainterDescription.setText(inputDopWorksPainterDescription);
-                    log.info("Произведена проверка текста описания доп.работ Маляр из памяти: он уже вводился и был сохранен в Map работ.");
+                    logManager.log("Произведена проверка текста описания доп.работ Маляр из памяти: он уже вводился и был сохранен в Map работ.");
                 } else {
                     // Если же не было отправляем пустой текст
                     dopWorksPainterDescription.setText("");
-                    log.info("Произведена проверка текста описания доп.работ Маляр из памяти: в памяти нет ранее введенного текст, отправлен пустой символ.");
+                    logManager.log("Произведена проверка текста описания доп.работ Маляр из памяти: в памяти нет ранее введенного текст, отправлен пустой символ.");
                 }
 
                 textPanel.add(dopWorksPainterDescription, BorderLayout.CENTER);
@@ -1278,7 +1375,7 @@ public class AddWorkPanel {
                     dopWorksPainterDescriptionPushed = but.getDopWorksPainterDescriptionButton();
                     but.getDopWorksPainterDescriptionButton().setBorder(BorderFactory.createLineBorder(Color.red, 1));
                     inputDopWorksPainterDescription = dopWorksPainterDescription.getText();
-                    log.info("Описание доп.работ Маляр выбрана кнопка ОК. Текст: " + dopWorksPainterDescription.getText());
+                    logManager.log("Описание доп.работ Маляр выбрана кнопка ОК. Текст: " + dopWorksPainterDescription.getText());
                     dialog.dispose(); // Закрыть диалоговое окно
                 }); // Кнопка "OK"
 
@@ -1288,7 +1385,7 @@ public class AddWorkPanel {
                     inputDopWorksPainterDescription = "";
                     but.getDopWorksPainterDescriptionButton().setBorder(BorderFactory.createLineBorder(Color.lightGray, 1));
                     dopWorksPainterDescriptionPushed = null;
-                    log.info("Описание доп.работ Маляр выбрана кнопка Отменена");
+                    logManager.log("Описание доп.работ Маляр выбрана кнопка Отменена");
                     dialog.dispose(); // Закрыть диалоговое окно
                 }); // Кнопка "Отмена"
 
@@ -1302,7 +1399,7 @@ public class AddWorkPanel {
         }); // Кнопка ввода описания доп.работ Маляр
         but.getDopWorksKuzovchikDescriptionButton().addActionListener(e -> {
             if (dopWorksKuzovchikButtonPushed != null) {
-                log.info("Нажата кнопка описания доп.работ Кузовщик");
+                logManager.log("Нажата кнопка описания доп.работ Кузовщик");
                 // Запуск задачи проверки грамматики в отдельном потоке
                 executor.submit(() -> {
                     // Проверка грамматики
@@ -1317,18 +1414,18 @@ public class AddWorkPanel {
 
                 JPanel textPanel = new JPanel();
                 textPanel.setLayout(new BorderLayout());
-                log.info("Создана и открыто окно ввода текста описания доп.работ Кузовщик");
+                logManager.log("Создана и открыто окно ввода текста описания доп.работ Кузовщик");
 
                 dopWorksKuzovchikDescription.setWrapStyleWord(true); // Включить перенос по словам
                 dopWorksKuzovchikDescription.setLineWrap(true); // Перенос строк
                 // Если описание есть в памяти, то его и прописываем
                 if (inputDopWorksKuzovchikDescription != null) {
                     dopWorksKuzovchikDescription.setText(inputDopWorksKuzovchikDescription);
-                    log.info("Произведена проверка текста описания доп.работ Кузовщик из памяти: он уже вводился и был сохранен в Map работ.");
+                    logManager.log("Произведена проверка текста описания доп.работ Кузовщик из памяти: он уже вводился и был сохранен в Map работ.");
                 } else {
                     // Если же не было отправляем пустой текст
                     dopWorksKuzovchikDescription.setText("");
-                    log.info("Произведена проверка текста описания доп.работ Кузовщик из памяти: в памяти нет ранее введенного текст, отправлен пустой символ.");
+                    logManager.log("Произведена проверка текста описания доп.работ Кузовщик из памяти: в памяти нет ранее введенного текст, отправлен пустой символ.");
                 }
                 textPanel.add(dopWorksKuzovchikDescription, BorderLayout.CENTER);
                 textPanel.setPreferredSize(new Dimension(200, 220));
@@ -1343,7 +1440,7 @@ public class AddWorkPanel {
                     dopWorksKuzovchikDescriptionPushed = but.getDopWorksKuzovchikDescriptionButton();
                     but.getDopWorksKuzovchikDescriptionButton().setBorder(BorderFactory.createLineBorder(Color.red, 1));
                     inputDopWorksKuzovchikDescription = dopWorksKuzovchikDescription.getText();
-                    log.info("Описание доп.работ Кузовщик выбрана кнопка ОК. Текст: " + dopWorksKuzovchikDescription.getText());
+                    logManager.log("Описание доп.работ Кузовщик выбрана кнопка ОК. Текст: " + dopWorksKuzovchikDescription.getText());
                     dialog.dispose(); // Закрыть диалоговое окно
                 }); // Кнопка "OK"
 
@@ -1353,7 +1450,7 @@ public class AddWorkPanel {
                     inputDopWorksKuzovchikDescription = "";
                     but.getDopWorksKuzovchikDescriptionButton().setBorder(BorderFactory.createLineBorder(Color.lightGray, 1));
                     dopWorksKuzovchikDescriptionPushed = null;
-                    log.info("Описание доп.работ Кузовщик выбрана кнопка Отменена");
+                    logManager.log("Описание доп.работ Кузовщик выбрана кнопка Отменена");
                     dialog.dispose(); // Закрыть диалоговое окно
                 }); // Кнопка "Отмена"
 
@@ -1368,10 +1465,13 @@ public class AddWorkPanel {
 
 
         checkEarlyPushedButtonsWorksPanel();
+        correctionPanelArmatureSide.updateValue(elementArmatureSide);
+        correctionPanelPaintSide.updateValue(elementPaintSide);
         panelAdd.updateUI();
     } // Панель с работами средней, левой и правой стороны авто
 
     private void choiseNumberNotNormWorkPanel(JPanel panelAdd) {
+        logManager.log("Запущен метод choiseNumberNotNormWorkPanel.");
         JPanel panelXY = new JPanel();
         JPanel panelXY2 = new JPanel();
         JPanel panelNumber123 = new JPanel();
@@ -1437,6 +1537,7 @@ public class AddWorkPanel {
     } // Панель с выбором номера не нормативных работ
 
     private void notNormWorkAddWork(JPanel panelNotNormWork, JPanel panelAdd) {
+        logManager.log("Запущен метод notNormWorkAddWork.");
         clearPushedButtonAfterElementAdd();
         // Используется для того что бы удалить new JLabel("Механик.") после повторного нажатия на номер работы.
         if (panelNotNormWork.getComponents().length > 6) {
@@ -1461,8 +1562,9 @@ public class AddWorkPanel {
         removeActionListener(but.getNotNormWorkDescriptionButton());
 
         but.getNotNormWorkDescriptionButton().addActionListener(e -> {
+
             if (notNormWorkJTextField.getBackground() != Color.pink && notNormWorkJTextField.getText().length() > 0) {
-                log.info("Нажата кнопка описания ненормативных работ №" + elementButtonPushed.getText());
+                logManager.log("Нажата кнопка описания ненормативных работ №" + elementButtonPushed.getText());
 
                 // Создаем модальное окно
                 DescriptionWindow window = new DescriptionWindow(frame, "Описание работ", true);
@@ -1470,11 +1572,11 @@ public class AddWorkPanel {
                 if (inputNotNormWorkDescription != null) {
                     // Если описание есть в памяти, то его и прописываем
                     window.setInitialText(inputNotNormWorkDescription);
-                    log.info("Произведена проверка текста описания ненормативных работ из памяти: он уже вводился и был сохранен в Map работ.");
+                    logManager.log("Произведена проверка текста описания ненормативных работ из памяти: он уже вводился и был сохранен в Map работ.");
                 } else {
                     // Если же не было отправляем пустой текст
                     window.setInitialText("");
-                    log.info("Произведена проверка текста описания ненормативных работ из памяти: в памяти нет ранее введенного текст, отправлен пустой символ.");
+                    logManager.log("Произведена проверка текста описания ненормативных работ из памяти: в памяти нет ранее введенного текст, отправлен пустой символ.");
                 }
                 // Центрирование окна и открытие
                 window.setLocationRelativeTo(frame);
@@ -1482,6 +1584,7 @@ public class AddWorkPanel {
 
                 // Получаем результат после закрытия окна
                 if (window.isCanceled()) {
+                    logManager.log("Нажата кнопка отмена");
                     inputNotNormWorkDescription = "";
                     but.getNotNormWorkDescriptionButton().setBorder(BorderFactory.createLineBorder(Color.lightGray, 1));
                     notNormWorkDescriptionPushed = null;
@@ -1492,6 +1595,7 @@ public class AddWorkPanel {
                     inputNotNormWorkDescription = window.getInputNotNormWorkDescription();
                     // Заполняем String из окна норматива для дальнейшего перевода в double и внесения в элемент
                     notNormWorkNormativeString = notNormWorkJTextField.getText();
+                    logManager.log("Нажата кнопка ОК. Текст описания: " + inputNotNormWorkDescription + " Норматив: " + notNormWorkNormativeString);
                     // Открываем окно добавить удалить элемент
                     addAndRemovePanel(clearCenter(panelAdd));
                     // меняем цвет рамки на красный
@@ -1512,6 +1616,7 @@ public class AddWorkPanel {
     } // Панель с описанием не нормативных работ
 
     private JButton updateActionListener(JButton button, ActionListener listener) {
+        logManager.log("Запущен метод updateActionListener для кнопки " + button.getName());
         ActionListener[] listeners = button.getActionListeners();
         for (ActionListener l : listeners) {
             button.removeActionListener(l);
@@ -1521,6 +1626,7 @@ public class AddWorkPanel {
     } // Обновление слушателя для кнопок номера не нормативных работ
 
     private JButton addActionListonerForNumberNotNormWork(JButton buttonNumber, JPanel panelAdd) {
+        logManager.log("Запущен метод addActionListonerForNumberNotNormWork для кнопки " + buttonNumber.getName());
         ActionListener newListener = e -> {
             clearPushedButtonAfterElementAdd();
             elementButtonPushed = changeColorPushedButton(elementButtonPushed, buttonNumber, 2);
@@ -1530,6 +1636,7 @@ public class AddWorkPanel {
     }  // Добавления слушателя для кнопок номера не нормативных работ
 
     private JButton addGearIconToButton(JButton button) {
+        logManager.log("Запущен метод addGearIconToButton для кнопки " + button.getName());
         button.removeAll(); // Убираем все с кнопки
         button.setPreferredSize(new Dimension(20, 18)); // Выставляем размер кнопки
         button.setIcon(new ImageIcon(new ImageIcon("Системные/gear.png").getImage().getScaledInstance(16, 16, Image.SCALE_SMOOTH))); // Наносим изображение
@@ -1538,6 +1645,7 @@ public class AddWorkPanel {
     } // Метод нанесения изображения шестеренки и изменения размера кнопки
 
     private JCheckBox createCheckBox(String toolTip) {
+        logManager.log("Запущен метод createCheckBox.");
         JCheckBox checkBox = new JCheckBox();
         checkBox.setToolTipText(toolTip);
         checkBox.setOpaque(false);
@@ -1546,6 +1654,7 @@ public class AddWorkPanel {
     } // Создание чекбоксов с их описаниями и позициями
 
     public static boolean isAnyCheckBoxSelected(JCheckBox[] checkBoxi) {
+        logManager.log("Запущен метод isAnyCheckBoxSelected.");
         // Проходим по массиву checkBoxes
         for (JCheckBox checkBox : checkBoxi) {
             if (checkBox.isSelected()) {
@@ -1557,6 +1666,7 @@ public class AddWorkPanel {
 
 
     private JPanel setPanelBackground(JPanel panel, String imagePath) {
+        logManager.log("Запущен метод setPanelBackground.");
         // Создаем ImageIcon из указанного пути
         ImageIcon imageIcon = new ImageIcon(imagePath);
         Image image = imageIcon.getImage();
@@ -1575,6 +1685,7 @@ public class AddWorkPanel {
     } // Добавления фона для панели полировки
 
     public static int getMaxGridY(JPanel panel, int targetGridX) {
+        logManager.log("Запущен метод getMaxGridY.");
         int maxGridY = -1;
 
         // Перебор всех компонентов в JPanel
@@ -1589,6 +1700,7 @@ public class AddWorkPanel {
     }
 
     public static JTextField addDocumentListener(JTextField textField) {
+        logManager.log("Запущен метод addDocumentListener.");
         Dimension fixedSize = new Dimension(25, 20);
         textField.setPreferredSize(fixedSize);
         textField.setMinimumSize(fixedSize);
@@ -1653,6 +1765,7 @@ public class AddWorkPanel {
 
 
     private void addAndRemovePanel(JPanel panel) {
+        logManager.log("Запущен метод addAndRemovePanel.");
         Dimension buttonSize = new Dimension(58, 20);
         remontComboBox.setBackground(Color.WHITE);
         remontComboBox.setPreferredSize(buttonSize);
@@ -1676,6 +1789,7 @@ public class AddWorkPanel {
                 new Insets(2, 2, 2, 2), 30, 0));
         // в первом случае у нас всего 3 основных механика могут выполнять ремонт
         if (remontButtonPushed != null) {
+            logManager.log("Добавляем JComboBox для случая если кнопка ремонт прожата.");
             // Добавляем JComboBox только если кнопка remontButtonPushed активирована
             addAndRemovePanel.add(remontComboBox, new GridBagConstraints(0, 4, 1, 1, 1, 1,
                     GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
@@ -1684,6 +1798,7 @@ public class AddWorkPanel {
         }
         // во втором случае у нас так же 3 основных и окно для ввода 4го неучтенного механика
         if (notNormWorkDescriptionPushed != null) {
+            logManager.log("Добавляем JComboBox для не нормативных работ с возможностью ввода.");
             addAndRemovePanel.add(remontComboBox, new GridBagConstraints(0, 4, 1, 1, 1, 1,
                     GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
                     new Insets(2, 2, 2, 2), 30, 0));
@@ -1698,103 +1813,150 @@ public class AddWorkPanel {
         panel.updateUI();
 
         but.getAddButton().addActionListener(o -> {
+            logManager.log("Нажата кнопка Добавить.");
             Element element = createElement();
+            logManager.log("Элемент создан.");
             // Если список элементов чист, то
             if (elementList.isEmpty()) {
+                logManager.log("elementList isEmpty.");
                 // Если Элемент меняется, то к имени добавляем "замена".
                 // Применяем здесь, а не в createElement() по причине метода elementList.get(i).getName().contains(element.getName())
                 // Если применить в createElement() то при contains "**** ****.**** замена" getName с "**** ****.****" без замена он его не засчитает и вернет false
                 elementList.add(addToNameZamenaIfZamenaButtonPushed(element));
+                logManager.log("Добавляем в список элементов элемент: elementList.add(addToNameZamenaIfZamenaButtonPushed(element)).");
                 // Добавляем в lineBorderColorMap сначала - сторона(ключ) -> (значение)элемент(он же ключ) -> (значение)список работ
                 if (lineBorderColorMap.get(sideButtonPushed.getText()) != null) {
+                    logManager.log("sideButtonPushed.getText()) не равен null.");
                     lineBorderColorMap.get(sideButtonPushed.getText()).put(elementButtonPushed.getText(), addColorOfButtonsWorks());
+                    logManager.log("Добавляем в lineBorderColorMap сначала - сторона(ключ) -> (значение)элемент(он же ключ) -> (значение)список работ: lineBorderColorMap.get(sideButtonPushed.getText()).put(elementButtonPushed.getText(), addColorOfButtonsWorks()).");
                 } else {
+                    logManager.log("sideButtonPushed.getText()) равен null. Вторым ключом будет имя выбранного элемента через нажатую кнопку");
                     // Если не нажата кнопка полировки то
                     if (!sideButtonPushed.getText().equals("Полировка")) {
+                        logManager.log("sideButtonPushed.getText()) не Полировка.");
                         // Вторым ключом будет имя выбранного элемента через нажатую кнопку
                         lineBorderColorMap.put(sideButtonPushed.getText(), new HashMap<>(Map.of(elementButtonPushed.getText(), addColorOfButtonsWorks())));
+                        logManager.log("Добавляем в lineBorderColorMap сначала - сторона(ключ) -> (значение)элемент(он же ключ) -> (значение)список работ: lineBorderColorMap.put(sideButtonPushed.getText(), new HashMap<>(Map.of(elementButtonPushed.getText(), addColorOfButtonsWorks()))).");
                     } else {
+                        logManager.log("sideButtonPushed.getText())  Полировка. Проверяем есть ли галочка хоть на одном checkBox");
                         // Если кнопка выбранной стороны является полировка, то проверяем есть ли галочка хоть на одном checkBox
                         if (isAnyCheckBoxSelected(checkBoxes)) {
+                            logManager.log("есть галочка хоть на одном checkBox. Вторым ключом будет так же кнопка выбранной стороны, то есть Полировка");
                             // Если выбран, то вторым ключом будет так же кнопка выбранной стороны, то есть "Полировка"
                             lineBorderColorMap.put(sideButtonPushed.getText(), new HashMap<>(Map.of(sideButtonPushed.getText(), addColorOfButtonsWorks())));
+                            logManager.log("Добавляем в lineBorderColorMap сначала - сторона(ключ) -> (значение)элемент(он же ключ) -> (значение)список работ: lineBorderColorMap.put(sideButtonPushed.getText(), new HashMap<>(Map.of(sideButtonPushed.getText(), addColorOfButtonsWorks()))).");
                         } else {
+                            logManager.log("нет галочки хоть на одном checkBox. Следует удалить вовсе пункт о полировке");
                             // Если же ни оди checkBox ни выбран следует удалить вовсе пункт о полировке
                             lineBorderColorMap.remove(sideButtonPushed.getText());
+                            logManager.log("lineBorderColorMap.remove(sideButtonPushed.getText())");
                             // Так же требуется удалить и из списка элементов упоминание о полировке
                             removeElementFromList(element.getName());
+                            logManager.log("Так же требуется удалить и из списка элементов упоминание о полировке: removeElementFromList(element.getName())");
                         }
                     }
                 }
                 // Если же в списке элементов уже что, то есть, то
             } else {
+                logManager.log("elementList не пуст. Сначала будет произведена проверка на то есть ли такой элемент в списке, если есть он удалится и заново далее добавится новый.");
                 // Сначала удаляем элемент из List
                 removeElementFromList(element.getName());
                 // Если Элемент меняется, то к имени добавляем "замена".
                 // Применяем здесь, а не в createElement() по причине метода elementList.get(i).getName().contains(element.getName())
                 // Если применить в createElement() то при contains "**** ****.**** замена" getName с "**** ****.****" без замена он его не засчитает и вернет false*/
                 elementList.add(addToNameZamenaIfZamenaButtonPushed(element));
+                logManager.log("Добавляем в список элементов элемент: elementList.add(addToNameZamenaIfZamenaButtonPushed(element)).");
                 if (lineBorderColorMap.get(sideButtonPushed.getText()) != null) {
+                    logManager.log("sideButtonPushed.getText()) не равен null.");
                     // Если не нажата кнопка полировки то
                     if (!sideButtonPushed.getText().equals("Полировка")) {
+                        logManager.log("sideButtonPushed.getText()) не Полировка.");
                         // Вторым ключом будет имя выбранного элемента через нажатую кнопку
                         lineBorderColorMap.get(sideButtonPushed.getText()).put(elementButtonPushed.getText(), addColorOfButtonsWorks());
+                        logManager.log("Добавляем в lineBorderColorMap сначала - сторона(ключ) -> (значение)элемент(он же ключ) -> (значение)список работ: lineBorderColorMap.put(sideButtonPushed.getText(), new HashMap<>(Map.of(elementButtonPushed.getText(), addColorOfButtonsWorks()))).");
                     } else {
+                        logManager.log("sideButtonPushed.getText())  Полировка. Проверяем есть ли галочка хоть на одном checkBox");
                         // Если кнопка выбранной стороны является полировка, то проверяем есть ли галочка хоть на одном checkBox
                         if (isAnyCheckBoxSelected(checkBoxes)) {
+                            logManager.log("есть галочка хоть на одном checkBox. Вторым ключом будет так же кнопка выбранной стороны, то есть Полировка");
                             // Если выбран, то вторым ключом будет так же кнопка выбранной стороны, то есть "Полировка"
                             lineBorderColorMap.get(sideButtonPushed.getText()).put(sideButtonPushed.getText(), addColorOfButtonsWorks());
+                            logManager.log("Добавляем в lineBorderColorMap сначала - сторона(ключ) -> (значение)элемент(он же ключ) -> (значение)список работ: lineBorderColorMap.put(sideButtonPushed.getText(), new HashMap<>(Map.of(sideButtonPushed.getText(), addColorOfButtonsWorks()))).");
                         } else {
+                            logManager.log("нет галочки хоть на одном checkBox. Следует удалить вовсе пункт о полировке");
                             // Если же ни оди checkBox ни выбран следует удалить вовсе пункт о полировке
                             lineBorderColorMap.remove(sideButtonPushed.getText());
+                            logManager.log("lineBorderColorMap.remove(sideButtonPushed.getText())");
                             // Так же требуется удалить и из списка элементов упоминание о полировке
                             removeElementFromList(element.getName());
+                            logManager.log("Так же требуется удалить и из списка элементов упоминание о полировке: removeElementFromList(element.getName())");
                         }
                     }
                 } else {
+                    logManager.log("sideButtonPushed.getText()) равен null. Вторым ключом будет имя выбранного элемента через нажатую кнопку");
                     // Проверяем не нажата кнопка полировки.
                     if (!sideButtonPushed.getText().equals("Полировка")) {
+                        logManager.log("sideButtonPushed.getText()) не Полировка.");
                         // Вторым ключом будет имя выбранного элемента через нажатую кнопку
                         lineBorderColorMap.put(sideButtonPushed.getText(), new HashMap<>(Map.of(elementButtonPushed.getText(), addColorOfButtonsWorks())));
+                        logManager.log("Добавляем в lineBorderColorMap сначала - сторона(ключ) -> (значение)элемент(он же ключ) -> (значение)список работ: lineBorderColorMap.put(sideButtonPushed.getText(), new HashMap<>(Map.of(elementButtonPushed.getText(), addColorOfButtonsWorks()))).");
                     } else {
+                        logManager.log("sideButtonPushed.getText())  Полировка. Проверяем есть ли галочка хоть на одном checkBox");
                         // Если кнопка выбранной стороны является полировка, то проверяем есть ли галочка хоть на одном checkBox
                         if (isAnyCheckBoxSelected(checkBoxes)) {
+                            logManager.log("есть галочка хоть на одном checkBox. Вторым ключом будет так же кнопка выбранной стороны, то есть Полировка");
                             // Если выбран, то вторым ключом будет так же кнопка выбранной стороны, то есть "Полировка"
                             lineBorderColorMap.put(sideButtonPushed.getText(), new HashMap<>(Map.of(sideButtonPushed.getText(), addColorOfButtonsWorks())));
+                            logManager.log("Добавляем в lineBorderColorMap сначала - сторона(ключ) -> (значение)элемент(он же ключ) -> (значение)список работ: lineBorderColorMap.put(sideButtonPushed.getText(), new HashMap<>(Map.of(sideButtonPushed.getText(), addColorOfButtonsWorks()))).");
                         } else {
+                            logManager.log("нет галочки хоть на одном checkBox. Следует удалить вовсе пункт о полировке");
                             // Если же ни оди checkBox ни выбран следует удалить вовсе пункт о полировке
                             lineBorderColorMap.remove(sideButtonPushed.getText());
+                            logManager.log("lineBorderColorMap.remove(sideButtonPushed.getText())");
                             // Так же требуется удалить и из списка элементов упоминание о полировке
                             removeElementFromList(element.getName());
+                            logManager.log("Так же требуется удалить и из списка элементов упоминание о полировке: removeElementFromList(element.getName())");
                         }
                     }
                 }
             }
             // Так как у остекления всего 2 панели то добавляем ей после добавления зеленую рамку тут!
             if (sideButtonPushed.getText().equals("Остекление")) {
+                logManager.log("Элемент Остекление. Так как у остекления всего 2 панели то добавляем ей после добавления зеленую рамку");
                 elementButtonPushed.setBorder(BorderFactory.createLineBorder(Color.green, 1));
+                logManager.log("elementButtonPushed.setBorder(BorderFactory.createLineBorder(Color.green, 1))");
                 elementButtonPushed = null;
+                logManager.log("Убираем значение у elementButtonPushed = null");
             }
             // Затем обнуляем ЛКМ
+            logManager.log("Обнуляем ЛКМ.");
             clearLkm();
             // Пересчитываем ЛКМ оставшихся элементов
+            logManager.log("Пересчитываем ЛКМ оставшихся элементов.");
             reCalcLkmPrice();
             // Отправляем новый список на отображение в окошке.
+            logManager.log("Отправляем новый список на отображение в окошке просмотра.");
             sendToStringInElementListTextViewing();
             // Убираем панель addAndRemovePanel
             clearCenter(panel).updateUI();
 
         });   // Добавить
         but.getRemoveButton().addActionListener(e -> {
+            logManager.log("Нажата кнопка Удалить.");
             // Сначала удаляем элемент из List
+            logManager.log("Удаляем элемент из List через removeElementFromList(createName()).");
             removeElementFromList(createName());
             // Затем обнуляем ЛКМ
+            logManager.log("Обнуляем ЛКМ.");
             clearLkm();
             // Пересчитываем ЛКМ оставшихся элементов
+            logManager.log("Пересчитываем ЛКМ оставшихся элементов.");
             reCalcLkmPrice();
             // Отправляем новый список на отображение в окошке.
+            logManager.log("Отправляем новый список на отображение в окошке просмотра.");
             sendToStringInElementListTextViewing();
             // Удаляем из Map элемент
+            logManager.log("Удаляем из Map элемент.");
             if (lineBorderColorMap.get(sideButtonPushed.getText()) != null) {
                 // Проверяем не нажата кнопка полировки.
                 if (!sideButtonPushed.getText().equals("Полировка")) {
@@ -1817,6 +1979,7 @@ public class AddWorkPanel {
     } // Панель добавить\удалить элемент
 
     private JButton takeColorOfButtons(JButton button, int panelNumber) {
+        logManager.log("Запущен метод takeColorOfButtons для кнопки: " + button.getText() + " и панели №" + panelNumber);
         button.setBorder(BorderFactory.createLineBorder(Color.lightGray, 1));
         switch (panelNumber) {
             case 1:  // Первая панель сторона автомобиля
@@ -1909,7 +2072,7 @@ public class AddWorkPanel {
                 }
                 break;
             case 4: // case 4 это панель полировка сложный вариант.
-                if (lineBorderColorMap.get(button.getText()) != null) {
+                if (lineBorderColorMap.get(button.getText()) != null && button.getText().equals("Полировка")) {
                     button.setBorder(BorderFactory.createLineBorder(Color.green));
                     // находим первый ключ кнопку1 (сторона)
                     Map<String, List<String>> panel4 = lineBorderColorMap.get(button.getText());
@@ -1931,6 +2094,12 @@ public class AddWorkPanel {
                                 }
                             }
                         }
+                    }
+                } else {
+                    // Проходим по каждому JCheckBox в массиве checkBoxes
+                    for (JCheckBox checkBox : checkBoxes) {
+                        // Так как в памяти еще нет элемента полировка снимаем выбор со всех чекбоксов
+                        checkBox.setSelected(false);
                     }
                 }
                 break;
@@ -1961,6 +2130,7 @@ public class AddWorkPanel {
     } // Пробег по Map для оформления цвета рамок кнопок
 
     private void checkRemontComboBox(String hoDo, int panel) {
+        logManager.log("Запущен метод checkRemontComboBox для: " + hoDo + " и панели №" + panel);
         // Первое что
         switch (hoDo) {
             case "Маляр":
@@ -1994,9 +2164,14 @@ public class AddWorkPanel {
 
     private JButton changeColorPushedButton(JButton lastPushedButton, JButton pushedButton,
                                             int panelNumber) {
+        logManager.log("Запущен метод changeColorPushedButton.");
         if (pushedButton.getText().equals("Полировка")) {
             // Только тут используем данный костыль так как в полировке нам необходима запустить проверку чекБоксов заранее
-            takeColorOfButtons(lastPushedButton, panelNumber);
+            if (lastPushedButton != null) {
+                // Если прошлая кнопка была нажата, то мы проверяем ее и так как мы в проверке для кнопки полировка которая идет
+                // в первом столбце выбора, это панель "1" а прийти проверка может от другой панели, то мы вручную выставляем проверку 1ой панели.
+                takeColorOfButtons(lastPushedButton, 1);
+            }
             sideButtonPushed = but.getPolirovkaButton();
             lastPushedButton = pushedButton;
         }
@@ -2012,6 +2187,7 @@ public class AddWorkPanel {
     } // Изменение цвета нажатой кнопки(местами с прошлой кнопкой)
 
     private List<String> addColorOfButtonsWorks() {
+        logManager.log("Запущен метод addColorOfButtonsWorks.");
         List<String> color = new ArrayList<>();
         if (!sideButtonPushed.getText().equals("Полировка")) {
             if (zamenaOrRsButtonPushed != null) {
@@ -2112,6 +2288,7 @@ public class AddWorkPanel {
     } // Добавление зеленой рамки кнопке и занесение нажатий в Map при добавлении в список и память
 
     private JPanel clearAll(JPanel panel) {
+        logManager.log("Запущен метод clearAll.");
         BorderLayout layout = (BorderLayout) panel.getLayout();
         clearPushedButtonAfterElementAdd();
         elementLeftRightSidePanel.removeAll();
@@ -2125,6 +2302,7 @@ public class AddWorkPanel {
     } // Удалить все панели кроме начальной с выбором сторон
 
     private JPanel clearCenter(JPanel panel) {
+        logManager.log("Запущен метод clearCenter.");
         BorderLayout layout = (BorderLayout) panel.getLayout();
         if (layout.getLayoutComponent(BorderLayout.CENTER) != null) {
             panel.remove(layout.getLayoutComponent(BorderLayout.CENTER));
@@ -2134,6 +2312,7 @@ public class AddWorkPanel {
     } // Удаление панели добавить\удалить
 
     private void clearPushedButtonAfterElementAdd() {
+        logManager.log("Запущен метод clearPushedButtonAfterElementAdd.");
         zamenaOrRsButtonPushed = null;  // Кнопка замена
         paint1xOr2xButtonPushed = null; // Кнопка окраска с1 или 2х сторон
         remontButtonPushed = null;      // Кнопка ремонта
@@ -2168,116 +2347,159 @@ public class AddWorkPanel {
     } // Стирание (приведя их к null) нажатых в процессе кнопок
 
     private Element createElement() {
-        log.info("Инициировано создание элемента.");
+        logManager.log("Инициировано создание элемента.");
         Element element = new Element();
         // С начало выставляем имя.
         element.setName(createName());
+        logManager.log("Имя элемента вернулось: " + element.getName() + " Продолжаем создание элемента");
         // От сих пор начинаем проставлять нормативы. Если это стекло.
         if (sideButtonPushed.getText().equals("Остекление")) {
             element.setGlass(2);
+            logManager.log("Элемент стекло выставляем element.setGlass(2).");
         }
         // От сих пор начинаем проставлять нормативы. Если это не стекло и не полировка.
         if (!sideButtonPushed.getText().equals("Остекление") && !sideButtonPushed.getText().equals("Полировка") && !sideButtonPushed.getText().equals("Ненормативные")) {
+            logManager.log("Элемент не Остекление и Полировка.");
             element.setPaintSide(elementPaintSide);
+            logManager.log("выставляем element.setPaintSide(elementPaintSide)." + elementPaintSide);
             element.setArmatureSide(elementArmatureSide);
+            logManager.log("выставляем element.setArmatureSide(elementArmatureSide)." + elementArmatureSide);
             element.setKuzDetReplaceSide(elementKuzDetReplaceSide);
+            logManager.log("выставляем element.setKuzDetReplaceSide(elementKuzDetReplaceSide)." + elementKuzDetReplaceSide);
             elementPaintAllForLkm += elementPaintSide;  // Добавляем в ЛКМ норматив объем окраски общего для всех Элементов
+            logManager.log("Добавляем в ЛКМ норматив объем окраски общего для всех Элементов: elementPaintAllForLkm += elementPaintSide.");
             element.setLkmForElement(element.getPaintSide()); // Добавляем в ЛКМ норматив объем окраски для конкретного Элемента
+            logManager.log("Добавляем в ЛКМ норматив объем окраски для конкретного Элемента: element.setLkmForElement(element.getPaintSide()).");
             // Если нажата кнопка ремонта, то добавляем, добавив "." перед последним символом
             // переведя в двоичное число
             if (remontButtonPushed != null) {
                 String rem;
                 rem = new StringBuilder(elementRemontString).insert(elementRemontString.length() - 1, ".").toString();
                 element.setRemont(Double.parseDouble(rem));
+                logManager.log("Добавляем в элемент ремонт: " + rem);
                 element.setHoDoRemont((String) remontComboBox.getSelectedItem());
+                logManager.log("Добавляем в элемент кто делал ремонт: " + remontComboBox.getSelectedItem());
             }
             // Если имя элемента входит в перечень, то добавляем ручки, молдинги и зеркала.
             if (zercaloButtonPushed != null) {
                 element.setZerkalo(1);
+                logManager.log("Добавляем в элемент окраску зеркала: element.setZerkalo(1)");
                 element.setLkmForElement(element.getLkmForElement() + 1);
+                logManager.log("Добавляем в ЛКМ норматив объем окраски для конкретного Элемента: element.setLkmForElement(element.getLkmForElement() + 1);.");
                 elementPaintAllForLkm += 1; // Добавляем в ЛКМ общее, норматив объем окраски согласно элементу
+                logManager.log("Добавляем в ЛКМ норматив объем окраски общего для всех Элементов: elementPaintAllForLkm += 1.");
             }
             if (ruchkaButtonPushed != null) {
                 element.setRuchka(1);
+                logManager.log("Добавляем в элемент окраску ручки: element.setRuchka(1)");
                 element.setLkmForElement(element.getLkmForElement() + 1);
+                logManager.log("Добавляем в ЛКМ норматив объем окраски для конкретного Элемента: element.setLkmForElement(element.getLkmForElement() + 1);.");
                 elementPaintAllForLkm += 1; // Добавляем в ЛКМ общее, норматив объем окраски согласно элементу
+                logManager.log("Добавляем в ЛКМ норматив объем окраски общего для всех Элементов: elementPaintAllForLkm += 1.");
             }
             if (moldingButtonPushed != null) {
                 element.setMolding(1);
+                logManager.log("Добавляем в элемент окраску молдинга: element.setMolding(1)");
                 element.setLkmForElement(element.getLkmForElement() + 1);
+                logManager.log("Добавляем в ЛКМ норматив объем окраски для конкретного Элемента: element.setLkmForElement(element.getLkmForElement() + 1);.");
                 elementPaintAllForLkm += 1; // Добавляем в ЛКМ общее, норматив объем окраски согласно элементу
+                logManager.log("Добавляем в ЛКМ норматив объем окраски общего для всех Элементов: elementPaintAllForLkm += 1.");
             }
             // Если имя элемента входит в перечень добавляем расширитель крыльев
             if (expanderButtonPushed != null) {
                 element.setExpander(2);
+                logManager.log("Добавляем в элемент окраску расширителя: element.setExpander(2)");
                 element.setLkmForElement(element.getLkmForElement() + 2);
+                logManager.log("Добавляем в ЛКМ норматив объем окраски для конкретного Элемента: element.setLkmForElement(element.getLkmForElement() + 2);.");
                 elementPaintAllForLkm += 2; // Добавляем в ЛКМ общее, норматив объем окраски согласно элементу
+                logManager.log("Добавляем в ЛКМ норматив объем окраски общего для всех Элементов: elementPaintAllForLkm += 2.");
             }
             // Если имя элемента входит в перечень, то добавляем накладку
             if (overlayButtonPushed != null) {
                 element.setOverlay(2);
+                logManager.log("Добавляем в элемент окраску накладки: element.setOverlay(2)");
                 element.setLkmForElement(element.getLkmForElement() + 2);
+                logManager.log("Добавляем в ЛКМ норматив объем окраски для конкретного Элемента: element.setLkmForElement(element.getLkmForElement() + 2);.");
                 elementPaintAllForLkm += 2; // Добавляем в ЛКМ общее, норматив объем окраски согласно элементу
+                logManager.log("Добавляем в ЛКМ норматив объем окраски общего для всех Элементов: elementPaintAllForLkm += 2.");
             }
             // Если у элемента есть стекло, то проверяем надо ли снимать.
             if (haveGlass > 0) {
                 // Умножаем 2 так как норма на стекло 2
                 element.setGlass(haveGlass * 2);
+                logManager.log("У элемента есть с/у стекла добавляем: element.setGlass(haveGlass * 2).");
                 if (haveGlass == 2) {
                     element.setNameGlass("Лобовое и Заднее" + " стекло c/у");
+                    logManager.log("У элемента есть с/у 2х стекол добавляем: element.setNameGlass(Лобовое и Заднее + стекло c/у)");
                 } else {
                     element.setNameGlass(glassButtonPushed.getText() + " стекло c/у");
+                    logManager.log("У элемента есть с/у 1го стекла добавляем: element.setNameGlass(glassButtonPushed.getText() + стекло c/у)");
                 }
             }
             if (dopWorksArmaturchikButtonPushed != null) {
+                logManager.log("У элемента есть доп работы Арматурщик.");
                 // С начало необходимо перевести норматив в вид текста
                 String dopWorks;
                 // добавив точку перед последним символом таким образом переведя его двоичное число в виде текста
                 dopWorks = new StringBuilder(dopWorksArmaturchik.getText()).insert(dopWorksArmaturchik.getText().length() - 1, ".").toString();
                 // Далее присвоить элементу в параметр доп.Работы арматурщик двоичное число переведя его из String в double
                 element.setDopWorksArmoturchik(Double.parseDouble(dopWorks));
+                logManager.log("Добавляем элементу норматив доп работы Арматурщик: element.setDopWorksArmoturchik(Double.parseDouble(dopWorks)) = " + dopWorks);
                 // Дальше если есть описание доп.работ арматурщик
                 if (dopWorksArmaturchikDescriptionPushed != null && inputDopWorksArmaturchikDescription != null) {
                     element.setDescriptionDopWorksArmaturchic(inputDopWorksArmaturchikDescription);
+                    logManager.log("У элемента есть и описание доп работы Арматурщик. Добавляем: element.setDescriptionDopWorksArmaturchic(inputDopWorksArmaturchikDescription) " + inputDopWorksArmaturchikDescription);
                 }
             }
             if (dopWorksPainterButtonPushed != null) {
+                logManager.log("У элемента есть доп работы Маляр.");
                 // С начало необходимо перевести норматив в вид текста
                 String dopWorks;
                 // добавив точку перед последним символом таким образом переведя его двоичное число в виде текста
                 dopWorks = new StringBuilder(dopWorksPainter.getText()).insert(dopWorksPainter.getText().length() - 1, ".").toString();
                 // Далее присвоить элементу в параметр доп.Работы Маляр двоичное число переведя его из String в double
                 element.setDopWorksPainter(Double.parseDouble(dopWorks));
+                logManager.log("Добавляем элементу норматив доп работы Маляр: element.setDopWorksPainter(Double.parseDouble(dopWorks)) = " + dopWorks);
                 // Дальше если есть описание доп.работ Маляр
                 if (dopWorksPainterDescriptionPushed != null && inputDopWorksPainterDescription != null) {
                     element.setDescriptionDopWorksPainter(inputDopWorksPainterDescription);
+                    logManager.log("У элемента есть и описание доп работы Маляр. Добавляем: element.setDescriptionDopWorksPainter(inputDopWorksPainterDescription) " + inputDopWorksPainterDescription);
                 }
             }
             if (dopWorksKuzovchikButtonPushed != null) {
+                logManager.log("У элемента есть доп работы Кузовщик.");
                 // С начало необходимо перевести норматив в вид текста
                 String dopWorks;
                 // добавив точку перед последним символом таким образом переведя его двоичное число в виде текста
                 dopWorks = new StringBuilder(dopWorksKuzovchik.getText()).insert(dopWorksKuzovchik.getText().length() - 1, ".").toString();
                 // Далее присвоить элементу в параметр доп.Работы Кузовщик двоичное число переведя его из String в double
                 element.setDopWorksKuzovchik(Double.parseDouble(dopWorks));
+                logManager.log("Добавляем элементу норматив доп работы Кузовщик: element.setDopWorksKuzovchik(Double.parseDouble(dopWorks)) = " + dopWorks);
                 // Дальше если есть описание доп.работ Кузовщик
                 if (dopWorksKuzovchikDescriptionPushed != null && inputDopWorksKuzovchikDescription != null) {
                     element.setDescriptionDopWorksKuzovchik(inputDopWorksKuzovchikDescription);
+                    logManager.log("У элемента есть и описание доп работы Кузовщик. Добавляем: element.setDescriptionDopWorksKuzovchik(inputDopWorksKuzovchikDescription) " + inputDopWorksKuzovchikDescription);
                 }
             }
             calcLkm(element);
         } else if (sideButtonPushed.getText().equals("Полировка")) {
             element.setPaintSide(elementPaintSide);
-        } else if(sideButtonPushed.getText().equals("Ненормативные")){
+            logManager.log("Элемент Полировка. Выставляем element.setPaintSide(elementPaintSide)");
+        } else if (sideButtonPushed.getText().equals("Ненормативные")) {
+            logManager.log("Элемент Ненормативные работы.");
             String notNorm;
             notNorm = new StringBuilder(notNormWorkNormativeString).insert(notNormWorkNormativeString.length() - 1, ".").toString();
             element.setNotNormWork(Double.parseDouble(notNorm));
+            logManager.log("Выставляем element.setNotNormWork(Double.parseDouble(notNorm)) = " + notNorm);
             element.setHoDoRemont((String) remontComboBox.getSelectedItem());
+            logManager.log("Выставляем element.setHoDoRemont((String) remontComboBox.getSelectedItem()) = " + (String) remontComboBox.getSelectedItem());
         }
+        logManager.log("return element");
         return element;
     }  // Создание элемента
 
     private JButton removeActionListener(JButton button) {
+        logManager.log("Запущен метод removeActionListener.");
         /* Очень глупое решение, но другого не нашел, суть его в том чтобы постоянно обновлять актионЛистенер
            Если его нет то, так как при каждом нажатии создаётся новая панель добавления и при
            нажатии "дабавить" актионЛистенер выполняется столько раз сколько была раз создана панель.*/
@@ -2289,50 +2511,64 @@ public class AddWorkPanel {
     } // Удаление у кнопки ActionListener дабы удалить удвоенность нажатий
 
     private void sendToStringInElementListTextViewing() {
+        logManager.log("Запущен метод sendToStringInElementListTextViewing.");
         elementListTextViewing.setText("ЛКМ Итого: " + lkmTotalPrice + "руб.\n" + Arrays.toString(elementList.toArray()).replaceAll("^\\[|\\]$", ""));
     }  // Вывод на окно просмотра добавленных элементов
 
     private Element addToNameZamenaIfZamenaButtonPushed(Element element) {
+        logManager.log("Запущен метод addToNameZamenaIfZamenaButtonPushed.");
         // Если Элемент меняется, то к имени добавляем "замена".
         if (zamenaOrRsButtonPushed != null) {
             if (zamenaOrRsButtonPushed.getText().equals("Замена")) {
                 element.setName(element.getName() + " " + zamenaOrRsButtonPushed.getText());
+                logManager.log("К имени элемента добавлена обозначение Замена");
             }
         }
         return element;
     }  // Добавление к имени элемента "замена" если элемент меняется
 
     private String createName() {
+        logManager.log("Запущен метод createName.");
         String name;
         // Оформляем имя если это не полировка
         if (!sideButtonPushed.getText().equals("Полировка") && !sideButtonPushed.getText().equals("Ненормативные")) {
+            logManager.log("Элемент не является Полировка и Ненормативные.");
             // Первое оформляем имя (левая правая сторона)
             if (sideButtonPushed.getText().equals("Левая") || sideButtonPushed.getText().equals("Правая")) {
+                logManager.log("Элемент является Левая или Правая часть авто.");
                 if (elementButtonPushed.getText().equals("Пер.Крыло") || elementButtonPushed.getText().equals("Зад.Крыло")) {
                     name = sideButtonPushed.getText().substring(0, sideButtonPushed.getText().length() - 2) + "ое " + elementButtonPushed.getText();
+                    logManager.log("Элемент является Пер или Зад. Крыло.");
                 } else if (elementButtonPushed.getText().equals("Пер.Дверь") || elementButtonPushed.getText().equals("Зад.Дверь")) {
                     name = sideButtonPushed.getText() + " " + elementButtonPushed.getText();
+                    logManager.log("Элемент является Пер или Зад. Дверь.");
                 } else {
                     name = sideButtonPushed.getText().substring(0, sideButtonPushed.getText().length() - 2) + "ый " + elementButtonPushed.getText();
+                    logManager.log("Элемент не является Пер или Зад. Крыло или Дверь.");
                 }
                 // Второе оформление имени остекление
             } else if (sideButtonPushed.getText().equals("Остекление")) {
                 name = elementButtonPushed.getText() + " " + sideButtonPushed.getText();
+                logManager.log("Элемент является Остекление.");
                 // Третье оформление имени центральная часть авто (сторону упускаем, оставляем только элемент)
             } else {
                 name = elementButtonPushed.getText();
+                logManager.log("Элемент является центральная часть авто.");
             }
-            log.info("Создали имя стандартного элемента: " + name);
             // Если полировка, то нужно проверить все чекбоксы
         } else if (sideButtonPushed.getText().equals("Полировка")) {
+            logManager.log("Элемент является Полировка.");
             name = createNamePolirovka();
         } else { // В случае не нормативных работ
+            logManager.log("Элемент является Ненормативные работы.");
             name = createNameNotNormWork();
         }
+        logManager.log("Создали и вернули имя элемента: " + name);
         return name;
     }  // Создание имени элемента
 
     private String createNamePolirovka() {
+        logManager.log("Запущен метод createNamePolirovka.");
         String name;
         int painter = 0;
         // Список для хранения имен выбранных чекбоксов
@@ -2348,16 +2584,17 @@ public class AddWorkPanel {
         String selectedNames = String.join("' ", selectedCheckBoxNames);
         name = sideButtonPushed.getText() + " " + selectedNames;
         elementPaintSide = painter * 0.8;
-        log.info("Создали имя для элемента полировка: " + name);
+        logManager.log("Создали имя для элемента полировка: " + name);
         return name;
     }
 
     private String createNameNotNormWork() {
-        log.info("Создали имя не нормативных работ: " + inputNotNormWorkDescription);
+        logManager.log("Создали имя для не нормативных работ: " + inputNotNormWorkDescription);
         return inputNotNormWorkDescription;
     }
 
     private void checkEarlyPushedButtonsWorksPanel() {
+        logManager.log("Запущен метод checkEarlyPushedButtonsWorksPanel.");
         /*
         Проверяем по цвету рамки какие кнопки были нажаты ранее.
          */
@@ -2453,9 +2690,23 @@ public class AddWorkPanel {
                 but.getDopWorksKuzovchikDescriptionButton().setBorder(BorderFactory.createLineBorder(Color.red, 1));
             }
         }
+        String name = createName();
+        Integer q = null;
+        Element element = null;
+        for (int i = 0; i <= elementList.size() - 1; i++) {
+            if (elementList.get(i).getName().contains(name)) {
+                q = i;
+                element = elementList.get(i);
+            }
+        }
+        if (q != null) {
+            elementArmatureSide = element.getArmatureSide();
+            elementPaintSide = element.getPaintSide();
+        }
     } // Проверка и нажатие кнопок добавленного элемента
 
     private void removeElementFromList(String elementName) {
+        logManager.log("Запущен метод removeElementFromList.");
         Integer q = null;
         Element el = null;
         /*
@@ -2477,6 +2728,7 @@ public class AddWorkPanel {
     public void load
             (List<Element> elementList, Map<String, Map<String, List<String>>> lineBorderColorMap, Client
                     client, Lkm lkm, JPanel panel) {
+        logManager.log("Запущен метод load.");
         this.elementList = elementList;
         this.lineBorderColorMap = lineBorderColorMap;
         reCalcLkmPrice();
@@ -2487,6 +2739,7 @@ public class AddWorkPanel {
     }
 
     private void calcLkm(Element element) {
+        logManager.log("Запущен метод calcLkm.");
         if (!element.getName().contains("Остекление")) {
             lkm.plusOneCircles(); // Добавляем круги всех +1
             lkm.setNapkin(lkm.getNapkin() + 3); // Добавляем салфетку
@@ -2532,6 +2785,7 @@ public class AddWorkPanel {
     } // Метод подсчета необходимых ЛКМ материалов
 
     private void calcLkmPrice() {
+        logManager.log("Запущен метод calcLkmPrice.");
         int circleCount = lkm.getP80() + lkm.getP180() + lkm.getP280() + lkm.getP400() + lkm.getP500();
         double circlesCost = circleCount * lkmPrices.getCircle();
 
@@ -2561,6 +2815,7 @@ public class AddWorkPanel {
     } // Метод подсчета стоимости необходимого ЛКМ
 
     private void reCalcLkmPrice() {
+        logManager.log("Запущен метод reCalcLkmPrice.");
         lkmTotalPrice = 0;
         elementPaintAllForLkm = 0;
         if (!elementList.isEmpty()) {
@@ -2574,6 +2829,7 @@ public class AddWorkPanel {
     } // Пересчитать ЛКМ заново
 
     private void clearLkm() {
+        logManager.log("Запущен метод clearLkm.");
         lkm.setP80(0);
         lkm.setP180(0);
         lkm.setP280(0);
