@@ -26,7 +26,7 @@ public class StartFrame {
 
     public JPanel createFrame(JPanel panel) {
         JMenuFrame menuFrame = new JMenuFrame(frame);
-        frame.setSize(800, 600);
+        frame.setSize(825, 605);
         frame.setLayout(new BorderLayout());
         frame.add(panel);
         frame.setJMenuBar(menuFrame.getMenuBar());

@@ -163,14 +163,14 @@ public class ExcelUpdater {
         if (element.getName().contains("Замена")) {
             // Если работы по замене кузовной детали, то к имени прибавляем р/с для замены куз. Детали
             cell.setCellValue(element.getName().replace("Замена", "р/с для замены куз.детали"));
-        } else if (!element.getName().contains("Остекление") && element.getArmatureSide() != 0 && !element.getName().contains("Полировка") && element.getNotNormWork() == 0) {
+        } else if (!element.getName().contains("Остекление") && element.getArmatureSide() != 0 && !element.getName().toLowerCase().contains("полировка") && element.getNotNormWork() == 0) {
             // Проверяем, что элемент не "Остекление","Полировка" и "не нормативный" так как этот элемент мы сразу пишем одной строкой!!!
             // Если работы не замена, то добавляем к имени р/с
             cell.setCellValue((element.getName() + " р/с "));
-        } else if (element.getName().contains("Остекление") && !element.getName().contains("Полировка") && element.getNotNormWork() == 0) {
+        } else if (element.getName().contains("Остекление") && !element.getName().toLowerCase().contains("полировка") && element.getNotNormWork() == 0) {
             // Если элемент остекление, то добавляем к имени с/у
             cell.setCellValue((element.getName() + " c/у "));
-        } else if (element.getName().contains("Полировка") && element.getNotNormWork() == 0) {
+        } else if (element.getName().toLowerCase().contains("полировка") && element.getNotNormWork() == 0) {
             // Если элемент "Полировка" записываем в ячейку имя которое является списком имен элементов кузова под полировку
             cell.setCellValue((element.getName()));
             // Так как этот список может быть внушительный, отправляем ячейку на растяжку под это имя, что бы все влезло!
@@ -195,9 +195,9 @@ public class ExcelUpdater {
             total += (element.getGlass() * prices.getHourlyRate()); // Добавляем к итоговой стоимости работ стоимость данной работы
         } else { // Если элемент не стекло
             cell = row.getCell(narmotive); // Берем ячейку норматив работ
-            if (!element.getName().contains("Полировка") && element.getNotNormWork() == 0) {
+            if (!element.getName().toLowerCase().contains("полировка") && element.getNotNormWork() == 0) {
                 cell.setCellValue(element.getArmatureSide()); // !!!!!!!!Вставляем значение арматурных работ если элемент не полировка и не нормативный!!!!!!!!!!!
-            } else if (element.getName().contains("Полировка")) {
+            } else if (element.getName().toLowerCase().contains("полировка") && element.getNotNormWork() == 0) {
                 cell.setCellValue(element.getPaintSide()); // !!!!!!!!Если элемент полировка сразу вставляем значение малярных работ!!!!!!!!!!
             } else {
                 cell.setCellValue(element.getNotNormWork()); // Если элемент не стекло и не полировка, то он не нормативные работы!!!
@@ -209,10 +209,10 @@ public class ExcelUpdater {
 
             // Тут прописываем ячейку стоимости конкретной работы. Пример: р/с = 2н/ч таким образом вставляем значение (2 * на ставку)
             // Проверяем на ниши однострочные элементы. (полировка и не нормативные)
-            if (!element.getName().contains("Полировка") && element.getNotNormWork() == 0) {
+            if (!element.getName().toLowerCase().contains("полировка") && element.getNotNormWork() == 0) {
                 cell.setCellValue(element.getArmatureSide() * prices.getHourlyRate()); // Вставляем значение стоимости данной работы (норматив * цену норма часа)
                 total += (element.getArmatureSide() * prices.getHourlyRate()); // Добавляем к итоговой стоимости работ стоимость данной работы
-            } else if (element.getName().contains("Полировка")) {
+            } else if (element.getName().toLowerCase().contains("полировка") && element.getNotNormWork() == 0) {
                 // Если полировка
                 cell.setCellValue(element.getPaintSide() * prices.getHourlyRate()); // Вставляем значение стоимости данной работы (норматив * цену норма часа)
                 total += (element.getPaintSide() * prices.getHourlyRate()); // Добавляем к итоговой стоимости работ стоимость данной работы

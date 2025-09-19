@@ -50,12 +50,12 @@ public class AddWorkPanel {
     Double elementPaintSide = 0.0;  // Норматив окраски с одной или двух сторон
     CorrectionPanel correctionPanelPaintSide = new CorrectionPanel(elementPaintSide, newValue -> {
         elementPaintSide = newValue;
-    });
+    });                               // Панель с регулировкой норматива маляра +/- 0.5
     double elementPaintAllForLkm = 0.0; //  Общее количество норматива для подсчета ЛКМ
     double elementArmatureSide = 0.0; // Норматив на арматурные работы
     CorrectionPanel correctionPanelArmatureSide = new CorrectionPanel(elementArmatureSide, newValue -> {
         elementArmatureSide = newValue;
-    });
+    });                               // Панель с регулировкой норматива арматурщика +/- 0.5
     Double elementKuzDetReplaceSide = 0.0; // Норматив на кузовные работы (сварка, замена приварных деталей)
     String elementRemontString; // Норматив на ремонтные работы (шпаклевка)
     String notNormWorkNormativeString; // Норматив на ненорматвиные работы
@@ -98,6 +98,7 @@ public class AddWorkPanel {
             createCheckBox("Фара правая"), createCheckBox("Зеркало левое"),
             createCheckBox("Зеркало правое")
     }; // Массив чекбоксов с их описаниями и позициями для работ полировки
+    JCheckBox finalPolirovkaElementCheckBox = createCheckBox("Финальная полировка после окраски."); // Чекбокс финальная полировка после покраски.
     Lkm lkm = new Lkm();
     LkmPrices lkmPrices = new LkmPrices();
     int lkmTotalPrice = 0;
@@ -1536,6 +1537,256 @@ public class AddWorkPanel {
         panelAdd.updateUI();
     } // Панель с выбором номера не нормативных работ
 
+    private void addAndRemovePanel(JPanel panel) {
+        logManager.log("Запущен метод addAndRemovePanel.");
+        Dimension buttonSize = new Dimension(58, 20);
+        remontComboBox.setBackground(Color.WHITE);
+        remontComboBox.setPreferredSize(buttonSize);
+
+
+        JPanel addAndRemovePanel = new JPanel(new GridBagLayout());
+        JPanel panelXY = new JPanel(new BorderLayout());
+        JPanel panelXY2 = new JPanel(new BorderLayout());
+
+        addAndRemovePanel.add(new JLabel(" "), new GridBagConstraints(0, 0, 1, 1, 1, 1,
+                GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
+                new Insets(0, 0, 0, 0), 0, 0));
+        addAndRemovePanel.add(new JLabel(" "), new GridBagConstraints(0, 1, 1, 1, 1, 1,
+                GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
+                new Insets(0, 2, 0, 2), 0, 0));
+        addAndRemovePanel.add(takeColorOfButtons(removeActionListener(but.getAddButton()), 1), new GridBagConstraints(0, 2, 1, 1, 1, 1,
+                GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
+                new Insets(0, 2, 2, 2), 30, 0));
+        addAndRemovePanel.add(takeColorOfButtons(removeActionListener(but.getRemoveButton()), 1), new GridBagConstraints(0, 3, 1, 1, 1, 1,
+                GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
+                new Insets(2, 2, 2, 2), 30, 0));
+        // Добавляем не активный выбор механика для симметрии кроме панели с полировкой и остеклением
+        if (!sideButtonPushed.getText().equals("Полировка") && !"Остекление".equals(sideButtonPushed.getText())) {
+            addAndRemovePanel.add(remontComboBox, new GridBagConstraints(0, 4, 1, 1, 1, 1,
+                    GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
+                    new Insets(2, 2, 2, 2), 0, 0));
+            remontComboBox.setEnabled(false);
+        }
+        // в первом случае у нас всего 3 основных механика могут выполнять ремонт
+        if (remontButtonPushed != null) {
+            logManager.log("Добавляем JComboBox для случая если кнопка ремонт прожата.");
+            // Добавляем JComboBox только если кнопка remontButtonPushed активирована
+            addAndRemovePanel.add(remontComboBox, new GridBagConstraints(0, 4, 1, 1, 1, 1,
+                    GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
+                    new Insets(2, 2, 2, 2), 30, 0));
+            remontComboBox.setEditable(false);
+            remontComboBox.setEnabled(true);
+        }
+        // во втором случае у нас так же 3 основных и окно для ввода 4го неучтенного механика
+        if (notNormWorkDescriptionPushed != null) {
+            logManager.log("Добавляем JComboBox для не нормативных работ с возможностью ввода.");
+            addAndRemovePanel.add(remontComboBox, new GridBagConstraints(0, 4, 1, 1, 1, 1,
+                    GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
+                    new Insets(2, 2, 2, 2), 30, 0));
+            // Отправляем на проверку для правильного выставления механика если он есть в памяти или если нет делаем дополнительное редактируемое поле
+            remontComboBox.setEnabled(true);
+            checkRemontComboBox(notNormWorkHoDoString, 5);
+        }
+        if (!"Полировка".equals(sideButtonPushed.getText()) && !"Ненормативные".equals(sideButtonPushed.getText()) && !"Остекление".equals(sideButtonPushed.getText())) {
+            // Добавляем чекбокс финальной полировки элемента
+            addAndRemovePanel.add(finalPolirovkaElementCheckBox, new GridBagConstraints(0, 5, 1, 1, 1, 0.3,
+                    GridBagConstraints.WEST, GridBagConstraints.NONE,
+                    new Insets(0, 0, 2, 2), 0, 0));
+            addAndRemovePanel.add(new JLabel("     Ф.полировка"), new GridBagConstraints(0, 5, 1, 1, 1, 0.7,
+                    GridBagConstraints.EAST, GridBagConstraints.NONE,
+                    new Insets(0, 2, 2, 2), 0, 0));
+        }
+
+        panelXY.add(addAndRemovePanel, BorderLayout.NORTH);
+        panelXY2.add(panelXY, BorderLayout.WEST);
+        panel.add(panelXY2, BorderLayout.CENTER);
+        panel.updateUI();
+
+        but.getAddButton().addActionListener(o -> {
+            logManager.log("Нажата кнопка Добавить.");
+            Element element = createElement();
+            logManager.log("Элемент создан.");
+            Element elementFinalPolirovka = null;
+            if (finalPolirovkaElementCheckBox.isSelected()) {
+                elementFinalPolirovka = createElementFinalPolirovka();
+                logManager.log("Установленна галка Ф.Полировки, создан дополнительный элемент полировки.");
+            }
+
+            // Если список элементов чист, то
+            if (elementList.isEmpty()) {
+                logManager.log("elementList isEmpty.");
+                // Если Элемент меняется, то к имени добавляем "замена".
+                // Применяем здесь, а не в createElement() по причине метода elementList.get(i).getName().contains(element.getName())
+                // Если применить в createElement() то при contains "**** ****.**** замена" getName с "**** ****.****" без замена он его не засчитает и вернет false
+                elementList.add(addToNameZamenaIfZamenaButtonPushed(element));
+                logManager.log("Добавляем в список элементов элемент: elementList.add(addToNameZamenaIfZamenaButtonPushed(element)).");
+                if (finalPolirovkaElementCheckBox.isSelected()) {
+                    elementList.add(elementFinalPolirovka);
+                    logManager.log("Добавляем в список элементов элемент c Ф.Полировкой.");
+                }
+                // Добавляем в lineBorderColorMap сначала - сторона(ключ) -> (значение)элемент(он же ключ) -> (значение)список работ
+                if (lineBorderColorMap.get(sideButtonPushed.getText()) != null) {
+                    logManager.log("sideButtonPushed.getText()) не равен null.");
+                    lineBorderColorMap.get(sideButtonPushed.getText()).put(elementButtonPushed.getText(), addColorOfButtonsWorks());
+                    logManager.log("Добавляем в lineBorderColorMap сначала - сторона(ключ) -> (значение)элемент(он же ключ) -> (значение)список работ: lineBorderColorMap.get(sideButtonPushed.getText()).put(elementButtonPushed.getText(), addColorOfButtonsWorks()).");
+                } else {
+                    logManager.log("sideButtonPushed.getText()) равен null. Вторым ключом будет имя выбранного элемента через нажатую кнопку");
+                    // Если не нажата кнопка полировки то
+                    if (!sideButtonPushed.getText().equals("Полировка")) {
+                        logManager.log("sideButtonPushed.getText()) не Полировка.");
+                        // Вторым ключом будет имя выбранного элемента через нажатую кнопку
+                        lineBorderColorMap.put(sideButtonPushed.getText(), new HashMap<>(Map.of(elementButtonPushed.getText(), addColorOfButtonsWorks())));
+                        logManager.log("Добавляем в lineBorderColorMap сначала - сторона(ключ) -> (значение)элемент(он же ключ) -> (значение)список работ: lineBorderColorMap.put(sideButtonPushed.getText(), new HashMap<>(Map.of(elementButtonPushed.getText(), addColorOfButtonsWorks()))).");
+                    } else {
+                        logManager.log("sideButtonPushed.getText())  Полировка. Проверяем есть ли галочка хоть на одном checkBox");
+                        // Если кнопка выбранной стороны является полировка, то проверяем есть ли галочка хоть на одном checkBox
+                        if (isAnyCheckBoxSelected(checkBoxes)) {
+                            logManager.log("есть галочка хоть на одном checkBox. Вторым ключом будет так же кнопка выбранной стороны, то есть Полировка");
+                            // Если выбран, то вторым ключом будет так же кнопка выбранной стороны, то есть "Полировка"
+                            lineBorderColorMap.put(sideButtonPushed.getText(), new HashMap<>(Map.of(sideButtonPushed.getText(), addColorOfButtonsWorks())));
+                            logManager.log("Добавляем в lineBorderColorMap сначала - сторона(ключ) -> (значение)элемент(он же ключ) -> (значение)список работ: lineBorderColorMap.put(sideButtonPushed.getText(), new HashMap<>(Map.of(sideButtonPushed.getText(), addColorOfButtonsWorks()))).");
+                        } else {
+                            logManager.log("нет галочки хоть на одном checkBox. Следует удалить вовсе пункт о полировке");
+                            // Если же ни оди checkBox ни выбран следует удалить вовсе пункт о полировке
+                            lineBorderColorMap.remove(sideButtonPushed.getText());
+                            logManager.log("lineBorderColorMap.remove(sideButtonPushed.getText())");
+                            // Так же требуется удалить и из списка элементов упоминание о полировке
+                            removeElementFromList(element.getName());
+                            logManager.log("Так же требуется удалить и из списка элементов упоминание о полировке: removeElementFromList(element.getName())");
+                        }
+                    }
+                }
+                // Если же в списке элементов уже что, то есть, то
+            } else {
+                logManager.log("elementList не пуст. Сначала будет произведена проверка на то есть ли такой элемент в списке, если есть он удалится и заново далее добавится новый.");
+                // Сначала удаляем элемент из List
+                removeElementFromList(element.getName());
+                // Если Элемент меняется, то к имени добавляем "замена".
+                // Применяем здесь, а не в createElement() по причине метода elementList.get(i).getName().contains(element.getName())
+                // Если применить в createElement() то при contains "**** ****.**** замена" getName с "**** ****.****" без замена он его не засчитает и вернет false*/
+                elementList.add(addToNameZamenaIfZamenaButtonPushed(element));
+                logManager.log("Добавляем в список элементов элемент: elementList.add(addToNameZamenaIfZamenaButtonPushed(element)).");
+                if (finalPolirovkaElementCheckBox.isSelected()) {
+                    //removeElementFromList(elementFinalPolirovka.getName());
+                    elementList.add(elementFinalPolirovka);
+                    logManager.log("Добавляем в список элементов элемент c Ф.Полировкой.");
+                }
+                if (lineBorderColorMap.get(sideButtonPushed.getText()) != null) {
+                    logManager.log("sideButtonPushed.getText()) не равен null.");
+                    // Если не нажата кнопка полировки то
+                    if (!sideButtonPushed.getText().equals("Полировка")) {
+                        logManager.log("sideButtonPushed.getText()) не Полировка.");
+                        // Вторым ключом будет имя выбранного элемента через нажатую кнопку
+                        lineBorderColorMap.get(sideButtonPushed.getText()).put(elementButtonPushed.getText(), addColorOfButtonsWorks());
+                        logManager.log("Добавляем в lineBorderColorMap сначала - сторона(ключ) -> (значение)элемент(он же ключ) -> (значение)список работ: lineBorderColorMap.put(sideButtonPushed.getText(), new HashMap<>(Map.of(elementButtonPushed.getText(), addColorOfButtonsWorks()))).");
+                    } else {
+                        logManager.log("sideButtonPushed.getText())  Полировка. Проверяем есть ли галочка хоть на одном checkBox");
+                        // Если кнопка выбранной стороны является полировка, то проверяем есть ли галочка хоть на одном checkBox
+                        if (isAnyCheckBoxSelected(checkBoxes)) {
+                            logManager.log("есть галочка хоть на одном checkBox. Вторым ключом будет так же кнопка выбранной стороны, то есть Полировка");
+                            // Если выбран, то вторым ключом будет так же кнопка выбранной стороны, то есть "Полировка"
+                            lineBorderColorMap.get(sideButtonPushed.getText()).put(sideButtonPushed.getText(), addColorOfButtonsWorks());
+                            logManager.log("Добавляем в lineBorderColorMap сначала - сторона(ключ) -> (значение)элемент(он же ключ) -> (значение)список работ: lineBorderColorMap.put(sideButtonPushed.getText(), new HashMap<>(Map.of(sideButtonPushed.getText(), addColorOfButtonsWorks()))).");
+                        } else {
+                            logManager.log("нет галочки хоть на одном checkBox. Следует удалить вовсе пункт о полировке");
+                            // Если же ни оди checkBox ни выбран следует удалить вовсе пункт о полировке
+                            lineBorderColorMap.remove(sideButtonPushed.getText());
+                            logManager.log("lineBorderColorMap.remove(sideButtonPushed.getText())");
+                            // Так же требуется удалить и из списка элементов упоминание о полировке
+                            removeElementFromList(element.getName());
+                            logManager.log("Так же требуется удалить и из списка элементов упоминание о полировке: removeElementFromList(element.getName())");
+                        }
+                    }
+                } else {
+                    logManager.log("sideButtonPushed.getText()) равен null. Вторым ключом будет имя выбранного элемента через нажатую кнопку");
+                    // Проверяем не нажата кнопка полировки.
+                    if (!sideButtonPushed.getText().equals("Полировка")) {
+                        logManager.log("sideButtonPushed.getText()) не Полировка.");
+                        // Вторым ключом будет имя выбранного элемента через нажатую кнопку
+                        lineBorderColorMap.put(sideButtonPushed.getText(), new HashMap<>(Map.of(elementButtonPushed.getText(), addColorOfButtonsWorks())));
+                        logManager.log("Добавляем в lineBorderColorMap сначала - сторона(ключ) -> (значение)элемент(он же ключ) -> (значение)список работ: lineBorderColorMap.put(sideButtonPushed.getText(), new HashMap<>(Map.of(elementButtonPushed.getText(), addColorOfButtonsWorks()))).");
+                    } else {
+                        logManager.log("sideButtonPushed.getText())  Полировка. Проверяем есть ли галочка хоть на одном checkBox");
+                        // Если кнопка выбранной стороны является полировка, то проверяем есть ли галочка хоть на одном checkBox
+                        if (isAnyCheckBoxSelected(checkBoxes)) {
+                            logManager.log("есть галочка хоть на одном checkBox. Вторым ключом будет так же кнопка выбранной стороны, то есть Полировка");
+                            // Если выбран, то вторым ключом будет так же кнопка выбранной стороны, то есть "Полировка"
+                            lineBorderColorMap.put(sideButtonPushed.getText(), new HashMap<>(Map.of(sideButtonPushed.getText(), addColorOfButtonsWorks())));
+                            logManager.log("Добавляем в lineBorderColorMap сначала - сторона(ключ) -> (значение)элемент(он же ключ) -> (значение)список работ: lineBorderColorMap.put(sideButtonPushed.getText(), new HashMap<>(Map.of(sideButtonPushed.getText(), addColorOfButtonsWorks()))).");
+                        } else {
+                            logManager.log("нет галочки хоть на одном checkBox. Следует удалить вовсе пункт о полировке");
+                            // Если же ни оди checkBox ни выбран следует удалить вовсе пункт о полировке
+                            lineBorderColorMap.remove(sideButtonPushed.getText());
+                            logManager.log("lineBorderColorMap.remove(sideButtonPushed.getText())");
+                            // Так же требуется удалить и из списка элементов упоминание о полировке
+                            removeElementFromList(element.getName());
+                            logManager.log("Так же требуется удалить и из списка элементов упоминание о полировке: removeElementFromList(element.getName())");
+                        }
+                    }
+                }
+            }
+            // Так как у остекления всего 2 панели то добавляем ей после добавления зеленую рамку тут!
+            if (sideButtonPushed.getText().equals("Остекление")) {
+                logManager.log("Элемент Остекление. Так как у остекления всего 2 панели то добавляем ей после добавления зеленую рамку");
+                elementButtonPushed.setBorder(BorderFactory.createLineBorder(Color.green, 1));
+                logManager.log("elementButtonPushed.setBorder(BorderFactory.createLineBorder(Color.green, 1))");
+                elementButtonPushed = null;
+                logManager.log("Убираем значение у elementButtonPushed = null");
+            }
+            // Затем обнуляем ЛКМ
+            logManager.log("Обнуляем ЛКМ.");
+            clearLkm();
+            // Пересчитываем ЛКМ оставшихся элементов
+            logManager.log("Пересчитываем ЛКМ оставшихся элементов.");
+            reCalcLkmPrice();
+            // Отправляем новый список на отображение в окошке.
+            logManager.log("Отправляем новый список на отображение в окошке просмотра.");
+            sendToStringInElementListTextViewing();
+            // Убираем панель addAndRemovePanel
+            clearCenter(panel).updateUI();
+
+        });   // Добавить
+        but.getRemoveButton().addActionListener(e -> {
+            logManager.log("Нажата кнопка Удалить.");
+            // Сначала удаляем элемент из List
+            logManager.log("Удаляем элемент из List через removeElementFromList(createName()).");
+            removeElementFromList(createName());
+            if (finalPolirovkaElementCheckBox.isSelected()) {
+                removeElementFromList(createElementFinalPolirovka().getName());
+                logManager.log("Удаляем элемент c Ф.Полировкой из List ");
+            }
+            // Затем обнуляем ЛКМ
+            logManager.log("Обнуляем ЛКМ.");
+            clearLkm();
+            // Пересчитываем ЛКМ оставшихся элементов
+            logManager.log("Пересчитываем ЛКМ оставшихся элементов.");
+            reCalcLkmPrice();
+            // Отправляем новый список на отображение в окошке.
+            logManager.log("Отправляем новый список на отображение в окошке просмотра.");
+            sendToStringInElementListTextViewing();
+            // Удаляем из Map элемент
+            logManager.log("Удаляем из Map элемент.");
+            if (lineBorderColorMap.get(sideButtonPushed.getText()) != null) {
+                // Проверяем не нажата кнопка полировки.
+                if (!sideButtonPushed.getText().equals("Полировка")) {
+                    lineBorderColorMap.get(sideButtonPushed.getText()).remove(elementButtonPushed.getText());
+                    // Прожимаем кнопку выбранного элемента для обновления кнопок
+                    elementButtonPushed.doClick();
+                } else {
+                    lineBorderColorMap.remove(sideButtonPushed.getText());
+                }
+            }
+            if (sideButtonPushed.getText().equals("Полировка")) {
+                for (JCheckBox checkBox : checkBoxes) {
+                    checkBox.setSelected(false);
+                }
+            }
+
+            // Убираем панель addAndRemovePanel
+            clearCenter(panel).updateUI();
+        });// Удалить
+    } // Панель добавить\удалить элемент
+
     private void notNormWorkAddWork(JPanel panelNotNormWork, JPanel panelAdd) {
         logManager.log("Запущен метод notNormWorkAddWork.");
         clearPushedButtonAfterElementAdd();
@@ -1616,7 +1867,7 @@ public class AddWorkPanel {
     } // Панель с описанием не нормативных работ
 
     private JButton updateActionListener(JButton button, ActionListener listener) {
-        logManager.log("Запущен метод updateActionListener для кнопки " + button.getName());
+        logManager.log("Запущен метод updateActionListener для кнопки " + button.getText());
         ActionListener[] listeners = button.getActionListeners();
         for (ActionListener l : listeners) {
             button.removeActionListener(l);
@@ -1626,7 +1877,7 @@ public class AddWorkPanel {
     } // Обновление слушателя для кнопок номера не нормативных работ
 
     private JButton addActionListonerForNumberNotNormWork(JButton buttonNumber, JPanel panelAdd) {
-        logManager.log("Запущен метод addActionListonerForNumberNotNormWork для кнопки " + buttonNumber.getName());
+        logManager.log("Запущен метод addActionListonerForNumberNotNormWork для кнопки " + buttonNumber.getText());
         ActionListener newListener = e -> {
             clearPushedButtonAfterElementAdd();
             elementButtonPushed = changeColorPushedButton(elementButtonPushed, buttonNumber, 2);
@@ -1763,221 +2014,6 @@ public class AddWorkPanel {
         return textField;
     } // Добавление слушателя для JTextField-ов, ввода чисел нормативов
 
-
-    private void addAndRemovePanel(JPanel panel) {
-        logManager.log("Запущен метод addAndRemovePanel.");
-        Dimension buttonSize = new Dimension(58, 20);
-        remontComboBox.setBackground(Color.WHITE);
-        remontComboBox.setPreferredSize(buttonSize);
-
-
-        JPanel addAndRemovePanel = new JPanel(new GridBagLayout());
-        JPanel panelXY = new JPanel(new BorderLayout());
-        JPanel panelXY2 = new JPanel(new BorderLayout());
-
-        addAndRemovePanel.add(new JLabel(" "), new GridBagConstraints(0, 0, 1, 1, 1, 1,
-                GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
-                new Insets(0, 0, 0, 0), 0, 0));
-        addAndRemovePanel.add(new JLabel(" "), new GridBagConstraints(0, 1, 1, 1, 1, 1,
-                GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
-                new Insets(0, 2, 0, 2), 0, 0));
-        addAndRemovePanel.add(takeColorOfButtons(removeActionListener(but.getAddButton()), 1), new GridBagConstraints(0, 2, 1, 1, 1, 1,
-                GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
-                new Insets(0, 2, 2, 2), 30, 0));
-        addAndRemovePanel.add(takeColorOfButtons(removeActionListener(but.getRemoveButton()), 1), new GridBagConstraints(0, 3, 1, 1, 1, 1,
-                GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
-                new Insets(2, 2, 2, 2), 30, 0));
-        // в первом случае у нас всего 3 основных механика могут выполнять ремонт
-        if (remontButtonPushed != null) {
-            logManager.log("Добавляем JComboBox для случая если кнопка ремонт прожата.");
-            // Добавляем JComboBox только если кнопка remontButtonPushed активирована
-            addAndRemovePanel.add(remontComboBox, new GridBagConstraints(0, 4, 1, 1, 1, 1,
-                    GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
-                    new Insets(2, 2, 2, 2), 30, 0));
-            remontComboBox.setEditable(false);
-        }
-        // во втором случае у нас так же 3 основных и окно для ввода 4го неучтенного механика
-        if (notNormWorkDescriptionPushed != null) {
-            logManager.log("Добавляем JComboBox для не нормативных работ с возможностью ввода.");
-            addAndRemovePanel.add(remontComboBox, new GridBagConstraints(0, 4, 1, 1, 1, 1,
-                    GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
-                    new Insets(2, 2, 2, 2), 30, 0));
-            // Отправляем на проверку для правильного выставления механика если он есть в памяти или если нет делаем дополнительное редактируемое поле
-            checkRemontComboBox(notNormWorkHoDoString, 5);
-
-        }
-
-        panelXY.add(addAndRemovePanel, BorderLayout.NORTH);
-        panelXY2.add(panelXY, BorderLayout.WEST);
-        panel.add(panelXY2, BorderLayout.CENTER);
-        panel.updateUI();
-
-        but.getAddButton().addActionListener(o -> {
-            logManager.log("Нажата кнопка Добавить.");
-            Element element = createElement();
-            logManager.log("Элемент создан.");
-            // Если список элементов чист, то
-            if (elementList.isEmpty()) {
-                logManager.log("elementList isEmpty.");
-                // Если Элемент меняется, то к имени добавляем "замена".
-                // Применяем здесь, а не в createElement() по причине метода elementList.get(i).getName().contains(element.getName())
-                // Если применить в createElement() то при contains "**** ****.**** замена" getName с "**** ****.****" без замена он его не засчитает и вернет false
-                elementList.add(addToNameZamenaIfZamenaButtonPushed(element));
-                logManager.log("Добавляем в список элементов элемент: elementList.add(addToNameZamenaIfZamenaButtonPushed(element)).");
-                // Добавляем в lineBorderColorMap сначала - сторона(ключ) -> (значение)элемент(он же ключ) -> (значение)список работ
-                if (lineBorderColorMap.get(sideButtonPushed.getText()) != null) {
-                    logManager.log("sideButtonPushed.getText()) не равен null.");
-                    lineBorderColorMap.get(sideButtonPushed.getText()).put(elementButtonPushed.getText(), addColorOfButtonsWorks());
-                    logManager.log("Добавляем в lineBorderColorMap сначала - сторона(ключ) -> (значение)элемент(он же ключ) -> (значение)список работ: lineBorderColorMap.get(sideButtonPushed.getText()).put(elementButtonPushed.getText(), addColorOfButtonsWorks()).");
-                } else {
-                    logManager.log("sideButtonPushed.getText()) равен null. Вторым ключом будет имя выбранного элемента через нажатую кнопку");
-                    // Если не нажата кнопка полировки то
-                    if (!sideButtonPushed.getText().equals("Полировка")) {
-                        logManager.log("sideButtonPushed.getText()) не Полировка.");
-                        // Вторым ключом будет имя выбранного элемента через нажатую кнопку
-                        lineBorderColorMap.put(sideButtonPushed.getText(), new HashMap<>(Map.of(elementButtonPushed.getText(), addColorOfButtonsWorks())));
-                        logManager.log("Добавляем в lineBorderColorMap сначала - сторона(ключ) -> (значение)элемент(он же ключ) -> (значение)список работ: lineBorderColorMap.put(sideButtonPushed.getText(), new HashMap<>(Map.of(elementButtonPushed.getText(), addColorOfButtonsWorks()))).");
-                    } else {
-                        logManager.log("sideButtonPushed.getText())  Полировка. Проверяем есть ли галочка хоть на одном checkBox");
-                        // Если кнопка выбранной стороны является полировка, то проверяем есть ли галочка хоть на одном checkBox
-                        if (isAnyCheckBoxSelected(checkBoxes)) {
-                            logManager.log("есть галочка хоть на одном checkBox. Вторым ключом будет так же кнопка выбранной стороны, то есть Полировка");
-                            // Если выбран, то вторым ключом будет так же кнопка выбранной стороны, то есть "Полировка"
-                            lineBorderColorMap.put(sideButtonPushed.getText(), new HashMap<>(Map.of(sideButtonPushed.getText(), addColorOfButtonsWorks())));
-                            logManager.log("Добавляем в lineBorderColorMap сначала - сторона(ключ) -> (значение)элемент(он же ключ) -> (значение)список работ: lineBorderColorMap.put(sideButtonPushed.getText(), new HashMap<>(Map.of(sideButtonPushed.getText(), addColorOfButtonsWorks()))).");
-                        } else {
-                            logManager.log("нет галочки хоть на одном checkBox. Следует удалить вовсе пункт о полировке");
-                            // Если же ни оди checkBox ни выбран следует удалить вовсе пункт о полировке
-                            lineBorderColorMap.remove(sideButtonPushed.getText());
-                            logManager.log("lineBorderColorMap.remove(sideButtonPushed.getText())");
-                            // Так же требуется удалить и из списка элементов упоминание о полировке
-                            removeElementFromList(element.getName());
-                            logManager.log("Так же требуется удалить и из списка элементов упоминание о полировке: removeElementFromList(element.getName())");
-                        }
-                    }
-                }
-                // Если же в списке элементов уже что, то есть, то
-            } else {
-                logManager.log("elementList не пуст. Сначала будет произведена проверка на то есть ли такой элемент в списке, если есть он удалится и заново далее добавится новый.");
-                // Сначала удаляем элемент из List
-                removeElementFromList(element.getName());
-                // Если Элемент меняется, то к имени добавляем "замена".
-                // Применяем здесь, а не в createElement() по причине метода elementList.get(i).getName().contains(element.getName())
-                // Если применить в createElement() то при contains "**** ****.**** замена" getName с "**** ****.****" без замена он его не засчитает и вернет false*/
-                elementList.add(addToNameZamenaIfZamenaButtonPushed(element));
-                logManager.log("Добавляем в список элементов элемент: elementList.add(addToNameZamenaIfZamenaButtonPushed(element)).");
-                if (lineBorderColorMap.get(sideButtonPushed.getText()) != null) {
-                    logManager.log("sideButtonPushed.getText()) не равен null.");
-                    // Если не нажата кнопка полировки то
-                    if (!sideButtonPushed.getText().equals("Полировка")) {
-                        logManager.log("sideButtonPushed.getText()) не Полировка.");
-                        // Вторым ключом будет имя выбранного элемента через нажатую кнопку
-                        lineBorderColorMap.get(sideButtonPushed.getText()).put(elementButtonPushed.getText(), addColorOfButtonsWorks());
-                        logManager.log("Добавляем в lineBorderColorMap сначала - сторона(ключ) -> (значение)элемент(он же ключ) -> (значение)список работ: lineBorderColorMap.put(sideButtonPushed.getText(), new HashMap<>(Map.of(elementButtonPushed.getText(), addColorOfButtonsWorks()))).");
-                    } else {
-                        logManager.log("sideButtonPushed.getText())  Полировка. Проверяем есть ли галочка хоть на одном checkBox");
-                        // Если кнопка выбранной стороны является полировка, то проверяем есть ли галочка хоть на одном checkBox
-                        if (isAnyCheckBoxSelected(checkBoxes)) {
-                            logManager.log("есть галочка хоть на одном checkBox. Вторым ключом будет так же кнопка выбранной стороны, то есть Полировка");
-                            // Если выбран, то вторым ключом будет так же кнопка выбранной стороны, то есть "Полировка"
-                            lineBorderColorMap.get(sideButtonPushed.getText()).put(sideButtonPushed.getText(), addColorOfButtonsWorks());
-                            logManager.log("Добавляем в lineBorderColorMap сначала - сторона(ключ) -> (значение)элемент(он же ключ) -> (значение)список работ: lineBorderColorMap.put(sideButtonPushed.getText(), new HashMap<>(Map.of(sideButtonPushed.getText(), addColorOfButtonsWorks()))).");
-                        } else {
-                            logManager.log("нет галочки хоть на одном checkBox. Следует удалить вовсе пункт о полировке");
-                            // Если же ни оди checkBox ни выбран следует удалить вовсе пункт о полировке
-                            lineBorderColorMap.remove(sideButtonPushed.getText());
-                            logManager.log("lineBorderColorMap.remove(sideButtonPushed.getText())");
-                            // Так же требуется удалить и из списка элементов упоминание о полировке
-                            removeElementFromList(element.getName());
-                            logManager.log("Так же требуется удалить и из списка элементов упоминание о полировке: removeElementFromList(element.getName())");
-                        }
-                    }
-                } else {
-                    logManager.log("sideButtonPushed.getText()) равен null. Вторым ключом будет имя выбранного элемента через нажатую кнопку");
-                    // Проверяем не нажата кнопка полировки.
-                    if (!sideButtonPushed.getText().equals("Полировка")) {
-                        logManager.log("sideButtonPushed.getText()) не Полировка.");
-                        // Вторым ключом будет имя выбранного элемента через нажатую кнопку
-                        lineBorderColorMap.put(sideButtonPushed.getText(), new HashMap<>(Map.of(elementButtonPushed.getText(), addColorOfButtonsWorks())));
-                        logManager.log("Добавляем в lineBorderColorMap сначала - сторона(ключ) -> (значение)элемент(он же ключ) -> (значение)список работ: lineBorderColorMap.put(sideButtonPushed.getText(), new HashMap<>(Map.of(elementButtonPushed.getText(), addColorOfButtonsWorks()))).");
-                    } else {
-                        logManager.log("sideButtonPushed.getText())  Полировка. Проверяем есть ли галочка хоть на одном checkBox");
-                        // Если кнопка выбранной стороны является полировка, то проверяем есть ли галочка хоть на одном checkBox
-                        if (isAnyCheckBoxSelected(checkBoxes)) {
-                            logManager.log("есть галочка хоть на одном checkBox. Вторым ключом будет так же кнопка выбранной стороны, то есть Полировка");
-                            // Если выбран, то вторым ключом будет так же кнопка выбранной стороны, то есть "Полировка"
-                            lineBorderColorMap.put(sideButtonPushed.getText(), new HashMap<>(Map.of(sideButtonPushed.getText(), addColorOfButtonsWorks())));
-                            logManager.log("Добавляем в lineBorderColorMap сначала - сторона(ключ) -> (значение)элемент(он же ключ) -> (значение)список работ: lineBorderColorMap.put(sideButtonPushed.getText(), new HashMap<>(Map.of(sideButtonPushed.getText(), addColorOfButtonsWorks()))).");
-                        } else {
-                            logManager.log("нет галочки хоть на одном checkBox. Следует удалить вовсе пункт о полировке");
-                            // Если же ни оди checkBox ни выбран следует удалить вовсе пункт о полировке
-                            lineBorderColorMap.remove(sideButtonPushed.getText());
-                            logManager.log("lineBorderColorMap.remove(sideButtonPushed.getText())");
-                            // Так же требуется удалить и из списка элементов упоминание о полировке
-                            removeElementFromList(element.getName());
-                            logManager.log("Так же требуется удалить и из списка элементов упоминание о полировке: removeElementFromList(element.getName())");
-                        }
-                    }
-                }
-            }
-            // Так как у остекления всего 2 панели то добавляем ей после добавления зеленую рамку тут!
-            if (sideButtonPushed.getText().equals("Остекление")) {
-                logManager.log("Элемент Остекление. Так как у остекления всего 2 панели то добавляем ей после добавления зеленую рамку");
-                elementButtonPushed.setBorder(BorderFactory.createLineBorder(Color.green, 1));
-                logManager.log("elementButtonPushed.setBorder(BorderFactory.createLineBorder(Color.green, 1))");
-                elementButtonPushed = null;
-                logManager.log("Убираем значение у elementButtonPushed = null");
-            }
-            // Затем обнуляем ЛКМ
-            logManager.log("Обнуляем ЛКМ.");
-            clearLkm();
-            // Пересчитываем ЛКМ оставшихся элементов
-            logManager.log("Пересчитываем ЛКМ оставшихся элементов.");
-            reCalcLkmPrice();
-            // Отправляем новый список на отображение в окошке.
-            logManager.log("Отправляем новый список на отображение в окошке просмотра.");
-            sendToStringInElementListTextViewing();
-            // Убираем панель addAndRemovePanel
-            clearCenter(panel).updateUI();
-
-        });   // Добавить
-        but.getRemoveButton().addActionListener(e -> {
-            logManager.log("Нажата кнопка Удалить.");
-            // Сначала удаляем элемент из List
-            logManager.log("Удаляем элемент из List через removeElementFromList(createName()).");
-            removeElementFromList(createName());
-            // Затем обнуляем ЛКМ
-            logManager.log("Обнуляем ЛКМ.");
-            clearLkm();
-            // Пересчитываем ЛКМ оставшихся элементов
-            logManager.log("Пересчитываем ЛКМ оставшихся элементов.");
-            reCalcLkmPrice();
-            // Отправляем новый список на отображение в окошке.
-            logManager.log("Отправляем новый список на отображение в окошке просмотра.");
-            sendToStringInElementListTextViewing();
-            // Удаляем из Map элемент
-            logManager.log("Удаляем из Map элемент.");
-            if (lineBorderColorMap.get(sideButtonPushed.getText()) != null) {
-                // Проверяем не нажата кнопка полировки.
-                if (!sideButtonPushed.getText().equals("Полировка")) {
-                    lineBorderColorMap.get(sideButtonPushed.getText()).remove(elementButtonPushed.getText());
-                    // Прожимаем кнопку выбранного элемента для обновления кнопок
-                    elementButtonPushed.doClick();
-                } else {
-                    lineBorderColorMap.remove(sideButtonPushed.getText());
-                }
-            }
-            if (sideButtonPushed.getText().equals("Полировка")) {
-                for (JCheckBox checkBox : checkBoxes) {
-                    checkBox.setSelected(false);
-                }
-            }
-
-            // Убираем панель addAndRemovePanel
-            clearCenter(panel).updateUI();
-        });// Удалить
-    } // Панель добавить\удалить элемент
-
     private JButton takeColorOfButtons(JButton button, int panelNumber) {
         logManager.log("Запущен метод takeColorOfButtons для кнопки: " + button.getText() + " и панели №" + panelNumber);
         button.setBorder(BorderFactory.createLineBorder(Color.lightGray, 1));
@@ -2007,6 +2043,9 @@ public class AddWorkPanel {
                         if (!listOfAddWorks.isEmpty()) {
                             // проходим по работам и возвращаем кнопки с зеленой рамкой если они есть в списке
                             for (String check : listOfAddWorks) {
+                                if (check.equals(finalPolirovkaElementCheckBox.getToolTipText())) {
+                                    finalPolirovkaElementCheckBox.setSelected(true);
+                                }
                                 if (check.equals(button.getText())) {
                                     button.setBorder(BorderFactory.createLineBorder(Color.green));
                                 }
@@ -2276,6 +2315,9 @@ public class AddWorkPanel {
                 notNormWorkDescriptionPushed.setBorder(BorderFactory.createLineBorder(Color.green, 1));
                 color.add(notNormWorkNormativeString + " " + inputNotNormWorkDescription.replaceAll(",", "\u2400").replaceAll(" ", "\u2422") + " " + remontComboBox.getSelectedItem());
             }
+            if (finalPolirovkaElementCheckBox.isSelected()) {
+                color.add(finalPolirovkaElementCheckBox.getToolTipText());
+            }
         } else {
             // Итерируем по каждому JCheckBox в массиве
             for (JCheckBox checkBox : checkBoxes) {
@@ -2343,7 +2385,9 @@ public class AddWorkPanel {
         inputDopWorksPainterDescription = null;      // Введенный текст описания доп.работы Маляр
         inputDopWorksKuzovchikDescription = null;    // Введенный текст описания доп.работы Кузовщик
         inputNotNormWorkDescription = null;          // Введенный текст описания ненормативных работ
-        notNormWorkHoDoString = null;
+        notNormWorkHoDoString = null;                // Назначенный механик для ненормативных работ
+        finalPolirovkaElementCheckBox.setSelected(false); // Чекбокс финальной полировки конкретного элемента
+        remontComboBox.setSelectedIndex(0);               // Чекбокс выбора механика
     } // Стирание (приведя их к null) нажатых в процессе кнопок
 
     private Element createElement() {
@@ -2496,7 +2540,14 @@ public class AddWorkPanel {
         }
         logManager.log("return element");
         return element;
-    }  // Создание элемента
+    }  // Создание элемента основного
+
+    private Element createElementFinalPolirovka() {
+        Element element = new Element();
+        element.setName(createName() + " " + finalPolirovkaElementCheckBox.getToolTipText());
+        element.setPaintSide(0.8);
+        return element;
+    }
 
     private JButton removeActionListener(JButton button) {
         logManager.log("Запущен метод removeActionListener.");
@@ -2589,8 +2640,9 @@ public class AddWorkPanel {
     }
 
     private String createNameNotNormWork() {
-        logManager.log("Создали имя для не нормативных работ: " + inputNotNormWorkDescription);
-        return inputNotNormWorkDescription;
+        String name = elementButtonPushed.getText() + " " + inputNotNormWorkDescription;
+        logManager.log("Создали имя для не нормативных работ: " + name);
+        return name;
     }
 
     private void checkEarlyPushedButtonsWorksPanel() {
@@ -2690,38 +2742,41 @@ public class AddWorkPanel {
                 but.getDopWorksKuzovchikDescriptionButton().setBorder(BorderFactory.createLineBorder(Color.red, 1));
             }
         }
+       // Проверка для выставления нормативов если они менялись у конкретного элемента.
         String name = createName();
-        Integer q = null;
-        Element element = null;
-        for (int i = 0; i <= elementList.size() - 1; i++) {
-            if (elementList.get(i).getName().contains(name)) {
-                q = i;
-                element = elementList.get(i);
+        String polishingText = finalPolirovkaElementCheckBox.getToolTipText();
+
+        for (Element e : elementList) {
+            if (e.getName().contains(name) && !e.getName().contains(polishingText)) {
+                elementArmatureSide = e.getArmatureSide();
+                elementPaintSide = e.getPaintSide();
             }
-        }
-        if (q != null) {
-            elementArmatureSide = element.getArmatureSide();
-            elementPaintSide = element.getPaintSide();
         }
     } // Проверка и нажатие кнопок добавленного элемента
 
     private void removeElementFromList(String elementName) {
-        logManager.log("Запущен метод removeElementFromList.");
+        logManager.log("Запущен метод removeElementFromList. Для элемента: " + elementName);
         Integer q = null;
         Element el = null;
+        List<Element> removeList = new ArrayList<>();
         /*
         Удаление элементов из списка работает просто по имени за исключение полировки в которой нужно всегда удалять
         предыдущую версию элемента с полировкой через дополнительную проверку. Если имя элемента начинается с "Полировка" и
         значение String elementName начинается тоже с "Полировка", то этот элемент подлежит удалению.
-         */
+        */
+
         for (int i = 0; i <= elementList.size() - 1; i++) {
             if (elementList.get(i).getName().contains(elementName) || (elementList.get(i).getName().startsWith("Полировка") && elementName.startsWith("Полировка"))) {
                 q = i;
                 el = elementList.get(i);
+                removeList.add(el);
             }
         }
         if (q != null) {
-            elementList.remove(el);
+            for (Element del : removeList) {
+                elementList.remove(del);
+                logManager.log("Удалён элемент: " + el.getName());
+            }
         }
     } // Удаление из Списка элементов "element"
 

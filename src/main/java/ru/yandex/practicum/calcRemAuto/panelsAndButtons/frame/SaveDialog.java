@@ -248,7 +248,9 @@ public class SaveDialog extends JDialog {
         logManager.log("Запущен метод takeLine в классе SaveDialog");
         StringBuilder line = new StringBuilder(element.getName());
         if (!element.getName().startsWith("Полировка")) {
-            line.append(probels.substring(element.getName().length()));
+            if (!element.getName().contains("Финальная полировка после окраски")) {
+                line.append(probels.substring(element.getName().length()));
+            }
         }
         if (!element.getName().contains("Остекление") && element.getNotNormWork() == 0) {
             // Строим строки для основных работ кроме элементов стекол и не нормированных. У них просто имя и стоимость
