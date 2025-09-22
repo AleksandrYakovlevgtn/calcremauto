@@ -37,7 +37,7 @@ public class SaveDialog extends JDialog {
         logManager.log("Запущен метод SaveDialog в классе SaveDialog");
 
         setLayout(new BorderLayout());
-        setSize(800, 600);
+        setSize(825, 605);
         setLocationRelativeTo(parentFrame);
 
         checkBoxSendToTelegram.setSelected(false); // По умолчанию галка не установлена.
